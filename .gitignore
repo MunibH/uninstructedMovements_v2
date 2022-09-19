@@ -1,0 +1,7 @@
+\figs
+/figs
+*.png
+*.mat
+*.svg
+*.eps
+*.epsc
