@@ -67,32 +67,3 @@ params.probe = {meta.probe}; % put probe numbers into params, one entry for elem
 %% LOAD DATA
 
 [obj,params] = loadSessionData(meta,params);
-
-%% POPULATION SELECTIVITY CORRELATION MATRIX
-
-cond2use = [2 3]; % left hit, right hit
-sel_corr_mat = getSelectivityCorrelationMatrix(obj,cond2use);
-
-%% CODING DIMENSIONS
-
-clearvars -except obj meta params sel_corr_mat
-
-cond2use = [2 3]; % left hit, right hit
-rez = getCodingDimensions(obj,params,cond2use);
-
-allrez = concatRezAcrossSessions(rez);
-
-%% PLOTS
-close all
-
-sav = 0; % 1=save, 0=no_save
-
-plotSelectivityCorrMatrix(obj(1),sel_corr_mat,params(1).alignEvent,sav)
-plotCDProj(allrez,rez,sav)
-plotCDVarExp(allrez,sav)
-plotSelectivity(allrez,rez,sav)
-plotSelectivityExplained(allrez,rez,sav)
-
-
-
-

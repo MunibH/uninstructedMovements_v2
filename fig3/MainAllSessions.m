@@ -1,4 +1,13 @@
+% run this file from the fig3 directory
 clear,clc,close all
+
+% add paths for data loading scripts, all fig funcs, and utils
+utilspth = 'C:\Users\munib\Documents\Economo-Lab\code\uninstructedMovements_v2';
+addpath(genpath(fullfile(utilspth,'DataLoadingScripts')));
+addpath(genpath(fullfile(utilspth,'funcs')));
+addpath(genpath(fullfile(utilspth,'utils')));
+
+% add paths for figure specific functions
 addpath(genpath(pwd))
 
 %% PARAMETERS
