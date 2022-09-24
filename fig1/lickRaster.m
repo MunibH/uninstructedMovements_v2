@@ -1,4 +1,13 @@
 clear,clc,close all
+
+% add paths for data loading scripts, all fig funcs, and utils
+utilspth = 'C:\Users\munib\Documents\Economo-Lab\code\uninstructedMovements_v2';
+addpath(genpath(fullfile(utilspth,'DataLoadingScripts')));
+addpath(genpath(fullfile(utilspth,'funcs')));
+addpath(genpath(fullfile(utilspth,'utils')));
+
+
+% add paths for figure specific functions
 addpath(genpath(pwd))
 
 %% PARAMETERS
@@ -45,9 +54,9 @@ meta = [];
 % meta = loadJEB7_ALMVideo(meta,datapth);
 % meta = loadEKH1_ALMVideo(meta,datapth);
 % meta = loadEKH3_ALMVideo(meta,datapth);
-% meta = loadJGR2_ALMVideo(meta,datapth);
+meta = loadJGR2_ALMVideo(meta,datapth);
 % meta = loadJGR3_ALMVideo(meta,datapth);
-meta = loadJEB15_ALMVideo(meta,datapth);
+% meta = loadJEB15_ALMVideo(meta,datapth);
 
 
 params.probe = {meta.probe}; % put probe numbers into params, one entry for element in meta, just so i don't have to change code i've already written
@@ -55,8 +64,8 @@ params.probe = {meta.probe}; % put probe numbers into params, one entry for elem
 
 %% LOAD DATA
 
-meta = meta(2);
-params.probe = params.probe(2);
+meta = meta(1);
+params.probe = params.probe(1);
 [obj,params] = loadSessionData(meta,params);
 
 
@@ -73,12 +82,13 @@ goCue = 0;
 sample = mode(obj.bp.ev.sample) - mode(obj.bp.ev.goCue);
 delay = mode(obj.bp.ev.delay) - mode(obj.bp.ev.goCue);
 
+nTrials = min(numel(params.trialid{1}),numel(params.trialid{2}));
 
 % left trials
 f = figure; hold on;
-f.Position = [292   438   227   539];
+f.Position = [520   480   314   499];
 trialOffset = 1;
-for trix = 1:numel(params.trialid{1})
+for trix = 1:nTrials
     check1 = 0;
     check2 = 0;
 
@@ -126,9 +136,9 @@ ax.FontSize = 12;
 
 % right trials
 f = figure; hold on;
-f.Position = [292   438   227   539];
+f.Position = [520   480   314   499];
 trialOffset = 1;
-for trix = 1:numel(params.trialid{2})
+for trix = 1:nTrials
     check1 = 0;
     check2 = 0;
 

@@ -1,3 +1,5 @@
+% same as st_elsayed.m but first remove CDs from full population single trial activity
+
 clear,clc,close all
 
 % add paths for data loading scripts, all fig funcs, and utils
@@ -5,7 +7,6 @@ utilspth = 'C:\Users\munib\Documents\Economo-Lab\code\uninstructedMovements_v2';
 addpath(genpath(fullfile(utilspth,'DataLoadingScripts')));
 addpath(genpath(fullfile(utilspth,'funcs')));
 addpath(genpath(fullfile(utilspth,'utils')));
-rmpath(genpath(fullfile(utilspth,'fig1/')))
 
 % add paths for figure specific functions
 addpath(genpath(pwd))
@@ -27,8 +28,8 @@ params.condition(end+1) = {'L&hit&~stim.enable&~autowater'};             % left 
 params.condition(end+1) = {'R&miss&~stim.enable&~autowater'};            % error right, no stim, aw off
 params.condition(end+1) = {'L&miss&~stim.enable&~autowater'};            % error left, no stim, aw off
 
-params.tmin = -2.5;
-params.tmax = 2.5;
+params.tmin = -1.6;
+params.tmax = 2;
 params.dt = 1/100;
 
 % smooth with causal gaussian kernel
@@ -53,7 +54,7 @@ params.advance_movement = 0.0;
 datapth = '/Users/Munib/Documents/Economo-Lab/data/';
 
 meta = [];
-% 
+
 meta = loadJEB6_ALMVideo(meta,datapth);
 meta = loadJEB7_ALMVideo(meta,datapth);
 meta = loadEKH1_ALMVideo(meta,datapth);
@@ -83,41 +84,24 @@ for sessix = 1:numel(meta)
     me(sessix) = loadMotionEnergy(obj(sessix), meta(sessix), params(sessix), datapth);
 end
 
-
-
-%% Null and Potent Space
+%% Null and Potent Space - remove coding dimensions first
 
 clearvars -except obj meta params me sav
 
-% -----------------------------------------------------------------------
-% -- Curate Input Data --
-% zscore single trial neural data (time*trials,neurons), for all trials
-% -- Calculate null and potent spaces --
-% null space from quiet time points
-% potent space from moving time points
-% -- Calculate coding directions from null and potent spaces --
-% -----------------------------------------------------------------------
-
+cond2use = [2 3]; % left hit, right hit
 for sessix = 1:numel(meta)
-
-     % -- input data
-    trialdat_zscored = zscore_singleTrialNeuralData(obj(sessix).trialdat);
-
-    % -- null and potent spaces
+    trialdat = removeCodingDimensions(obj(sessix),params(sessix),cond2use);
     cond2use = [2 3 4 5]; % right hit, left hit, right miss, left miss
-    rez(sessix) = singleTrial_elsayed_np(trialdat_zscored, obj(sessix), me(sessix), params(sessix), cond2use);
-
-    % -- coding dimensions
+    rez(sessix) = singleTrial_elsayed_np(trialdat, obj(sessix), me(sessix), params(sessix), cond2use);
     cond2use = [1 2]; % right hits, left hits (corresponding to null/potent psths in rez)
-    cond2use_trialdat = [2 3]; % for calculating selectivity explained in full neural pop
-    cd_null(sessix) = getCodingDimensions(rez(sessix).N_null_psth,trialdat_zscored,obj(sessix),params(sessix),cond2use,cond2use_trialdat);
-    cd_potent(sessix) = getCodingDimensions(rez(sessix).N_potent_psth,trialdat_zscored,obj(sessix),params(sessix),cond2use,cond2use_trialdat);
+    cd_null(sessix) = getCodingDimensions(rez(sessix).N_null_psth,trialdat,obj(sessix),params(sessix),cond2use);
+    cd_potent(sessix) = getCodingDimensions(rez(sessix).N_potent_psth,trialdat,obj(sessix),params(sessix),cond2use);
 end
-
-
 
 cd_null_all = concatRezAcrossSessions(cd_null);
 cd_potent_all = concatRezAcrossSessions(cd_potent);
+
+
 
 
 %% plots
@@ -131,104 +115,62 @@ sav = 0;
 % -- Null and Potent Space Single Trial Projections --
 % -----------------------------------------------------------------------
  
-% % - projections showing move / quiet somehow
+% - projections showing move / quiet somehow
 cond2use = [2 3]; % right hits, left hits
-ndims = 4; % top ndims variance explaining dimensions
-% plotSingleTrialNPHeatmaps(rez,params,mendims,cond2use,meta);
+ndims = 3;
+% plotSingleTrialNPHeatmaps(rez,params,me,ndims,cond2use)
 
 
-% % - how much variance in move and non-move time points
+% - how much variance in move and non-move time points
 cond2use = [2 3]; % right hits, left hits
 % plotVarianceInEpochs(rez,me,params,cond2use);                       
 
-% % - ve
+% - ve
 % plotVarianceExplained_NP(rez);
 
-% % - ve over time (TODO)
-% % % plotVarianceExplained_NP_overTime(rez);
+% - ve over time
+% plotVarianceExplained_NP_overTime(rez);
 
 
 % -----------------------------------------------------------------------
 % -- Null and Potent Space Trial-averaged Projections --
 % -----------------------------------------------------------------------
 
-ndims = 5; % how many n/p dimensions to plot, in order of variance explained
-cond2plot = [1 2]; % right hit, left hit
-% plot_NP_PSTH(rez,obj,params,ndims,cond2plot,meta)
+ndims = 10; % how many n/p dimensions to plot, in order of variance explained
+cond2plot = [3 4]; % right hit, left hit
+% plot_NP_PSTH(rez,obj,params,ndims,cond2plot)
 
 
 % -----------------------------------------------------------------------
 % -- Coding Dimensions --
 % -----------------------------------------------------------------------
 
-titlestring = 'Null';
-% plotCDProj(cd_null_all,cd_null,sav,titlestring)
-% plotCDVarExp(cd_null_all,sav,titlestring)
-% plotSelectivity(cd_null_all,cd_null,sav,titlestring)
-% plotSelectivityExplained(cd_null_all,cd_null,sav,titlestring)
+% % - null
+plotCDProj(cd_null_all,cd_null,sav)
+% plotCDVarExp(cd_null_all,sav)
+% plotSelectivity(cd_null_all,cd_null,sav)
+% plotSelectivityExplained(cd_null_all,cd_null,sav)
+% title('Null')
 
-titlestring = 'Potent';
-% plotCDProj(cd_potent_all,cd_potent,sav,titlestring)
-% plotCDVarExp(cd_potent_all,sav,titlestring)
-% plotSelectivity(cd_potent_all,cd_potent,sav,titlestring)
-% plotSelectivityExplained(cd_potent_all,cd_potent,sav,titlestring)
-
+% % - potent
+plotCDProj(cd_potent_all,cd_potent,sav)
+% plotCDVarExp(cd_potent_all,sav)
+% plotSelectivity(cd_potent_all,cd_potent,sav)
+% plotSelectivityExplained(cd_potent_all,cd_potent,sav)
+% title('Potent')
 
 
 %% t=0 is the go cue, but only on trials where the animals were not moving PRIOR to the go cue
 % same plots as plotSelectivityExplained 
 
 % plotSelectivityExplained_GoCue_Transitions(rez,cd_potent_all,cd_potent,me,obj(1).time,sav)
-% findMovementBouts(rez,cd_potent_all,cd_potent,me,obj)
-
-
-
+findMovementBouts(rez,cd_potent_all,cd_potent,me,obj)
 
 %% t=0 is transitions between non-movement and movement that do not coincide with the go cue
 % same plots as plotSelectivityExplained 
 
 
-stitch_dist = 0.1; % in seconds, stitch together movement bouts shorter than this 
-purge_dist = 0.5; % in seconds, remove move bouts shorter than this value, after stitching complete
-me = stitchAndPurgeMoveBouts(me,params,stitch_dist,purge_dist);
 
-% find movement transitions where there is at least 0.5s non-move to 0.5
-% which is why purge_dist is set to 0.5...
-% so just need to find movement bouts that have 0.5 of non-move around it
-[~,gcix] = min(abs(obj(1).time - 0));
-for sessix = 1:numel(me)
-    for trix = 1:size(me(sessix).data,2)
-%     % find bouts of non-movement
-%     [qstart, qend, qlen, qcounts] = ZeroOnesCount(~me(sessix).move(:,trix));
-
-    % find bouts of movement
-    [mstart, mend, mlen, mcounts] = ZeroOnesCount(me(sessix).move(:,trix));
-
-    temp = [diff(mend) nan];
-    ix = find((temp./params(sessix).dt) > 0.5);
-    if isempty(ix)
-        continue
-    end
-    % exclude go cue (FINISH)
-    for i = numel(ix)
-        if mstart(ix(i))<gcix && mend(ix(i))<gcix
-            me(sessix).transitionStart(trix) = mstart(ix(i));
-            me(sessix).transitionEnd(trix) = mend(ix(i));    
-        end
-    end
-    
-
-    end
-end
-
-
-close all
-temp = me(1).data;
-temp(~me(1).move) = nan;
-figure; imagesc(temp'); colormap(linspecer)
-set(gcf,"Position",[938    42   718   954]);
-figure; imagesc(me(1).move'); colormap(linspecer)
-set(gcf,"Position",[259    42   676   954]);
 
 
 

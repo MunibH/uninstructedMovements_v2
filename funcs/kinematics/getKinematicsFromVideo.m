@@ -1,12 +1,19 @@
-function [kin,featLeg] = getKinematicsFromVideo(obj,dfparams,params,trialnums)
+function [kin,featLeg] = getKinematicsFromVideo(obj,params)
 
-NvarsPerFeat = 4;
-feats = dfparams.traj_features;
+% ----------------------------------------------
+% -- parameters --
+% ----------------------------------------------
+NvarsPerFeat = 4; % (xdisp,ydisp,xvel,yvel)
 
-taxis = obj.time + dfparams.advance_movement;
+feats = params.traj_features; % features to extract kinematics for
 
+taxis = obj.time + params.advance_movement; % time axis to align to
 
-% get x/y position and velocity for each feature in feats
+nTrials = obj.bp.Ntrials; 
+
+% ----------------------------------------------
+% -- get kinematics --
+% ----------------------------------------------
 
 xpos = cell(2,1); % one entry for each view
 ypos = cell(2,1); 
@@ -15,14 +22,15 @@ xvel = cell(2,1);
 yvel = cell(2,1);
 
 for viewix = 1:numel(feats) % loop through cam0 and cam1
-    xpos{viewix} = nan(numel(obj.time),numel(trialnums));
-    ypos{viewix} = nan(numel(obj.time),numel(trialnums));
-    xvel{viewix} = nan(numel(obj.time),numel(trialnums));
-    yvel{viewix} = nan(numel(obj.time),numel(trialnums));
+    xpos{viewix} = nan(numel(obj.time),nTrials);
+    ypos{viewix} = nan(numel(obj.time),nTrials);
+    xvel{viewix} = nan(numel(obj.time),nTrials);
+    yvel{viewix} = nan(numel(obj.time),nTrials);
     for featix = 1:numel(feats{viewix}) % loop through number of features for current cam
         feat = feats{viewix}{featix};
-        [xpos{viewix}(:,:,featix), ypos{viewix}(:,:,featix)] = findPosition(taxis, obj, trialnums, viewix, feat, params.alignEvent);
-        [xvel{viewix}(:,:,featix), yvel{viewix}(:,:,featix)] = findVelocity(taxis, obj, trialnums, viewix, feat, params.alignEvent);
+
+        [xpos{viewix}(:,:,featix), ypos{viewix}(:,:,featix)] = findPosition(taxis, obj, nTrials, viewix, feat, params.alignEvent);
+        [xvel{viewix}(:,:,featix), yvel{viewix}(:,:,featix)] = findVelocity(xpos{viewix}(:,:,featix), ypos{viewix}(:,:,featix), feat);
     end
 end
 

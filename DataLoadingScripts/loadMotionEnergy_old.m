@@ -1,4 +1,8 @@
-function me = loadMotionEnergy(obj,meta,params,trialnums)
+function me = loadMotionEnergy_old(obj,meta,params,trialnums)
+
+
+
+
 
 % find and load motion energy .mat file
 if ~contains(meta.datapth,'.mat')

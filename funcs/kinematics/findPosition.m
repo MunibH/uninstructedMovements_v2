@@ -1,60 +1,51 @@
-function [xpos, ypos] = findPosition(taxis, obj, trialnums, view, feat, alignEv)
+function [xpos, ypos] = findPosition(taxis, obj, nTrials, view, feat, alignEv)
 
 traj = obj.traj{view};
 
 featix = findDLCFeatIndex(obj.traj,view,{feat});
 
-xpos = nan(numel(taxis),numel(trialnums));
-ypos = nan(numel(taxis),numel(trialnums));
+xpos = nan(numel(taxis),nTrials);
+ypos = nan(numel(taxis),nTrials);
 
-for i = 1:numel(trialnums)                        % For each trial
-    trix = trialnums(i);
-    try
-        if isnan(traj(trix).NdroppedFrames )                       % If the video data from this trial isn't good, skip it
+for i = 1:nTrials % for each trial
+
+    trix = i;
+
+    % check if video data for trial is good, skip if not
+    if isfield(traj(trix),'NdroppedFrames')
+        if isnan(traj(trix).NdroppedFrames )
             continue;
         end
-    catch
-        % hack fix for new data objs that don't have NdrppedFrames or frameTimes
     end
 
+    % check if frameTimes exists, if not, create it
     if ~isfield(traj(trix),'frameTimes')
         traj(trix).frameTimes = (1:size(traj(trix).ts,1)) ./ 400;
     end
 
-    if ~isnan(traj(trix).frameTimes)                           % If the video data from this trial is good...
-        if contains(feat,'tongue')
-            ts = traj(trix).ts(:, 1:2, featix);
-%             ts = fillmissing(ts,'nearest');
-        else
-            ts = mySmooth(traj(trix).ts(:, 1:2, featix), 21);                                               % get time series for x,y position of feat and current view
-            %                     tssmooth = fillmissing(tssmooth,'nearest');
+    % get feat trajs for valid trials
+    if ~isnan(traj(trix).frameTimes)
+        ts = traj(trix).ts(:,1:2,featix);
+        % if tongue, don't smooth
+        if ~contains(feat,'tongue')
+            ts = mySmooth(ts, 21);
         end
-        tsinterp = interp1(traj(trix).frameTimes-0.5-obj.bp.ev.(alignEv)(trix), ts, taxis);               % Linear interpolation of x,y position to keep number of time points consistent across trials
-        %         tsinterpsmooth = interp1(traj(trix).frameTimes-0.5-obj.bp.ev.(alignEv)(trix), tssmooth, taxis);               % Linear interpolation of x,y position to keep number of time points consistent across trials
-        %
-        %         figure(1); hold on
-        %         plot(taxis,tsinterp,'LineWidth',2);
-        %         plot(taxis,tsinterpsmooth,'LineWidth',2)
-        %         xlim([-2.5 2.5])
-        %         pause
-        %         clf
-
-        xpos(:,i) = tsinterp(:,1);
-        ypos(:,i) = tsinterp(:,2);
-
-
-
-        %         fill missing values for all features except tongue
-        if contains(feat,'tongue')
-            continue
-%             xpos(:,i) = fillmissing(xpos(:,i),'constant',nanmin(xpos(:,i)));
-%             ypos(:,i) = fillmissing(ypos(:,i),'constant',nanmin(xpos(:,i)));
-        else
-            xpos(:,i) = fillmissing(xpos(:,i),'nearest');
-            ypos(:,i) = fillmissing(ypos(:,i),'nearest');
-        end
-
+        % linear interpolation of frameTimes to taxis
+        tsinterp = interp1(traj(trix).frameTimes-0.5-obj.bp.ev.(alignEv)(trix), ts, taxis);
     end
+
+    xpos(:,i) = tsinterp(:,1);
+    ypos(:,i) = tsinterp(:,2);
+
+
+
+    % fill missing values for all features except tongue
+    if ~contains(feat,'tongue')
+        xpos(:,i) = fillmissing(xpos(:,i),'nearest');
+        ypos(:,i) = fillmissing(ypos(:,i),'nearest');
+    end
+
 end
+
 
 end  % findPosition

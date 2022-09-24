@@ -100,12 +100,13 @@ clearvars -except obj meta params me sav
 
 for sessix = 1:numel(meta)
 
-     % -- input data
+    % -- input data
     trialdat_zscored = zscore_singleTrialNeuralData(obj(sessix).trialdat);
 
     % -- null and potent spaces
     cond2use = [2 3 4 5]; % right hit, left hit, right miss, left miss
-    rez(sessix) = singleTrial_elsayed_np(trialdat_zscored, obj(sessix), me(sessix), params(sessix), cond2use);
+    first = 'null'; % 'null'  'potent'
+    rez(sessix) = singleTrial_pca_np(trialdat_zscored, obj(sessix), me(sessix), params(sessix), cond2use, first);
 
     % -- coding dimensions
     cond2use = [1 2]; % right hits, left hits (corresponding to null/potent psths in rez)
@@ -115,7 +116,7 @@ for sessix = 1:numel(meta)
 end
 
 
-
+% concatenate coding dimension results across sessions
 cd_null_all = concatRezAcrossSessions(cd_null);
 cd_potent_all = concatRezAcrossSessions(cd_potent);
 
@@ -172,7 +173,6 @@ titlestring = 'Potent';
 % plotCDVarExp(cd_potent_all,sav,titlestring)
 % plotSelectivity(cd_potent_all,cd_potent,sav,titlestring)
 % plotSelectivityExplained(cd_potent_all,cd_potent,sav,titlestring)
-
 
 
 %% t=0 is the go cue, but only on trials where the animals were not moving PRIOR to the go cue

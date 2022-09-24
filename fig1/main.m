@@ -1,4 +1,14 @@
 clear,clc,close all
+
+% add paths for data loading scripts, all fig funcs, and utils
+utilspth = 'C:\Users\munib\Documents\Economo-Lab\code\uninstructedMovements_v2';
+addpath(genpath(fullfile(utilspth,'DataLoadingScripts')));
+addpath(genpath(fullfile(utilspth,'funcs')));
+addpath(genpath(fullfile(utilspth,'utils')));
+rmpath(genpath(fullfile(utilspth,'fig3/')))
+
+
+% add paths for figure specific functions
 addpath(genpath(pwd))
 
 %% PARAMETERS
@@ -43,18 +53,20 @@ params.advance_movement = 0.0;
 datapth = '/Users/Munib/Documents/Economo-Lab/data/';
 
 meta = [];
-
-meta = loadJEB6_ALMVideo(meta,datapth);
-meta = loadJEB7_ALMVideo(meta,datapth);
-meta = loadEKH1_ALMVideo(meta,datapth);
-meta = loadEKH3_ALMVideo(meta,datapth);
-meta = loadJGR2_ALMVideo(meta,datapth);
-meta = loadJGR3_ALMVideo(meta,datapth);
+% 
+% meta = loadJEB6_ALMVideo(meta,datapth);
+% meta = loadJEB7_ALMVideo(meta,datapth);
+% meta = loadEKH1_ALMVideo(meta,datapth);
+% meta = loadEKH3_ALMVideo(meta,datapth);
+% meta = loadJGR2_ALMVideo(meta,datapth);
+% meta = loadJGR3_ALMVideo(meta,datapth);
+% meta = loadJEB14_ALMVideo(meta,datapth);
 meta = loadJEB15_ALMVideo(meta,datapth);
-
 
 params.probe = {meta.probe}; % put probe numbers into params, one entry for element in meta, just so i don't have to change code i've already written
 
+meta = meta(1);
+params.probe = params.probe(1);
 
 %% LOAD DATA
 
@@ -62,32 +74,12 @@ params.probe = {meta.probe}; % put probe numbers into params, one entry for elem
 
 %% POPULATION SELECTIVITY CORRELATION MATRIX
 
-
-for i = 1:nume
-
-selpsth = obj(1).psth;
-for sessix = 2:numel(obj)
-    temp = obj(sessix);    
-    selpsth = cat(2,selpsth,temp.psth);
-end
-selpsth(isnan(psth)) = 0;
-selpsth(isinf(psth)) = 0;
-sm = 31;
-psth_selectivity = mySmooth(selpsth(:,:,2) - selpsth(:,:,3),sm);
-
-corr_matrix_selectivity = zeros(size(psth_selectivity,1),size(psth_selectivity,1));
-
-for i = 1:size(corr_matrix_selectivity,1)
-    for j = 1:size(corr_matrix_selectivity,1)
-        temp = corrcoef(psth_selectivity(i,:),psth_selectivity(j,:));
-        corr_matrix_selectivity(i,j) = temp(1,2);
-    end
-end
-
+cond2use = [2 3]; % left hit, right hit
+sel_corr_mat = getSelectivityCorrelationMatrix(obj,cond2use);
 
 %% CODING DIMENSIONS
 
-clearvars -except obj meta params
+clearvars -except obj meta params sel_corr_mat
 
 cond2use = [2 3]; % left hit, right hit
 rez = getCodingDimensions(obj,params,cond2use);
@@ -99,10 +91,11 @@ close all
 
 sav = 0; % 1=save, 0=no_save
 
+plotSelectivityCorrMatrix(obj(1),sel_corr_mat,params(1).alignEvent,sav)
 plotCDProj(allrez,rez,sav)
-% plotCDVarExp(allrez,sav)
-% plotSelectivity(allrez,rez,sav)
-% plotSelectivityExplained(allrez,rez,sav)
+plotCDVarExp(allrez,sav)
+plotSelectivity(allrez,rez,sav)
+plotSelectivityExplained(allrez,rez,sav)
 
 
 
