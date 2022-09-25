@@ -26,12 +26,14 @@ end
 % ----------------------------------------------
 % -- Tongue angle and length --
 % ----------------------------------------------
-[ang,len] = getLickAngleAndLength(kin.featLeg,kin.dat);
-kin.featLeg{end+1} = 'tongue_angle';
-kin.featLeg{end+1} = 'tongue_length';
+if ismember('tongue',params.traj_features{1})
+    [ang,len] = getLickAngleAndLength(kin.featLeg,kin.dat);
+    kin.featLeg{end+1} = 'tongue_angle';
+    kin.featLeg{end+1} = 'tongue_length';
 
-kin.dat(:,:,end+1) = ang;
-kin.dat(:,:,end+1) = len;
+    kin.dat(:,:,end+1) = ang;
+    kin.dat(:,:,end+1) = len;
+end
 
 % ----------------------------------------------
 % -- Motion energy --

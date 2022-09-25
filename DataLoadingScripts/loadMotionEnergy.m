@@ -49,7 +49,7 @@ end
 % trial at 400 Hz). Want to align to params.alignEvent and want to put it
 % in same dt as neural data
 % -----------------------------------------------------------
-taxis = obj.time;
+taxis = obj.time + params.advance_movement;
 alignTimes = obj.bp.ev.(params.alignEvent);
 me.newdata = zeros(numel(obj.time),numel(me.data));
 for trix = 1:numel(me.data)

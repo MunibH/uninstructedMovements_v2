@@ -45,7 +45,7 @@ params.feat_varToExplain = 80; % num factors for dim reduction of video features
 
 params.N_varToExplain = 80; % keep num dims that explains this much variance in neural data (when doing n/p)
 
-params.advance_movement = 0.0;
+params.advance_movement = 0;
 
 
 %% SPECIFY DATA TO LOAD
@@ -191,6 +191,28 @@ titlestring = 'Potent';
 stitch_dist = 0.1; % in seconds, stitch together movement bouts shorter than this 
 purge_dist = 0.5; % in seconds, remove move bouts shorter than this value, after stitching complete
 me = stitchAndPurgeMoveBouts(me,params,stitch_dist,purge_dist);
+
+%%
+temp = me(1).data;
+temp2 = me(1).move;
+z = temp;
+z(~temp2) = -max(max(temp));
+y = temp;
+y(temp2) = -max(max(temp));
+figure;
+subplot(1,3,1)
+imagesc(temp')
+title('original')
+subplot(1,3,2)
+imagesc(z')
+title('not moving nan')
+subplot(1,3,3)
+imagesc(y')
+title('moving nan')
+
+
+%%
+
 
 % find movement transitions where there is at least 0.5s non-move to 0.5
 % which is why purge_dist is set to 0.5...

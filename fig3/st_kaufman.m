@@ -37,9 +37,11 @@ params.smooth = 15;
 % cluster qualities to use
 params.quality = {'all'}; % accepts any cell array of strings - special character 'all' returns clusters of any quality
 
-
-params.traj_features = {{'tongue','left_tongue','right_tongue','jaw','trident','nose'},...
-                        {'top_tongue','topleft_tongue','bottom_tongue','bottomleft_tongue','jaw','top_paw','bottom_paw','top_nostril','bottom_nostril'}};
+% 
+% params.traj_features = {{'tongue','left_tongue','right_tongue','jaw','trident','nose'},...
+%                         {'top_tongue','topleft_tongue','bottom_tongue','bottomleft_tongue','jaw','top_paw','bottom_paw','top_nostril','bottom_nostril'}};
+params.traj_features = {{'jaw','trident','nose'},...
+                        {'jaw','top_nostril','bottom_nostril'}};
 
 params.feat_varToExplain = 80; % num factors for dim reduction of video features should explain this much variance
 
@@ -101,7 +103,7 @@ end
 
 %% Null and Potent Space
 
-clearvars -except obj meta params me sav
+clearvars -except obj meta params me kin sav
 
 % -----------------------------------------------------------------------
 % -- Curate Input Data --
@@ -119,8 +121,9 @@ for sessix = 1:numel(meta)
 
     % -- null and potent spaces
     cond2use = [2 3 4 5]; % right hit, left hit, right miss, left miss
-    first = 'null'; % 'null'  'potent'
-    rez(sessix) = singleTrial_pca_np(trialdat_zscored, obj(sessix), me(sessix), params(sessix), cond2use, first);
+    input_data.N = trialdat_zscored;
+    input_data.M = kin(sessix).dat; % kin(sessix).dat    kin(sessix).dat_reduced
+    rez(sessix) = singleTrial_kaufman_np(input_data, obj(sessix), me(sessix), params(sessix), cond2use);
 
     % -- coding dimensions
     cond2use = [1 2]; % right hits, left hits (corresponding to null/potent psths in rez)
@@ -154,10 +157,10 @@ ndims = 4; % top ndims variance explaining dimensions
 
 % % - how much variance in move and non-move time points
 cond2use = [2 3]; % right hits, left hits
-% plotVarianceInEpochs(rez,me,params,cond2use);                       
+plotVarianceInEpochs(rez,me,params,cond2use);                       
 
 % % - ve
-% plotVarianceExplained_NP(rez);
+plotVarianceExplained_NP(rez);
 
 % % - ve over time (TODO)
 % % % plotVarianceExplained_NP_overTime(rez);
@@ -176,13 +179,13 @@ cond2plot = [1 2]; % right hit, left hit
 % -- Coding Dimensions --
 % -----------------------------------------------------------------------
 
-titlestring = 'Null';
+% titlestring = 'Null';
 % plotCDProj(cd_null_all,cd_null,sav,titlestring)
 % plotCDVarExp(cd_null_all,sav,titlestring)
 % plotSelectivity(cd_null_all,cd_null,sav,titlestring)
 % plotSelectivityExplained(cd_null_all,cd_null,sav,titlestring)
 
-titlestring = 'Potent';
+% titlestring = 'Potent';
 % plotCDProj(cd_potent_all,cd_potent,sav,titlestring)
 % plotCDVarExp(cd_potent_all,sav,titlestring)
 % plotSelectivity(cd_potent_all,cd_potent,sav,titlestring)
