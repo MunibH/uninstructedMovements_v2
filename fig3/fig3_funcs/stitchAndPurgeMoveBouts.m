@@ -1,6 +1,6 @@
 function me = stitchAndPurgeMoveBouts(me,params,stitch_dist,purge_dist)
 % written by jack vincent
-% ported to matlab by munib hasnain
+% adapted/ported to matlab by munib hasnain
 
 fs = 1 ./ params(1).dt;
 stitch_dist = round(stitch_dist*fs);
@@ -9,7 +9,7 @@ purge_dist = round(purge_dist*fs);
 for sessix = 1:numel(me)
     for trix = 1:size(me(sessix).data,2)
 
-        medat = me(sessix).data(:,trix); % for plotting and sanity checks
+        medat = mySmooth(me(sessix).data(:,trix),11); % for plotting and sanity checks
         medat = fillmissing(medat,"nearest");
         move = me(sessix).move(:,trix);
         move = fillmissing(move,"nearest");
@@ -23,6 +23,20 @@ for sessix = 1:numel(me)
         for i = 1:numel(move) % numel(move)
             % check for falling edge
             if move(i) == 1 && binary_mask(i+1) == 0 % move(i) == 1 && binary_mask(i+1)
+                % if a 1 appears anywhere after the falling edge within stitching
+                % distance, stitch the 1s together (stitch to the farthest away 1)
+                if any(binary_mask(i+1:i+stitch_dist))
+                    % find index of last 1 in binary_mask(i+1:i+stitch_dist)
+                    last_true = find(binary_mask(i+1:i+stitch_dist),1,'last');
+                    binary_mask(i+1:i+1+last_true) = 1;
+                end
+            end
+        end
+
+         % do stitching again
+        for i = 1:numel(move) % numel(move)
+            % check for falling edge
+            if binary_mask(i) == 1 && binary_mask(i+1) == 0 % move(i) == 1 && binary_mask(i+1)
                 % if a 1 appears anywhere after the falling edge within stitching
                 % distance, stitch the 1s together (stitch to the farthest away 1)
                 if any(binary_mask(i+1:i+stitch_dist))

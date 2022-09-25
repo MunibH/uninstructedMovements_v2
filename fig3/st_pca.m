@@ -176,69 +176,85 @@ titlestring = 'Potent';
 
 
 %% t=0 is the go cue, but only on trials where the animals were not moving PRIOR to the go cue
-% same plots as plotSelectivityExplained 
-
-% plotSelectivityExplained_GoCue_Transitions(rez,cd_potent_all,cd_potent,me,obj(1).time,sav)
-% findMovementBouts(rez,cd_potent_all,cd_potent,me,obj)
-
-
-
+% same plots as plotSelectivityExplained
 
 %% t=0 is transitions between non-movement and movement that do not coincide with the go cue
-% same plots as plotSelectivityExplained 
+% same plots as plotSelectivityExplained
 
-
-stitch_dist = 0.1; % in seconds, stitch together movement bouts shorter than this 
+stitch_dist = 0.1; % in seconds, stitch together movement bouts shorter than this
 purge_dist = 0.5; % in seconds, remove move bouts shorter than this value, after stitching complete
-me = stitchAndPurgeMoveBouts(me,params,stitch_dist,purge_dist);
+tbout = 0.2; % move/non-move bout/transition required to be at least this long in seconds
+[dat.mdat,dat.mdat_leg,dat.qdat,dat.qdat_leg,newme] = nonGC_moveTransitions(obj,me,params,stitch_dist,purge_dist,tbout);
 
-% find movement transitions where there is at least 0.5s non-move to 0.5
-% which is why purge_dist is set to 0.5...
-% so just need to find movement bouts that have 0.5 of non-move around it
-[~,gcix] = min(abs(obj(1).time - 0));
-for sessix = 1:numel(me)
-    for trix = 1:size(me(sessix).data,2)
-%     % find bouts of non-movement
-%     [qstart, qend, qlen, qcounts] = ZeroOnesCount(~me(sessix).move(:,trix));
-
-    % find bouts of movement
-    [mstart, mend, mlen, mcounts] = ZeroOnesCount(me(sessix).move(:,trix));
-
-    temp = [diff(mend) nan];
-    ix = find((temp./params(sessix).dt) > 0.5);
-    if isempty(ix)
-        continue
-    end
-    % exclude go cue (FINISH)
-    for i = numel(ix)
-        if mstart(ix(i))<gcix && mend(ix(i))<gcix
-            me(sessix).transitionStart(trix) = mstart(ix(i));
-            me(sessix).transitionEnd(trix) = mend(ix(i));    
-        end
-    end
-    
-
-    end
-end
-
-
+%%
 close all
-temp = me(1).data;
-temp(~me(1).move) = nan;
-figure; imagesc(temp'); colormap(linspecer)
-set(gcf,"Position",[938    42   718   954]);
-figure; imagesc(me(1).move'); colormap(linspecer)
-set(gcf,"Position",[259    42   676   954]);
+
+dim = 1; % dim to plot (most to least variance explained)
+% plot_nonGC_moveTransitions_singleTrials(dat,obj,newme,rez,params,dim,meta)
+
+ndims = 10;
+% plot_nonGC_moveTransitions_trialAvg(dat,obj,me,rez,params,meta,ndims) % separate tiles for each dimension
+% plot_nonGC_moveTransitions_trialAvg_v2(dat,obj,me,rez,params,meta,ndims) % all dimensions plotted on same axis, 
+plot_nonGC_moveTransitions_trialAvg_v3(dat,obj,me,rez,params,meta,ndims) % mean,stderr across dimensions
 
 
+%% PROBABLY DON'T NEED TO DO THIS (will come back if needed)
+% from movement and non-movement transitions, shrink each epoch to tbout
+% length 
+% e.g. moveboutstart = 0.2; moveboutend = 0.6; quietboutstart = 0.6;
+% quietboutend = 0.9; 
+% trim this to: moveboutstart = 0.4; moveboutend = 0.6; quietboutstart =
+% 0.6; quietboutend = 0.8;
+
+% for sessix = 1:numel(m2q)
+%     for trix = 1:numel(m2q(sessix).moveStart)
+%         % trim move-to-quiet transitions to size (each epoch tbout long)
+%         mdat = m2q(sessix);
+%         for i = 1:numel(mdat.moveStart{trix})
+%             % for m2q, we will trim moveStart and quietEnd (if needed)
+%             mstart = mdat.moveStart{trix}(i);
+%             mend = mdat.moveEnd{trix}(i);
+%             qstart = mdat.quietStart{trix}(i);
+%             qend = mdat.quietEnd{trix}(i);
+%             ml = mend - mstart;
+%         end
+%         
+% 
+%         % trim quiet-to-move transitions to size (each epoch tbout long)
+%         qdat = q2m(sessix);
+%     end
+% end
 
 
+%% plot motion energy 
+% close all
+% rng(pi)
+% for sesh = 1:numel(meta)
+%     temp = newme(sesh).data;
+%     temp2 = newme(sesh).move;
+%     z = temp;
+%     z(~temp2) = nan;
+%     y = temp;
+%     y(temp2) = nan;
+%     f = figure; f.Position = [589    65   663   927];
+%     hold on;
+%     offset = 0; dy = 55;
+%     k = 30;
+%     nTrials = size(z,2);
+%     trix = randsample(nTrials,k,false);
+%     for i = 1:k
+%         plot(y(:,trix(i)) + offset,'k')
+%         plot(z(:,trix(i)) + offset,'r')
+%         offset = offset + dy;
+%     end
+% end
+% 
 
 
-
-
-
-
+% 
+% figure; plot(newme(sessix).data(:,trix))
+% hold on
+% plot(newme(sessix).move(:,trix)*100)
 
 
 
