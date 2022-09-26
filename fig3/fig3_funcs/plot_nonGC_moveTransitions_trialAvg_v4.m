@@ -1,27 +1,12 @@
-function plot_nonGC_moveTransitions_trialAvg_v3(dat,obj,me,rez,params,meta,ndims)
+function plot_nonGC_moveTransitions_trialAvg_v4(dat,obj,me,rez,params,meta,ndims)
 
 rng(pi)
-
-% generate colors
-h = 0.0;
-s = linspace(0.4,1,ndims);
-v = linspace(0.5,1,ndims);
-for i = 1:ndims
-    hsv(i,:) = [h s(i) v(i)];
-end
-rgb.null = hsv2rgb(hsv);
-
-h = 0.38;
-for i = 1:ndims
-    hsv(i,:) = [h s(i) v(i)];
-end
-rgb.potent = hsv2rgb(hsv);
 
 
 % m2q
 for sessix = 1:numel(me)
     f = figure;
-    f.Position = [403         163        1106         792];
+%     f.Position = [403   412   809   543];
     ax = gca;
     hold on
 
@@ -87,27 +72,45 @@ for sessix = 1:numel(me)
 
 
     end
-    % mean
-    meannull = squeeze(nanmean(allnull,2));
-    meanpotent = squeeze(nanmean(allpotent,2));
-    meanme = squeeze(normalize(nanmean(allme,2),'range',[-0.3 0.3]));
-    meanme = meanme(:,1);
+
+    % var
+    meannull = squeeze(nanvar(allnull,[],2));
+    meanpotent = squeeze(nanvar(allpotent,[],2));
+
 
     nullmeanplot = mean(meannull,2);
     nullerrplot = std(meannull,[],2) ./ sqrt(ndims);
     potentmeanplot = mean(meanpotent,2);
     potenterrplot = std(meanpotent,[],2) ./ sqrt(ndims);
 
+    yyaxis(ax,'left')
+    shadedErrorBar(obj(sessix).time,nullmeanplot,nullerrplot,{'Color',[62, 168, 105]./255,'LineWidth',2,'LineStyle','-'},0.5,ax)
+    shadedErrorBar(obj(sessix).time,potentmeanplot,potenterrplot,{'Color',[255, 56, 140]./255,'LineWidth',2,'LineStyle','-'},0.5,ax)
+    ax.YColor = [100 100 100 ]./255;
+    xlabel('Time to quiet (s)')
+    ylabel('Variance (a.u)')
 
-    plot(obj(sessix).time,meanme,'m','LineWidth',3)
-    shadedErrorBar(obj(sessix).time,nullmeanplot,nullerrplot,{'Color','r','LineWidth',2},0.5,ax)
-    shadedErrorBar(obj(sessix).time,potentmeanplot,potenterrplot,{'Color','g','LineWidth',2},0.5,ax)
+    ylims = ax.YLim;
+
+    meanme = squeeze(normalize(nanmean(allme,2),'range',[0 ylims(2)-0.3]));
+%     meanme = squeeze(nanmean(allme,2));
+    meanme = meanme(:,1);
+    yyaxis(ax,'right')
+    plot(obj(sessix).time,meanme,'Color',[225, 144, 15]./255,'LineWidth',3);
+    ax.YColor = [225, 144, 15]./255;
+    ylabel('Motion Energy')
 
     xline(0,'k:','LineWidth',2)
 
-    xlim([-1 1])
+    xlim([-0.5 0.5])
     title([meta(sessix).anm ' - ' meta(sessix).date])
-    xlabel('Time to quiet (s)')
+    
+
+    h = zeros(3, 1);
+    h(1) = plot(NaN,NaN,'-','Color',[225, 144, 15]./255);
+    h(2) = plot(NaN,NaN,'-','Color',[62, 168, 105]./255);
+    h(3) = plot(NaN,NaN,'-','Color',[255, 56, 140]./255);
+    legend(h, 'motion energy','null','potent');
 
 end
 

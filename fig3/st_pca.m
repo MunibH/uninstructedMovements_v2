@@ -181,9 +181,9 @@ titlestring = 'Potent';
 %% t=0 is transitions between non-movement and movement that do not coincide with the go cue
 % same plots as plotSelectivityExplained
 
-stitch_dist = 0.1; % in seconds, stitch together movement bouts shorter than this
-purge_dist = 0.5; % in seconds, remove move bouts shorter than this value, after stitching complete
-tbout = 0.2; % move/non-move bout/transition required to be at least this long in seconds
+stitch_dist = 0.025; % in seconds, stitch together movement bouts shorter than this
+purge_dist = 0.1; % in seconds, remove move bouts shorter than this value, after stitching complete
+tbout = 0.3; % move/non-move bout/transition required to be at least this long in seconds
 [dat.mdat,dat.mdat_leg,dat.qdat,dat.qdat_leg,newme] = nonGC_moveTransitions(obj,me,params,stitch_dist,purge_dist,tbout);
 
 %%
@@ -191,77 +191,15 @@ close all
 
 dim = 1; % dim to plot (most to least variance explained)
 % plot_nonGC_moveTransitions_singleTrials(dat,obj,newme,rez,params,dim,meta)
+% plot_nonGC_moveTransitions_singleTrials_v2(dat,obj,newme,rez,params,dim,meta) % random sampling of move to quiet bouts
+plot_nonGC_moveTransitions_singleTrials_v3(dat,obj,newme,rez,params,dim,meta) % random sampling of quiet to move bouts
 
 ndims = 10;
-% plot_nonGC_moveTransitions_trialAvg(dat,obj,me,rez,params,meta,ndims) % separate tiles for each dimension
-% plot_nonGC_moveTransitions_trialAvg_v2(dat,obj,me,rez,params,meta,ndims) % all dimensions plotted on same axis, 
-plot_nonGC_moveTransitions_trialAvg_v3(dat,obj,me,rez,params,meta,ndims) % mean,stderr across dimensions
-
-
-%% PROBABLY DON'T NEED TO DO THIS (will come back if needed)
-% from movement and non-movement transitions, shrink each epoch to tbout
-% length 
-% e.g. moveboutstart = 0.2; moveboutend = 0.6; quietboutstart = 0.6;
-% quietboutend = 0.9; 
-% trim this to: moveboutstart = 0.4; moveboutend = 0.6; quietboutstart =
-% 0.6; quietboutend = 0.8;
-
-% for sessix = 1:numel(m2q)
-%     for trix = 1:numel(m2q(sessix).moveStart)
-%         % trim move-to-quiet transitions to size (each epoch tbout long)
-%         mdat = m2q(sessix);
-%         for i = 1:numel(mdat.moveStart{trix})
-%             % for m2q, we will trim moveStart and quietEnd (if needed)
-%             mstart = mdat.moveStart{trix}(i);
-%             mend = mdat.moveEnd{trix}(i);
-%             qstart = mdat.quietStart{trix}(i);
-%             qend = mdat.quietEnd{trix}(i);
-%             ml = mend - mstart;
-%         end
-%         
-% 
-%         % trim quiet-to-move transitions to size (each epoch tbout long)
-%         qdat = q2m(sessix);
-%     end
-% end
-
-
-%% plot motion energy 
-% close all
-% rng(pi)
-% for sesh = 1:numel(meta)
-%     temp = newme(sesh).data;
-%     temp2 = newme(sesh).move;
-%     z = temp;
-%     z(~temp2) = nan;
-%     y = temp;
-%     y(temp2) = nan;
-%     f = figure; f.Position = [589    65   663   927];
-%     hold on;
-%     offset = 0; dy = 55;
-%     k = 30;
-%     nTrials = size(z,2);
-%     trix = randsample(nTrials,k,false);
-%     for i = 1:k
-%         plot(y(:,trix(i)) + offset,'k')
-%         plot(z(:,trix(i)) + offset,'r')
-%         offset = offset + dy;
-%     end
-% end
-% 
-
-
-% 
-% figure; plot(newme(sessix).data(:,trix))
-% hold on
-% plot(newme(sessix).move(:,trix)*100)
-
-
-
-
-
-
-
+% plot_nonGC_moveTransitions_trialAvg(dat,obj,newme,rez,params,meta,ndims) % separate tiles for each dimension
+% plot_nonGC_moveTransitions_trialAvg_v2(dat,obj,newme,rez,params,meta,ndims) % all dimensions plotted on same axis, 
+% plot_nonGC_moveTransitions_trialAvg_v3(dat,obj,newme,rez,params,meta,ndims) % mean,stderr across dimensions
+% plot_nonGC_moveTransitions_trialAvg_v4(dat,obj,newme,rez,params,meta,ndims) % var across dimensions, move to quiet
+% plot_nonGC_moveTransitions_trialAvg_v5(dat,obj,newme,rez,params,meta,ndims) % var across dimensions, quiet to move
 
 
 
