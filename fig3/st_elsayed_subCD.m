@@ -7,6 +7,7 @@ utilspth = 'C:\Users\munib\Documents\Economo-Lab\code\uninstructedMovements_v2';
 addpath(genpath(fullfile(utilspth,'DataLoadingScripts')));
 addpath(genpath(fullfile(utilspth,'funcs')));
 addpath(genpath(fullfile(utilspth,'utils')));
+rmpath(genpath(fullfile(utilspth,'mc_stim/')))
 
 % add paths for figure specific functions
 addpath(genpath(pwd))

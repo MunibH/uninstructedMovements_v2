@@ -6,6 +6,7 @@ addpath(genpath(fullfile(utilspth,'DataLoadingScripts')));
 addpath(genpath(fullfile(utilspth,'funcs')));
 addpath(genpath(fullfile(utilspth,'utils')));
 rmpath(genpath(fullfile(utilspth,'fig1/')))
+rmpath(genpath(fullfile(utilspth,'mc_stim/')))
 
 % add paths for figure specific functions
 addpath(genpath(pwd))

@@ -52,20 +52,24 @@ plotme = interp1(dat.obj.time,dat.me.data(:,trial),frametimes-gocue);
 
 
 % null/potent
-dim = 1;% from most to least ve dims
+ndims = dat.rez.dPrep;
+for i = 1:ndims
+    temp = squeeze(dat.rez.N_null(:,trial,i));
+    plotnull(:,i) = interp1(dat.obj.time,temp,frametimes-gocue);
+end
 
-[~,nullix] = sort(dat.rez.ve.null,'descend');
-nullix = nullix(dim);
+ndims = dat.rez.dMove;
+for i = 1:ndims
+    temp = squeeze(dat.rez.N_potent(:,trial,i));
+    plotpotent(:,i) = interp1(dat.obj.time,temp,frametimes-gocue);
+end
 
 
-[~,potentix] = sort(dat.rez.ve.potent,'descend');
-potentix = potentix(dim);
-
-plotnull = dat.rez.N_null(:,trial,nullix);
-plotnull = interp1(dat.obj.time,plotnull,frametimes-gocue);
-
-plotpotent = dat.rez.N_potent(:,trial,potentix);
-plotpotent = interp1(dat.obj.time,plotpotent,frametimes-gocue);
+% % jaw
+% jawx = dat.obj.traj{view}(trial).ts(:,1,4);
+% jawy = dat.obj.traj{view}(trial).ts(:,2,4);
+% jawy = v.Height - jawy;
+% plotme = jawy(ix1:ix2);
 
 %%%%%
 % figure; 
@@ -117,22 +121,27 @@ hIm = image(uint8(zeros(v.Height,v.Width,3)),...
 % create overlay
 
 k = 1;
-% init = v.CurrentTime;
 xmin = 0;
 xmax = 1;
 ms = 40;
 
 nprev = 85;
 
-tempme = normalize(plotme,'range',[5 35]);
-tempnull = normalize(plotnull,'range',[80 110]);
-temppotent = normalize(plotpotent,'range',[40 70]);
+msm = 7;
+npsm = 11;
+
+tempme = normalize(mySmooth(plotme,msm),'range',[5 35]);
+
+meannull = var(plotnull,[],2);
+tempnull = normalize(mySmooth(meannull,npsm),'range',[80 110]);
+
+meanpotent = var(plotpotent,[],2);
+temppotent = normalize(mySmooth(meanpotent,npsm),'range',[40 70]);
 
 text(hAx,100,15,'Motion Energy','Color','y','FontSize',9);
 text(hAx,100,50,'Potent','Color',[255, 56, 140]./255,'FontSize',9);
 text(hAx,100,95,'Null','Color',[62, 168, 105]./255,'FontSize',9);
 
-% msprev = linspace(ms-1,15,numel(1:numPrev));
 for iframe = 1:size(frames,4)
     im = frames(:,:,:,iframe);
     hIm.CData = flipud(im);
@@ -142,16 +151,19 @@ for iframe = 1:size(frames,4)
         hh(1) = plot(hAx,1:nprev,tempme(iframe-nprev+1:iframe),'y','LineWidth',2);
         hh(2) = plot(hAx,1:nprev,tempnull(iframe-nprev+1:iframe),'Color',[62, 168, 105]./255,'LineWidth',2);
         hh(3) = plot(hAx,1:nprev,temppotent(iframe-nprev+1:iframe),'Color',[255, 56, 140]./255,'LineWidth',2);
+        
+%         b = shadedErrorBar(1:nprev,meannull(iframe-nprev+1:iframe),errnull(iframe-nprev+1:iframe),{'Color',[62, 168, 105]./255,'LineWidth',1},0.5,hAx);
+%         c = shadedErrorBar(1:nprev,meanpotent(iframe-nprev+1:iframe),errpotent(iframe-nprev+1:iframe),{'Color',[255, 56, 140]./255,'LineWidth',1},0.5,hAx);
+
     else
-        hh(1) = plot(hAx,1:iframe,tempme(1:iframe),'y','LineWidth',2);
+        hh(1) = plot(hAx,1:iframe+1,tempme(1:iframe+1),'y','LineWidth',2);
         hh(2) = plot(hAx,1:iframe,tempnull(1:iframe),'Color',[62, 168, 105]./255,'LineWidth',2);
         hh(3) = plot(hAx,1:iframe,temppotent(1:iframe),'Color',[255, 56, 140]./255,'LineWidth',2);
+
+%         b = shadedErrorBar(1:iframe+1,meannull(1:iframe+1),errnull(1:iframe+1),{'Color',[62, 168, 105]./255,'LineWidth',1},0.5,hAx);
+%         c = shadedErrorBar(1:iframe+1,meanpotent(1:iframe+1),errpotent(1:iframe+1),{'Color',[255, 56, 140]./255,'LineWidth',1},0.5,hAx);
     end
 
-    % draw annotation
-%     hFeat1(1) = scatter(hAx,feat1x(k),feat1y(k),ms,'MarkerFaceColor','m','MarkerEdgeColor','none');
-%     hFeat2(1) = scatter(hAx,feat2x(k),feat2y(k),ms,'MarkerFaceColor','g','MarkerEdgeColor','none');
-%     hFeat3(1) = scatter(hAx,feat3x(k),feat3y(k),ms,'MarkerFaceColor','c','MarkerEdgeColor','none');
 
     % epoch annotation
     t = '';
@@ -164,35 +176,23 @@ for iframe = 1:size(frames,4)
     end
     tt = text(hAx,15,220,t,'Color','w','FontSize',12);
 
-%     % draw previous annotations
-%     if k>numPrev
-%         for i = 1:numPrev
-%             hFeat1(i+1) = scatter(hAx,feat1x(k-i)+2*i,feat1y(k-i),msprev(i),'MarkerFaceColor',cols1(k-i,:), ...
-%                 'MarkerEdgeColor',cols1(k-i,:),'MarkerFaceAlpha',0.5,'MarkerEdgeAlpha',0.3);
-%             hFeat2(i+1) = scatter(hAx,feat2x(k-i)+2*i,feat2y(k-i),msprev(i),'MarkerFaceColor',cols2(k-i,:), ...
-%                 'MarkerEdgeColor',cols2(k-i,:),'MarkerFaceAlpha',0.5,'MarkerEdgeAlpha',0.3);
-%             hFeat3(i+1) = scatter(hAx,feat3x(k-i)+2*i,feat3y(k-i),msprev(i),'MarkerFaceColor',cols3(k-i,:), ...
-%                 'MarkerEdgeColor',cols3(k-i,:),'MarkerFaceAlpha',0.5,'MarkerEdgeAlpha',0.3);
-%         end
-%     end
     
     drawnow
     % Save the frame in structure for later saving to video file
-    s(k) = getframe(hAx);
-%     k = k+1;
-%     delete(hFeat1);
-%     delete(hFeat2);
-%     delete(hFeat3);
+    s(iframe) = getframe(hAx);
+
     delete(tt);
     delete(hh);
+%     delete(a); 
+%     delete(b.mainLine); delete(b.patch); delete(b.edge);
+%     delete(c.mainLine); delete(c.patch); delete(c.edge);
 end
-% v.CurrentTime = init; % reset time to play back from first frame
 
 
 
 %%
 % Remove any unused structure array elements
-s(k:end) = [];
+
 
 % % Open a new figure and play the movie from the structure
 % hFig2 = figure;
@@ -201,10 +201,9 @@ s(k:end) = [];
 % Write to a video file
 % This could be done within the original loop, but I wanted to show it
 % separately
-fnout = [anm = 'JEB1;
-date = '2022-07-27';]
-vOut = VideoWriter('JGR2_trial24_tongue_jaw_nose_35_2022-09-22_v2.mp4','MPEG-4');
-vOut.FrameRate = 35;
+fnout = [anm '_' date '_trial' num2str(trial) '_dim' num2str(dim) '_var_100fps' '.mp4'];
+vOut = VideoWriter(fnout,'MPEG-4');
+vOut.FrameRate = 100;
 vOut.Quality = 100;
 open(vOut)
 for k = 1:numel(s)

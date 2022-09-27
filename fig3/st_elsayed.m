@@ -5,7 +5,8 @@ utilspth = 'C:\Users\munib\Documents\Economo-Lab\code\uninstructedMovements_v2';
 addpath(genpath(fullfile(utilspth,'DataLoadingScripts')));
 addpath(genpath(fullfile(utilspth,'funcs')));
 addpath(genpath(fullfile(utilspth,'utils')));
-rmpath(genpath(fullfile(utilspth,'fig1/')))
+rmpath(genpath(fullfile(utilspth,'fig1/')));
+rmpath(genpath(fullfile(utilspth,'mc_stim/')));
 
 % add paths for figure specific functions
 addpath(genpath(pwd))
@@ -192,14 +193,14 @@ close all
 dim = 2; % dim to plot (most to least variance explained)
 % plot_nonGC_moveTransitions_singleTrials(dat,obj,newme,rez,params,dim,meta)
 % plot_nonGC_moveTransitions_singleTrials_v2(dat,obj,newme,rez,params,dim,meta) % random sampling of move to quiet bouts
-plot_nonGC_moveTransitions_singleTrials_v3(dat,obj,newme,rez,params,dim,meta) % random sampling of quiet to move bouts
+% plot_nonGC_moveTransitions_singleTrials_v3(dat,obj,newme,rez,params,dim,meta) % random sampling of quiet to move bouts
 
 ndims = 10;
 % plot_nonGC_moveTransitions_trialAvg(dat,obj,newme,rez,params,meta,ndims) % separate tiles for each dimension
 % plot_nonGC_moveTransitions_trialAvg_v2(dat,obj,newme,rez,params,meta,ndims) % all dimensions plotted on same axis, 
 % plot_nonGC_moveTransitions_trialAvg_v3(dat,obj,newme,rez,params,meta,ndims) % mean,stderr across dimensions
 % plot_nonGC_moveTransitions_trialAvg_v4(dat,obj,newme,rez,params,meta,ndims) % var across dimensions, move to quiet
-% plot_nonGC_moveTransitions_trialAvg_v5(dat,obj,newme,rez,params,meta,ndims) % var across dimensions, quiet to move
+plot_nonGC_moveTransitions_trialAvg_v5(dat,obj,newme,rez,params,meta,ndims) % var across dimensions, quiet to move
 
 
 

@@ -41,13 +41,19 @@ datapth = '/Users/Munib/Documents/Economo-Lab/data/';
 
 meta = [];
 
+% --- ALM --- 
 % meta = loadJEB6_ALMVideo(meta,datapth);
 % meta = loadJEB7_ALMVideo(meta,datapth);
 % meta = loadEKH1_ALMVideo(meta,datapth);
-meta = loadEKH3_ALMVideo(meta,datapth);
+% meta = loadEKH3_ALMVideo(meta,datapth);
 % meta = loadJGR2_ALMVideo(meta,datapth);
 % meta = loadJGR3_ALMVideo(meta,datapth);
+% meta = loadJEB14_ALMVideo(meta,datapth);
 % meta = loadJEB15_ALMVideo(meta,datapth);
+
+% --- M1TJ ---
+meta = loadJEB14_M1TJVideo(meta,datapth);
+
 
 
 params.probe = {meta.probe}; % put probe numbers into params, one entry for element in meta, just so i don't have to change code i've already written
@@ -79,20 +85,26 @@ sm = 11;
 
 cond = [1,2];
 
+f1 = figure;
+f1.Position = [680   730   486   248];
+a1 = axes(f1);
+f2 = figure;
+f2.Position = [191   732   486   248];
+a2 = axes(f2);
 
-for i = 1:size(obj.psth,2)
+for i = 10:size(obj.psth,2)
 
     % psths
-    f = figure();
-    f.Position = [680   730   486   248];
-    ax = gca;
-    hold on;
+%     f = figure();
+%     f.Position = [680   730   486   248];
+    set(a1); cla(a1);
+    hold(a1,'on')
 
     for j = 1:numel(cond)
         tempdat = mySmooth(squeeze(obj.trialdat(:,i,params.trialid{j})),sm);
         tempmean = mean(tempdat,2);
         temperr = std(tempdat,[],2) ./ sqrt(numel(params.trialid{j}));
-        shadedErrorBar(obj.time,tempmean,temperr,{'Color',cols{j},'LineWidth',lw},alph, ax)
+        shadedErrorBar(obj.time,tempmean,temperr,{'Color',cols{j},'LineWidth',lw},alph, a1)
 
 %                 temp = mySmooth(obj.psth(:,i,j),sm);
 %                 plot(obj.time, temp,'Color',cols{j},'LineWidth',lw)
@@ -104,21 +116,21 @@ for i = 1:size(obj.psth,2)
     xline(0,'k:','LineWidth',lwx);
 
     xlim([obj.time(4), 2.5])
-    ylim([0 70])
+%     ylim([0 70])
     xlabel('Time (s) from go cue')
     ylabel('Firing Rate (spikes/s)')
 
-    ax.FontSize = 14;
+    a1.FontSize = 14;
     hold off
 
 
 
 
     % spike raster
-    f = figure();
-    f.Position = [191   732   486   248];
-    ax = gca;
-    hold on;
+%     f = figure();
+%     f.Position = [191   732   486   248];
+    set(a2); cla(a2);
+    hold(a2,'on')
 
     trialOffset = 1;
     clu = obj.clu{params.probe}(params.cluid(i)); 
@@ -142,7 +154,7 @@ for i = 1:size(obj.psth,2)
 
     xlim([obj.time(4), 2.5])
     ylim([0 trialOffset])
-    ax.FontSize = 14;
+    a2.FontSize = 14;
     hold off
 
 
@@ -151,7 +163,6 @@ for i = 1:size(obj.psth,2)
 
 
     pause
-    close all
 end
 
 % pth = '/Users/Munib/Documents/Economo-Lab/code/uninstructedMovements/fig1/figs/example_cells';

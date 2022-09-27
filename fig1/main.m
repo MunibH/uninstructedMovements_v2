@@ -6,6 +6,7 @@ addpath(genpath(fullfile(utilspth,'DataLoadingScripts')));
 addpath(genpath(fullfile(utilspth,'funcs')));
 addpath(genpath(fullfile(utilspth,'utils')));
 rmpath(genpath(fullfile(utilspth,'fig3/')))
+rmpath(genpath(fullfile(utilspth,'mc_stim/')))
 
 
 % add paths for figure specific functions
@@ -53,20 +54,22 @@ params.advance_movement = 0.0;
 datapth = '/Users/Munib/Documents/Economo-Lab/data/';
 
 meta = [];
-% 
-% meta = loadJEB6_ALMVideo(meta,datapth);
-% meta = loadJEB7_ALMVideo(meta,datapth);
-% meta = loadEKH1_ALMVideo(meta,datapth);
-% meta = loadEKH3_ALMVideo(meta,datapth);
-% meta = loadJGR2_ALMVideo(meta,datapth);
-% meta = loadJGR3_ALMVideo(meta,datapth);
-% meta = loadJEB14_ALMVideo(meta,datapth);
+
+% --- ALM --- 
+meta = loadJEB6_ALMVideo(meta,datapth);
+meta = loadJEB7_ALMVideo(meta,datapth);
+meta = loadEKH1_ALMVideo(meta,datapth);
+meta = loadEKH3_ALMVideo(meta,datapth);
+meta = loadJGR2_ALMVideo(meta,datapth);
+meta = loadJGR3_ALMVideo(meta,datapth);
+meta = loadJEB14_ALMVideo(meta,datapth);
 meta = loadJEB15_ALMVideo(meta,datapth);
+
+% --- M1TJ ---
+% meta = loadJEB14_M1TJVideo(meta,datapth);
 
 params.probe = {meta.probe}; % put probe numbers into params, one entry for element in meta, just so i don't have to change code i've already written
 
-meta = meta(1);
-params.probe = params.probe(1);
 
 %% LOAD DATA
 

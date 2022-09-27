@@ -210,9 +210,9 @@ end
 % Write to a video file
 % This could be done within the original loop, but I wanted to show it
 % separately
-fnout = [anm '_' date '_trial' num2str(trial) '_dim' num2str(dim) '.mp4'];
+fnout = [anm '_' date '_trial' num2str(trial) '_dim' num2str(dim) '_100fps' '.mp4'];
 vOut = VideoWriter(fnout,'MPEG-4');
-vOut.FrameRate = 35;
+vOut.FrameRate = 100;
 vOut.Quality = 100;
 open(vOut)
 for k = 1:numel(s)
