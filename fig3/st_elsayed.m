@@ -190,17 +190,29 @@ tbout = 0.3; % move/non-move bout/transition required to be at least this long i
 %%
 close all
 
-dim = 2; % dim to plot (most to least variance explained)
+dim = 1; % dim to plot (most to least variance explained)
+
 % plot_nonGC_moveTransitions_singleTrials(dat,obj,newme,rez,params,dim,meta)
+
 % plot_nonGC_moveTransitions_singleTrials_v2(dat,obj,newme,rez,params,dim,meta) % random sampling of move to quiet bouts
 % plot_nonGC_moveTransitions_singleTrials_v3(dat,obj,newme,rez,params,dim,meta) % random sampling of quiet to move bouts
 
 ndims = 10;
+% plot_nonGC_moveTransitions_singleTrials_v4(dat,obj,newme,rez,params,ndims,meta) % all bouts heat map, move to quiet % TODO and quiet to move
+
+ndims = 10;
 % plot_nonGC_moveTransitions_trialAvg(dat,obj,newme,rez,params,meta,ndims) % separate tiles for each dimension
+
 % plot_nonGC_moveTransitions_trialAvg_v2(dat,obj,newme,rez,params,meta,ndims) % all dimensions plotted on same axis, 
+
 % plot_nonGC_moveTransitions_trialAvg_v3(dat,obj,newme,rez,params,meta,ndims) % mean,stderr across dimensions
+
 % plot_nonGC_moveTransitions_trialAvg_v4(dat,obj,newme,rez,params,meta,ndims) % var across dimensions, move to quiet
-plot_nonGC_moveTransitions_trialAvg_v5(dat,obj,newme,rez,params,meta,ndims) % var across dimensions, quiet to move
+% plot_nonGC_moveTransitions_trialAvg_v5(dat,obj,newme,rez,params,meta,ndims) % var across dimensions, quiet to move
+
+% plot_nonGC_moveTransitions_trialAvg_v6(dat,obj,newme,rez,params,meta,ndims) % sumsqmag across dimensions, move to quiet
+plot_nonGC_moveTransitions_trialAvg_v7(dat,obj,newme,rez,params,meta,ndims) % sumsqmag across dimensions, quiet to move
+
 
 
 
