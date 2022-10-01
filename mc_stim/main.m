@@ -48,7 +48,8 @@ dfparams.cond(end+1) = {'L&hit&stim.enable&~autowater&~autolearn'};  % left hit 
 
 % -- stim types --
 dfparams.stim.types = {'Bi_MC','Right_MC','Left_MC','Bi_ALM','Bi_M1TJ','Right_ALM','Right_M1TJ','Left_ALM','Left_M1TJ'}; % ALM_Bi is MC_Bi
-dfparams.stim.num   = logical([0 0 0 1 0 0 0 0 0]); % Bi_ALM
+% dfparams.stim.num   = logical([0 0 0 1 0 0 0 0 0]); % Bi_ALM
+dfparams.stim.num   = logical([0 0 0 0 1 0 0 0 0]); % Bi_M1TJ
 
 % -- plotting params --
 dfparams.plt.color{1}     = [10, 10, 10];
@@ -68,7 +69,7 @@ datapth = '/Users/Munib/Documents/Economo-Lab/data/';
 
 meta = [];
 meta = loadMAH13_MCStim(meta,datapth);
-meta = loadMAH14_MCStim(meta,datapth);
+% meta = loadMAH14_MCStim(meta,datapth);
 
 
 % subset based on stim types
@@ -98,12 +99,13 @@ if dfparams.warp
 end
 
 %% behavioral performance
+close all
 
 rez = getPerformance(meta,obj,params);
 
 % plots
 cond2use = 1:6;
-connectConds = 1;
+connectConds = 0;
 plotPerformanceAllMice(meta,obj,rez,dfparams,params,cond2use,connectConds)
 % plotPerformanceEachMouse(meta,obj,rez,dfparams,params) % TODO
 
@@ -172,7 +174,7 @@ plotKinfeats(meta,obj,dfparams,params,kin,kinfeats,feats2plot,cond2plot,sav)
 
 
 %% avg jaw velocity during stim
-
+close all
 if strcmpi(dfparams.alignEv,'delay') % function depends on data aligned to delay period, since we use the stim period to measure avgjawvel
 %     feats2plot = {'jaw_ydisp_view1',...
 %         'jaw_yvel_view1',...

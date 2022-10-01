@@ -4,7 +4,12 @@
 anm = 'JEB15';
 date = '2022-07-27';
 
-sessix = 10;
+anms = {meta(:).anm};
+dates = {meta(:).date};
+
+anmix = ismember(anms,anm);
+dateix = ismember(dates,date);
+sessix = find(all([anmix;dateix],1));
 
 dat.rez = rez(sessix);
 dat.obj = obj(sessix);

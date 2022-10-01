@@ -27,7 +27,7 @@ end
 
 %% plot
 f = figure; hold on;
-f.Position = [680   205   477   773];
+% f.Position = [680   205   477   773];
 t = tiledlayout('flow');
 for k = 1:numel(featix)
     ax = nexttile; hold on;

@@ -60,13 +60,26 @@ meta = loadJEB6_ALMVideo(meta,datapth);
 meta = loadJEB7_ALMVideo(meta,datapth);
 meta = loadEKH1_ALMVideo(meta,datapth);
 meta = loadEKH3_ALMVideo(meta,datapth);
-meta = loadJGR2_ALMVideo(meta,datapth);
-meta = loadJGR3_ALMVideo(meta,datapth);
 meta = loadJEB14_ALMVideo(meta,datapth);
-meta = loadJEB15_ALMVideo(meta,datapth);
+% remove JEB14 8-22/23, keep 8/24
+nouse = logical(ones(size(meta)));
+anm = 'JEB14';
+date = '2022-08-22';
+anms = {meta(:).anm};
+dates = {meta(:).date};
+anmix = ismember(anms,anm);
+dateix = ismember(dates,date);
+sessix = find(all([anmix;dateix],1));
+nouse(sessix) = 0;
+date = '2022-08-23';
+anms = {meta(:).anm};
+dates = {meta(:).date};
+anmix = ismember(anms,anm);
+dateix = ismember(dates,date);
+sessix = find(all([anmix;dateix],1));
+nouse(sessix) = 0;
 
-% --- M1TJ ---
-% meta = loadJEB14_M1TJVideo(meta,datapth);
+meta = meta(nouse);
 
 params.probe = {meta.probe}; % put probe numbers into params, one entry for element in meta, just so i don't have to change code i've already written
 
@@ -88,8 +101,6 @@ for sessix = 1:numel(meta)
     me(sessix) = loadMotionEnergy(obj(sessix), meta(sessix), params(sessix), datapth);
 end
 
-
-
 %% Null and Potent Space
 
 clearvars -except obj meta params me sav
@@ -110,16 +121,13 @@ for sessix = 1:numel(meta)
 
     % -- null and potent spaces
     cond2use = [2 3 4 5]; % right hit, left hit, right miss, left miss
-    nullalltime = 1; % use all time points to estimate null space if 1
-    rez(sessix) = singleTrial_elsayed_np(trialdat_zscored, obj(sessix), me(sessix), params(sessix), cond2use, nullalltime);
+    rez(sessix) = singleTrial_elsayed_np(trialdat_zscored, obj(sessix), me(sessix), params(sessix), cond2use);
 
     % -- coding dimensions
     cond2use = [1 2]; % right hits, left hits (corresponding to null/potent psths in rez)
-    cond2proj = [1:4]; % right hits, left hits, right miss, left miss (corresponding to null/potent psths in rez)
     cond2use_trialdat = [2 3]; % for calculating selectivity explained in full neural pop
-    cd_null(sessix) = getCodingDimensions(rez(sessix).N_null_psth,trialdat_zscored,obj(sessix),params(sessix),cond2use,cond2use_trialdat, cond2proj);
-    cd_potent(sessix) = getCodingDimensions(rez(sessix).N_potent_psth,trialdat_zscored,obj(sessix),params(sessix),cond2use,cond2use_trialdat, cond2proj);
-
+    cd_null(sessix) = getCodingDimensions(rez(sessix).N_null_psth,trialdat_zscored,obj(sessix),params(sessix),cond2use,cond2use_trialdat);
+    cd_potent(sessix) = getCodingDimensions(rez(sessix).N_potent_psth,trialdat_zscored,obj(sessix),params(sessix),cond2use,cond2use_trialdat);
 end
 
 
@@ -168,16 +176,15 @@ cond2plot = [1 2]; % right hit, left hit
 % -----------------------------------------------------------------------
 % -- Coding Dimensions --
 % -----------------------------------------------------------------------
-plotmiss = 1;
 
 titlestring = 'Null';
-plotCDProj(cd_null_all,cd_null,sav,titlestring,plotmiss)
+% plotCDProj(cd_null_all,cd_null,sav,titlestring)
 % plotCDVarExp(cd_null_all,sav,titlestring)
 % plotSelectivity(cd_null_all,cd_null,sav,titlestring)
 % plotSelectivityExplained(cd_null_all,cd_null,sav,titlestring)
 
 titlestring = 'Potent';
-plotCDProj(cd_potent_all,cd_potent,sav,titlestring,plotmiss)
+% plotCDProj(cd_potent_all,cd_potent,sav,titlestring)
 % plotCDVarExp(cd_potent_all,sav,titlestring)
 % plotSelectivity(cd_potent_all,cd_potent,sav,titlestring)
 % plotSelectivityExplained(cd_potent_all,cd_potent,sav,titlestring)

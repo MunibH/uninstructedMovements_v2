@@ -1,16 +1,16 @@
-function plot_nonGC_moveTransitions_singleTrials_v4(dat,obj,me,rez,params,ndims,meta)
+function plot_nonGC_moveTransitions_singleTrials_v5(dat,obj,me,rez,params,ndims,meta)
 
 rng(pi)
 
 
-% m2q
+% q2m
 for sessix = 1:numel(me)
 
     dt = params(sessix).dt;
 
     % transition data
-    mdat = dat.mdat{sessix};
-    nTrials = numel(mdat);
+    qdat = dat.qdat{sessix};
+    nTrials = numel(qdat);
 
 
     % sort null/potent spaces by ve
@@ -28,8 +28,8 @@ for sessix = 1:numel(me)
     for dimix = 1:ndims
 
         for trix = 1:nTrials
-            mdat_trix = mdat{trix};
-            if isempty(mdat_trix)
+            qdat_trix = qdat{trix};
+            if isempty(qdat_trix)
                 continue
             end
 
@@ -40,8 +40,12 @@ for sessix = 1:numel(me)
             medat = me(sessix).data(:,trix);
 
             % for each transition
-            for i = 1:size(mdat_trix,2)
-                tix = mdat_trix(1,i):mdat_trix(end,i);
+            for i = 1:size(qdat_trix,2)
+                tix = qdat_trix(1,i):qdat_trix(end,i);
+                ix = find(tix == 0);
+                if ~isempty(ix)
+                    tix(ix) = [];
+                end
                 ts = tix .* dt;
                 ts = ts - mean(ts);
 
@@ -142,7 +146,7 @@ for sessix = 1:numel(me)
     imagesc(obj(sessix).time,1:size(toplot,2),toplot')
     xlim([-0.3 0.3])
     ylim([0 size(toplot,2)])
-    xlabel('Time to quiet (s)')
+    xlabel('Time to move (s)')
     ylabel('Motion Energy')
     ax(3).FontSize = 12;
     colorbar(ax(3)); %caxis([0 30])
@@ -155,7 +159,7 @@ for sessix = 1:numel(me)
 
     clear ax
     
-%     pth = 'C:\Users\munib\Documents\Economo-Lab\code\uninstructedMovements_v2\fig3\figs\quiet-transitions\';
+%     pth = 'C:\Users\munib\Documents\Economo-Lab\code\uninstructedMovements_v2\fig3\figs\move-transitions\';
 %     fn = [meta(sessix).anm ' - ' meta(sessix).date];
 %     mysavefig(f,pth,fn)
 %     pause(1)

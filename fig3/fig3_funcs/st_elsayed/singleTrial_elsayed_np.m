@@ -1,4 +1,4 @@
-function rez = singleTrial_elsayed_np(input_data,obj,me,params,cond2use)
+function rez = singleTrial_elsayed_np(input_data,obj,me,params,cond2use, nullalltime)
 warning('off', 'manopt:getHessian:approx')
 
 %% trials to use
@@ -46,7 +46,11 @@ N.full = input_data(:,trials,:);
 N.dims = size(N.full);
 N.full_reshape = reshape(N.full,N.dims(1)*N.dims(2),N.dims(3));
 
-N.null = N.full_reshape(~mask,:);
+if nullalltime 
+    N.null = N.full_reshape(:,:);
+else
+    N.null = N.full_reshape(~mask,:);
+end
 
 N.potent = N.full_reshape(mask,:);
 

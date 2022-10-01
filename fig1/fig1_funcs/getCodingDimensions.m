@@ -1,4 +1,4 @@
-function rez = getCodingDimensions(obj,params,cond2use)
+function rez = getCodingDimensions(obj,params,cond2use,cond2proj)
 
 cd_labels = {'early','late','go'};
 cd_epochs = {'delay','goCue','goCue'};
@@ -43,7 +43,7 @@ for sessix = 1:numel(obj)
     % ------------------------------------------
     % --project neural population on CDs--
     % ------------------------------------------
-    temp = permute(rez(sessix).psth(:,:,cond2use),[1 3 2]); % (time,cond,neurons), permuting to use tensorprod() on next line for the projection
+    temp = permute(rez(sessix).psth(:,:,cond2proj),[1 3 2]); % (time,cond,neurons), permuting to use tensorprod() on next line for the projection
     rez(sessix).cd_proj = tensorprod(temp,rez(sessix).cd_mode_orth,3,1); % (time,cond,cd), cond is in same order as con2use variable defined at the top of this function
 
 

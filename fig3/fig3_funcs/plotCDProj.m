@@ -1,4 +1,7 @@
-function plotCDProj(allrez,rez,sav,spacename)
+function plotCDProj(allrez,rez,sav,spacename,plotmiss)
+
+pptx.newVersions = [1 0 0]; % 1 - creates new version of pptx, 0 - add to existing if already exists, 1 entry for each figure created here
+
 
 clrs = getColors();
 lw = 3.5;
@@ -18,6 +21,11 @@ for i = 1:numel(rez(1).cd_labels) % for each coding direction
     temperror = std(tempdat,[],3)./sqrt(numel(rez));
     shadedErrorBar(rez(1).time,tempmean(:,1),temperror(:,1),{'Color',clrs.rhit,'LineWidth',lw},alph, ax)
     shadedErrorBar(rez(1).time,tempmean(:,2),temperror(:,2),{'Color',clrs.lhit,'LineWidth',lw},alph, ax)
+    if plotmiss
+        sm = 21;
+        shadedErrorBar(rez(1).time,mySmooth(tempmean(:,3),sm),mySmooth(temperror(:,3),sm),{'Color',clrs.rhit*0.5,'LineWidth',lw},alph, ax)
+        shadedErrorBar(rez(1).time,mySmooth(tempmean(:,4),sm),mySmooth(temperror(:,4),sm),{'Color',clrs.lhit*0.5,'LineWidth',lw},alph, ax)
+    end
 
 %     xlim([rez(1).time(1);rez(1).time(end)])
     xlim([rez(1).time(1);2])
@@ -45,10 +53,17 @@ for i = 1:numel(rez(1).cd_labels) % for each coding direction
     %     ylim([-60 50]);
 
     if sav
+%         pptx.figPath = 'C:\Users\munib\Documents\Economo-Lab\code\uninstructedMovements_v2\fig3\figs\st_elsayed\cd'; % path to save pptx file to
+%         pptx.filename = ['st_elsayed_' spacename '_cd']; % name of ppt file, if already exists, will add fig to new slide
+%         pptx.newVersion = pptx.newVersions(i);
+%         pptx.slideTitle = [rez(1).cd_labels{i} ' | ' spacename];
+%         pptx.fig = f;
+%         myExportToPPTX(pptx)
+
         pth = 'C:\Users\munib\Documents\Economo-Lab\code\uninstructedMovements\fig1_v2\figs\cd1';
         fn = ['cd_' lower(fns{i}(3:end-7))];
-        mysavefig(f,pth,fn,1);
-        %         exportfig(f, fullfile(pth,fn),'Format','eps','Color','rgb')
+        mysavefig(f,pth,fn);
+%                 exportfig(f, fullfile(pth,fn),'Format','eps','Color','rgb')
     end
 
     hold off

@@ -78,10 +78,10 @@ for sessix = 1:numel(me)
     end
 
      % sumsqmag
-%     meannull = sum(allnull.^2,3,'omitnan');
-%     meanpotent = sum(allpotent.^2,3,'omitnan');
-    meannull = squeeze(nanmean(allnull.^2,3));
-    meanpotent = squeeze(nanmean(allpotent.^2,3));
+    meannull = sum(allnull.^2,3,'omitnan');
+    meanpotent = sum(allpotent.^2,3,'omitnan');
+%     meannull = squeeze(nanmean(allnull.^2,3));
+%     meanpotent = squeeze(nanmean(allpotent.^2,3));
 
 
     nullmeanplot = nanmean(meannull,2);
@@ -93,8 +93,8 @@ for sessix = 1:numel(me)
     shadedErrorBar(obj(sessix).time,nullmeanplot,nullerrplot,{'Color',[62, 168, 105]./255,'LineWidth',2,'LineStyle','-'},0.5,ax)
     shadedErrorBar(obj(sessix).time,potentmeanplot,potenterrplot,{'Color',[255, 56, 140]./255,'LineWidth',2,'LineStyle','-'},0.5,ax)
     ax.YColor = [100 100 100 ]./255;
-    xlabel('Time to quiet (s)')
-    ylabel('Variance (a.u)')
+    xlabel('Time to move (s)')
+    ylabel('SSM - all dims (a.u)')
 
     ylims = ax.YLim;
 

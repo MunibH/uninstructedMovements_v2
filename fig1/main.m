@@ -85,7 +85,8 @@ sel_corr_mat = getSelectivityCorrelationMatrix(obj,cond2use);
 clearvars -except obj meta params sel_corr_mat
 
 cond2use = [2 3]; % left hit, right hit
-rez = getCodingDimensions(obj,params,cond2use);
+cond2proj = [2 3 4 5];
+rez = getCodingDimensions(obj,params,cond2use,cond2proj);
 
 allrez = concatRezAcrossSessions(rez);
 
@@ -95,7 +96,8 @@ close all
 sav = 0; % 1=save, 0=no_save
 
 plotSelectivityCorrMatrix(obj(1),sel_corr_mat,params(1).alignEvent,sav)
-plotCDProj(allrez,rez,sav)
+plotmiss = 1;
+plotCDProj(allrez,rez,sav,plotmiss)
 plotCDVarExp(allrez,sav)
 plotSelectivity(allrez,rez,sav)
 plotSelectivityExplained(allrez,rez,sav)

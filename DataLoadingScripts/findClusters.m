@@ -2,6 +2,17 @@ function idx = findClusters(qualityList, qualities)
 % find idx where qualityList contains at least one of the patterns in
 % qualities
 
+% remove leading/trailing spaces
+% also check if each entry in qualityList is a string/char, if not, change
+% it
+for i = 1:numel(qualityList)
+    if ~ischar(qualityList{i}) || ~isstring(qualityList{i})
+        qualityList{i} = '';
+    end
+end
+qualityList = strtrim(qualityList);
+
+
 if any(strcmpi(qualities,'all')) || strcmpi(qualities{1},'all')
     idx = 1:numel(qualityList);
     return

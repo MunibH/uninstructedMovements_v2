@@ -1,4 +1,4 @@
-function plotCDProj(allrez,rez,sav)
+function plotCDProj(allrez,rez,sav,plotmiss)
 
 clrs = getColors();
 lw = 3.5;
@@ -18,6 +18,10 @@ for i = 1:numel(rez(1).cd_labels) % for each coding direction
     temperror = std(tempdat,[],3)./sqrt(numel(rez));
     shadedErrorBar(rez(1).time,tempmean(:,1),temperror(:,1),{'Color',clrs.rhit,'LineWidth',lw},alph, ax)
     shadedErrorBar(rez(1).time,tempmean(:,2),temperror(:,2),{'Color',clrs.lhit,'LineWidth',lw},alph, ax)
+    if plotmiss
+        shadedErrorBar(rez(1).time,tempmean(:,3),temperror(:,3),{'Color',clrs.rhit*0.5,'LineWidth',lw},alph, ax)
+        shadedErrorBar(rez(1).time,tempmean(:,4),temperror(:,4),{'Color',clrs.lhit*0.5,'LineWidth',lw},alph, ax)
+    end
 
 %     xlim([rez(1).time(1);rez(1).time(end)])
     xlim([rez(1).time(1);2])
