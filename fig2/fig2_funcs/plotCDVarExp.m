@@ -1,4 +1,4 @@
-function plotCDVarExp(allrez,sav,spacename)
+function plotCDVarExp(allrez,sav)
 % 
 % temp = linspecer(12,'qualitative');
 % cols = temp(1:3,:);
@@ -34,7 +34,6 @@ ylim([-0.001 ax.YLim(2)])
 ax.XTick = xs;
 xticklabels({'early','late','go','sum'})
 ylabel('Fraction of VE (trial)')
-title(spacename)
 ax.FontSize = 14;
 
 
@@ -65,7 +64,6 @@ ylim([-0.001 ax.YLim(2)])
 ax.XTick = xs;
 xticklabels({'early','late','go'})
 ylabel('Fraction of VE (epoch)')
-title(spacename)
 ax.FontSize = 14;
 
 

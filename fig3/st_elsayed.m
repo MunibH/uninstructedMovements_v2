@@ -23,10 +23,10 @@ params.lowFR               = 1; % remove clusters with firing rates across all t
 
 % set conditions to calculate PSTHs for
 params.condition(1)     = {'(hit|miss|no)'};                             % all trials
-params.condition(end+1) = {'R&hit&~stim.enable&~autowater'};             % right hits, no stim, aw off
-params.condition(end+1) = {'L&hit&~stim.enable&~autowater'};             % left hits, no stim, aw off
-params.condition(end+1) = {'R&miss&~stim.enable&~autowater'};            % error right, no stim, aw off
-params.condition(end+1) = {'L&miss&~stim.enable&~autowater'};            % error left, no stim, aw off
+params.condition(end+1) = {'L&hit&~stim.enable&~autowater'};             % right hits, no stim, aw off
+params.condition(end+1) = {'R&hit&~stim.enable&~autowater'};             % left hits, no stim, aw off
+params.condition(end+1) = {'L&miss&~stim.enable&~autowater'};            % error right, no stim, aw off
+params.condition(end+1) = {'R&miss&~stim.enable&~autowater'};            % error left, no stim, aw off
 
 params.tmin = -2.5;
 params.tmax = 2.5;
@@ -56,17 +56,17 @@ datapth = '/Users/Munib/Documents/Economo-Lab/data/';
 meta = [];
 
 % --- ALM --- 
-meta = loadJEB6_ALMVideo(meta,datapth);
-meta = loadJEB7_ALMVideo(meta,datapth);
-meta = loadEKH1_ALMVideo(meta,datapth);
-meta = loadEKH3_ALMVideo(meta,datapth);
-meta = loadJGR2_ALMVideo(meta,datapth);
-meta = loadJGR3_ALMVideo(meta,datapth);
-meta = loadJEB14_ALMVideo(meta,datapth);
-meta = loadJEB15_ALMVideo(meta,datapth);
+% meta = loadJEB6_ALMVideo(meta,datapth);
+% meta = loadJEB7_ALMVideo(meta,datapth);
+% meta = loadEKH1_ALMVideo(meta,datapth);
+% meta = loadEKH3_ALMVideo(meta,datapth);
+% meta = loadJGR2_ALMVideo(meta,datapth);
+% meta = loadJGR3_ALMVideo(meta,datapth);
+% meta = loadJEB14_ALMVideo(meta,datapth);
+% meta = loadJEB15_ALMVideo(meta,datapth);
 
 % --- M1TJ ---
-% meta = loadJEB14_M1TJVideo(meta,datapth);
+meta = loadJEB14_M1TJVideo(meta,datapth);
 
 params.probe = {meta.probe}; % put probe numbers into params, one entry for element in meta, just so i don't have to change code i've already written
 
@@ -110,7 +110,7 @@ for sessix = 1:numel(meta)
 
     % -- null and potent spaces
     cond2use = [2 3 4 5]; % right hit, left hit, right miss, left miss
-    nullalltime = 1; % use all time points to estimate null space if 1
+    nullalltime = 0; % use all time points to estimate null space if 1
     rez(sessix) = singleTrial_elsayed_np(trialdat_zscored, obj(sessix), me(sessix), params(sessix), cond2use, nullalltime);
 
     % -- coding dimensions
@@ -168,16 +168,16 @@ cond2plot = [1 2]; % right hit, left hit
 % -----------------------------------------------------------------------
 % -- Coding Dimensions --
 % -----------------------------------------------------------------------
-plotmiss = 1;
+plotmiss = 0;
 
-titlestring = 'Null';
-plotCDProj(cd_null_all,cd_null,sav,titlestring,plotmiss)
+% titlestring = 'Null';
+% plotCDProj(cd_null_all,cd_null,sav,titlestring,plotmiss)
 % plotCDVarExp(cd_null_all,sav,titlestring)
 % plotSelectivity(cd_null_all,cd_null,sav,titlestring)
 % plotSelectivityExplained(cd_null_all,cd_null,sav,titlestring)
 
-titlestring = 'Potent';
-plotCDProj(cd_potent_all,cd_potent,sav,titlestring,plotmiss)
+% titlestring = 'Potent';
+% plotCDProj(cd_potent_all,cd_potent,sav,titlestring,plotmiss)
 % plotCDVarExp(cd_potent_all,sav,titlestring)
 % plotSelectivity(cd_potent_all,cd_potent,sav,titlestring)
 % plotSelectivityExplained(cd_potent_all,cd_potent,sav,titlestring)
@@ -198,6 +198,8 @@ tbout = 0.3; % move/non-move bout/transition required to be at least this long i
 %%
 close all
 
+% TODO: rewrite these functions to be more general
+
 dim = 1; % dim to plot (most to least variance explained)
 
 % plot_nonGC_moveTransitions_singleTrials(dat,obj,newme,rez,params,dim,meta)
@@ -207,7 +209,7 @@ dim = 1; % dim to plot (most to least variance explained)
 
 ndims = 10;
 % plot_nonGC_moveTransitions_singleTrials_v4(dat,obj,newme,rez,params,ndims,meta) % all bouts heat map, move to quiet 
-plot_nonGC_moveTransitions_singleTrials_v5(dat,obj,newme,rez,params,ndims,meta) % all bouts heat map, quiet to move
+% plot_nonGC_moveTransitions_singleTrials_v5(dat,obj,newme,rez,params,ndims,meta) % all bouts heat map, quiet to move
 
 ndims = 10;
 % plot_nonGC_moveTransitions_trialAvg(dat,obj,newme,rez,params,meta,ndims) % separate tiles for each dimension
@@ -219,8 +221,8 @@ ndims = 10;
 % plot_nonGC_moveTransitions_trialAvg_v4(dat,obj,newme,rez,params,meta,ndims) % var across dimensions, move to quiet
 % plot_nonGC_moveTransitions_trialAvg_v5(dat,obj,newme,rez,params,meta,ndims) % var across dimensions, quiet to move
 
-% plot_nonGC_moveTransitions_trialAvg_v6(dat,obj,newme,rez,params,meta,ndims) % sumsqmag across dimensions, move to quiet
-% plot_nonGC_moveTransitions_trialAvg_v7(dat,obj,newme,rez,params,meta,ndims) % sumsqmag across dimensions, quiet to move
+plot_nonGC_moveTransitions_trialAvg_v6(dat,obj,newme,rez,params,meta,ndims) % sumsqmag across dimensions, move to quiet
+plot_nonGC_moveTransitions_trialAvg_v7(dat,obj,newme,rez,params,meta,ndims) % sumsqmag across dimensions, quiet to move
 
 
 

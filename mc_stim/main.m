@@ -69,7 +69,7 @@ datapth = '/Users/Munib/Documents/Economo-Lab/data/';
 
 meta = [];
 meta = loadMAH13_MCStim(meta,datapth);
-% meta = loadMAH14_MCStim(meta,datapth);
+meta = loadMAH14_MCStim(meta,datapth);
 
 
 % subset based on stim types
@@ -186,8 +186,10 @@ if strcmpi(dfparams.alignEv,'delay') % function depends on data aligned to delay
     sav = 0;
 
 %     plotAvgJawVelocityDuringStim(meta,obj,dfparams,params,kin,kinfeats,feats2plot,cond2plot,sav)
+    plotAvgJawVelocityDuringStim_v2(meta,obj,dfparams,params,kin,kinfeats,feats2plot,cond2plot,sav)
 %     plotAvgJawVelocityDuringStim_firstHalfDelay(meta,obj,dfparams,params,kin,kinfeats,feats2plot,cond2plot,sav)
-    plotAvgJawVelocityDuringStim_singleTrials(meta,obj,dfparams,params,kin,kinfeats,feats2plot,cond2plot,sav)
+%     plotAvgJawVelocityDuringStim_singleTrials(meta,obj,dfparams,params,kin,kinfeats,feats2plot,cond2plot,sav)
+
 end
 
 %% decode trial type from single trial jaw pos/vel

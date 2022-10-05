@@ -1,4 +1,4 @@
-function plotAvgJawVelocityDuringStim(meta,obj,dfparams,params,kin,kinfeats,feats2plot,cond2plot,sav)
+function plotAvgJawVelocityDuringStim_v2(meta,obj,dfparams,params,kin,kinfeats,feats2plot,cond2plot,sav)
 
 dfparams.plt.ms = {'.','.','.','.','.','.'};
 
@@ -12,20 +12,35 @@ for i = 1:numel(times)
 end
 
 % get avg feature value across time and trials for each condition
+dat = cell(size(cond2plot));
+for i = 1:numel(cond2plot)
+    dat{i} = [];
+end
 for i = 1:numel(obj)
     for k = 1:numel(featix)
         for j = 1:numel(cond2plot)
             trials = params(i).trialid{cond2plot(j)};
             temp = kinfeats{i}(ix(1):ix(2),trials,featix(k));
-%             temp = normalizeInRange(temp,[0 1]);
-%             vel{i}{k}(j) = nanvar(nanvar(temp));
-            vel{i}{k}(j) = nanmean(nanmean(temp)); % vel{session}{feat}(cond)
+            dat{j} = [dat{j} ; nanmean(temp,1)'];
         end
     end
 end
 
 
 %% plot
+
+f = figure;
+hold on;
+for i = 1:1:numel(dat)
+     s = scatter(dat{i},1:numel(dat{i}),20,'MarkerEdgeColor','w','MarkerFaceColor',dfparams.plt.color{cond2plot(i)});
+end
+ax = gca;
+ax.Color = 'k';
+f.Color = 'k';
+
+
+
+%%
 f = figure; hold on;
 % f.Position = [680   205   477   773];
 t = tiledlayout('flow');
