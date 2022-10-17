@@ -7,6 +7,7 @@ addpath(genpath(fullfile(utilspth,'funcs')));
 addpath(genpath(fullfile(utilspth,'utils')));
 rmpath(genpath(fullfile(utilspth,'fig3/')))
 rmpath(genpath(fullfile(utilspth,'mc_stim/')))
+rmpath(genpath(fullfile(utilspth,'MotionMapper/')))
 
 
 % add paths for figure specific functions

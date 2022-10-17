@@ -9,6 +9,7 @@ function trialNums = findTrials(obj, conditions)
 % end
 
 varnames = getStructVarNames(obj);
+Ntrials = obj.bp.Ntrials;
 for i = 1:numel(varnames)
     eval([varnames{i} ' = obj.bp.' varnames{i} ';']);
     

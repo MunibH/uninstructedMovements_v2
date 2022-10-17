@@ -1,4 +1,4 @@
-function plot_nonGC_moveTransitions_singleTrials_v5(dat,obj,me,rez,params,ndims,meta)
+function plot_nonGC_moveTransitions_singleTrials_v5(dat,obj,me,rez,params,ndims,meta,sav)
 
 rng(pi)
 
@@ -73,7 +73,7 @@ for sessix = 1:numel(me)
 
     end
 
-    
+
 
     %% sumsqmag
     meannull = sum(allnull.^2,3,'omitnan');
@@ -83,88 +83,99 @@ for sessix = 1:numel(me)
     meanpotent = normalize(meanpotent,'range',[0 1]);
 
     % var
-%     meannull = squeeze(nanmean(allnull.^2,3));
-%     meanpotent = squeeze(nanmean(allpotent.^2,3));
+    %     meannull = squeeze(nanmean(allnull.^2,3));
+    %     meanpotent = squeeze(nanmean(allpotent.^2,3));
 
     mask = meannull == 0;
-%     mask = isnan(meannull);
+    %     mask = isnan(meannull);
     % find cols of mask with all 0s
     temp = sum(~mask,1);
     meannull(:,temp==0) = [];
 
     mask = meanpotent == 0;
-%     mask = isnan(meanpotent);
+    %     mask = isnan(meanpotent);
     % find cols of mask with all 0s
     temp = sum(~mask,1);
     meanpotent(:,temp==0) = [];
-    
-%     f = figure;
-%     ax = nexttile;
-%     histogram(meannull(:))
-%     ax = nexttile;
-%     histogram(meanpotent(:))
 
 
     cm = parula;
     f = figure;
-    f.Position = [373    42   293   954];
+    f.Position = [668    42   293   954];
 
+    xlims = [-0.4,0.4];
+
+    %% me
     ax(1) = nexttile; hold on;
-    toplot = meannull;
-    imagesc(obj(sessix).time,1:size(toplot,2),toplot')
-    xlim([-0.3 0.3])
-    ylim([0 size(toplot,2)])
-    xlabel('Time to quiet (s)')
-    ylabel('Null')
-    ax(1).FontSize = 12;
-    colorbar(ax(1)); %caxis([0 2.5])
-    xline(0,'k:','LineWidth',2)
-    colormap(cm)
-
-    ax(end+1) = nexttile; hold on;
-    toplot = meanpotent;
-    imagesc(obj(sessix).time,1:size(toplot,2),toplot')
-    xlim([-0.3 0.3])
-    ylim([0 size(toplot,2)])
-    xlabel('Time to quiet (s)')
-    ylabel('Potent')
-    ax(2).FontSize = 12;
-    colorbar(ax(2));% caxis([0 2.5])
-    xline(0,'k:','LineWidth',2)
-    colormap(cm)
-
-
-    ax(end+1) = nexttile; hold on;
     toplot = allme(:,:,1);
     mask = isnan(toplot);
     % find cols of mask with all 0s
     temp = sum(~mask,1);
     toplot(:,temp==0) = [];
     toplot = normalize(toplot,'range',[0 1]);
-%     mask = toplot > me(sessix).moveThresh;
-%     toplot(~mask) = -max(max(toplot));
-    imagesc(obj(sessix).time,1:size(toplot,2),toplot')
-    xlim([-0.3 0.3])
+    %
+    %     ttt = toplot(250-31:250+31-2,:);
+    %     figure; imagesc(ttt')
+
+    %     mask = toplot > me(sessix).moveThresh;
+    %     toplot(~mask) = -max(max(toplot));
+
+    [~,ix] = sort(nanmean(toplot,1),'descend');
+
+    imagesc(obj(sessix).time,1:size(toplot,2),toplot(:,ix)')
+    xlim(xlims)
     ylim([0 size(toplot,2)])
     xlabel('Time to move (s)')
     ylabel('Motion Energy')
-    ax(3).FontSize = 12;
-    colorbar(ax(3)); %caxis([0 30])
+    ax(1).FontSize = 12;
+    colorbar(ax(1)); %caxis([0 30])
+    xline(0,'k:','LineWidth',2)
+    colormap(cm)
+    %% null and potent
+
+    ax(end+1) = nexttile; hold on;
+    toplot = meanpotent;
+    imagesc(obj(sessix).time,1:size(toplot,2),toplot(:,ix)')
+    xlim(xlims)
+    ylim([0 size(toplot,2)])
+    xlabel('Time to move (s)')
+    ylabel('Potent')
+    ax(2).FontSize = 12;
+    colorbar(ax(2));% caxis([0 2.5])
     xline(0,'k:','LineWidth',2)
     colormap(cm)
 
-   
+    ax(end+1) = nexttile; hold on;
+    toplot = meannull;
+    imagesc(obj(sessix).time,1:size(toplot,2),toplot(:,ix)')
+    xlim(xlims)
+    ylim([0 size(toplot,2)])
+    xlabel('Time to move (s)')
+    ylabel('Null')
+    ax(3).FontSize = 12;
+    colorbar(ax(3)); %caxis([0 2.5])
+    xline(0,'k:','LineWidth',2)
+    colormap(cm)
+
+
+
+    %%
+
     sgtitle([meta(sessix).anm ' - ' meta(sessix).date])
 
+    if sav
+        ppt.fig = f;
+        ppt.figPath = 'C:\Users\munib\Documents\Economo-Lab\code\uninstructedMovements_v2\fig3\figs\move-transitions';
+        ppt.filename = 'moveToQuietSingleTrials';
+        ppt.newVersion = 0;
+        ppt.slideTitle = [meta(sessix).anm '  ' meta(sessix).date];
+        myExportToPPTX(ppt)
+    end
 
     clear ax
-    
-%     pth = 'C:\Users\munib\Documents\Economo-Lab\code\uninstructedMovements_v2\fig3\figs\move-transitions\';
-%     fn = [meta(sessix).anm ' - ' meta(sessix).date];
-%     mysavefig(f,pth,fn)
-%     pause(1)
-    
-    %%
+
+
+
 
 end
 

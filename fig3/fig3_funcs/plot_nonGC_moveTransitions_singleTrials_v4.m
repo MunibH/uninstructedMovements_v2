@@ -1,4 +1,4 @@
-function plot_nonGC_moveTransitions_singleTrials_v4(dat,obj,me,rez,params,ndims,meta)
+function plot_nonGC_moveTransitions_singleTrials_v4(dat,obj,me,rez,params,ndims,meta,sav)
 
 rng(pi)
 
@@ -21,9 +21,10 @@ for sessix = 1:numel(me)
     potentix = potentix(1:ndims);
 
     nbouts = 5; % approximately max number of bouts in a trial
-    allnull = nan(500,nTrials*nbouts,ndims);
-    allpotent = nan(500,nTrials*nbouts,ndims);
-    allme = nan(500,nTrials*nbouts,ndims);
+    nT = numel(obj(sessix).time);
+    allnull = nan(nT,nTrials*nbouts,ndims);
+    allpotent = nan(nT,nTrials*nbouts,ndims);
+    allme = nan(nT,nTrials*nbouts,ndims);
 
     for dimix = 1:ndims
 
@@ -33,7 +34,7 @@ for sessix = 1:numel(me)
                 continue
             end
 
-            sm = 41;
+            sm = 11;
             null = mySmooth(rez(sessix).N_null(:,trix,nullix(dimix)),sm);
             potent = mySmooth(rez(sessix).N_potent(:,trix,potentix(dimix)),sm);
             move = mySmooth(me(sessix).move(:,trix),sm);
@@ -50,15 +51,16 @@ for sessix = 1:numel(me)
                 meplot = medat(tix);
 
                 % get center of tix
-                center = ceil(numel(tix)/2);
+                dCenter = ceil(numel(tix)/2);
+                center = round(nT / 2);
                 try
-                    allnull(250-center:250+center-1,(trix+i-1),dimix) = nullplot;
-                    allpotent(250-center:250+center-1,(trix+i)-1,dimix) = potentplot;
-                    allme(250-center:250+center-1,(trix+i)-1,dimix) = meplot;
+                    allnull(center-dCenter:center+dCenter-1,(trix+i-1),dimix) = nullplot;
+                    allpotent(center-dCenter:center+dCenter-1,(trix+i)-1,dimix) = potentplot;
+                    allme(center-dCenter:center+dCenter-1,(trix+i)-1,dimix) = meplot;
                 catch
-                    allnull(250-center:250+center-2,(trix+i-1),dimix) = nullplot;
-                    allpotent(250-center:250+center-2,(trix+i)-1,dimix) = potentplot;
-                    allme(250-center:250+center-2,(trix+i)-1,dimix) = meplot;
+                    allnull(center-dCenter:center+dCenter-2,(trix+i-1),dimix) = nullplot;
+                    allpotent(center-dCenter:center+dCenter-2,(trix+i)-1,dimix) = potentplot;
+                    allme(center-dCenter:center+dCenter-2,(trix+i)-1,dimix) = meplot;
                 end
 
 
@@ -69,7 +71,7 @@ for sessix = 1:numel(me)
 
     end
 
-    
+
 
     %% sumsqmag
     meannull = sum(allnull.^2,3,'omitnan');
@@ -79,48 +81,60 @@ for sessix = 1:numel(me)
     meanpotent = normalize(meanpotent,'range',[0 1]);
 
     % var
-%     meannull = squeeze(nanmean(allnull.^2,3));
-%     meanpotent = squeeze(nanmean(allpotent.^2,3));
+    %     meannull = squeeze(nanmean(allnull.^2,3));
+    %     meanpotent = squeeze(nanmean(allpotent.^2,3));
 
     mask = meannull == 0;
-%     mask = isnan(meannull);
+    %     mask = isnan(meannull);
     % find cols of mask with all 0s
     temp = sum(~mask,1);
     meannull(:,temp==0) = [];
 
     mask = meanpotent == 0;
-%     mask = isnan(meanpotent);
+    %     mask = isnan(meanpotent);
     % find cols of mask with all 0s
     temp = sum(~mask,1);
     meanpotent(:,temp==0) = [];
-    
-%     f = figure;
-%     ax = nexttile;
-%     histogram(meannull(:))
-%     ax = nexttile;
-%     histogram(meanpotent(:))
 
 
     cm = parula;
     f = figure;
     f.Position = [373    42   293   954];
 
+    xlims = [-0.4,0.4];
+
+    %% me
     ax(1) = nexttile; hold on;
-    toplot = meannull;
-    imagesc(obj(sessix).time,1:size(toplot,2),toplot')
-    xlim([-0.3 0.3])
+    toplot = allme(:,:,1);
+    mask = isnan(toplot);
+    % find cols of mask with all 0s
+    temp = sum(~mask,1);
+    toplot(:,temp==0) = [];
+    toplot = normalize(toplot,'range',[0 1]);
+    %
+    %     ttt = toplot(250-31:250+31-2,:);
+    %     figure; imagesc(ttt')
+
+    %     mask = toplot > me(sessix).moveThresh;
+    %     toplot(~mask) = -max(max(toplot));
+
+    [~,ix] = sort(nanmean(toplot,1),'descend');
+
+    imagesc(obj(sessix).time,1:size(toplot,2),toplot(:,ix)')
+    xlim(xlims)
     ylim([0 size(toplot,2)])
     xlabel('Time to quiet (s)')
-    ylabel('Null')
+    ylabel('Motion Energy')
     ax(1).FontSize = 12;
-    colorbar(ax(1)); %caxis([0 2.5])
+    colorbar(ax(1)); %caxis([0 30])
     xline(0,'k:','LineWidth',2)
     colormap(cm)
+    %% null and potent
 
     ax(end+1) = nexttile; hold on;
     toplot = meanpotent;
-    imagesc(obj(sessix).time,1:size(toplot,2),toplot')
-    xlim([-0.3 0.3])
+    imagesc(obj(sessix).time,1:size(toplot,2),toplot(:,ix)')
+    xlim(xlims)
     ylim([0 size(toplot,2)])
     xlabel('Time to quiet (s)')
     ylabel('Potent')
@@ -129,38 +143,37 @@ for sessix = 1:numel(me)
     xline(0,'k:','LineWidth',2)
     colormap(cm)
 
-
     ax(end+1) = nexttile; hold on;
-    toplot = allme(:,:,1);
-    mask = isnan(toplot);
-    % find cols of mask with all 0s
-    temp = sum(~mask,1);
-    toplot(:,temp==0) = [];
-    toplot = normalize(toplot,'range',[0 1]);
-%     mask = toplot > me(sessix).moveThresh;
-%     toplot(~mask) = -max(max(toplot));
-    imagesc(obj(sessix).time,1:size(toplot,2),toplot')
-    xlim([-0.3 0.3])
+    toplot = meannull;
+    imagesc(obj(sessix).time,1:size(toplot,2),toplot(:,ix)')
+    xlim(xlims)
     ylim([0 size(toplot,2)])
     xlabel('Time to quiet (s)')
-    ylabel('Motion Energy')
+    ylabel('Null')
     ax(3).FontSize = 12;
-    colorbar(ax(3)); %caxis([0 30])
+    colorbar(ax(3)); %caxis([0 2.5])
     xline(0,'k:','LineWidth',2)
     colormap(cm)
 
-   
+
+
+    %%
+
     sgtitle([meta(sessix).anm ' - ' meta(sessix).date])
+
+    if sav
+        ppt.fig = f;
+        ppt.figPath = 'C:\Users\munib\Documents\Economo-Lab\code\uninstructedMovements_v2\fig3\figs\quiet-transitions';
+        ppt.filename = 'quietToMoveSingleTrials';
+        ppt.newVersion = 0;
+        ppt.slideTitle = [meta(sessix).anm '  ' meta(sessix).date];
+        myExportToPPTX(ppt)
+    end
 
 
     clear ax
-    
-%     pth = 'C:\Users\munib\Documents\Economo-Lab\code\uninstructedMovements_v2\fig3\figs\quiet-transitions\';
-%     fn = [meta(sessix).anm ' - ' meta(sessix).date];
-%     mysavefig(f,pth,fn)
-%     pause(1)
-    
-    %%
+
+
 
 end
 

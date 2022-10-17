@@ -106,14 +106,15 @@ for sessix = 1:numel(meta)
 
     % -- null and potent spaces
     cond2use = [2 3 4 5]; % right hit, left hit, right miss, left miss
-    first = 'null'; % 'null'  'potent'
+    first = 'potent'; % 'null'  'potent'
     rez(sessix) = singleTrial_pca_np(trialdat_zscored, obj(sessix), me(sessix), params(sessix), cond2use, first);
 
     % -- coding dimensions
     cond2use = [1 2]; % right hits, left hits (corresponding to null/potent psths in rez)
+    cond2proj = [1:4]; % right hits, left hits, right miss, left miss (corresponding to null/potent psths in rez)
     cond2use_trialdat = [2 3]; % for calculating selectivity explained in full neural pop
-    cd_null(sessix) = getCodingDimensions(rez(sessix).N_null_psth,trialdat_zscored,obj(sessix),params(sessix),cond2use,cond2use_trialdat);
-    cd_potent(sessix) = getCodingDimensions(rez(sessix).N_potent_psth,trialdat_zscored,obj(sessix),params(sessix),cond2use,cond2use_trialdat);
+    cd_null(sessix) = getCodingDimensions(rez(sessix).N_null_psth,trialdat_zscored,obj(sessix),params(sessix),cond2use,cond2use_trialdat,cond2proj);
+    cd_potent(sessix) = getCodingDimensions(rez(sessix).N_potent_psth,trialdat_zscored,obj(sessix),params(sessix),cond2use,cond2use_trialdat,cond2proj);
 end
 
 
@@ -182,27 +183,298 @@ titlestring = 'Potent';
 %% t=0 is transitions between non-movement and movement that do not coincide with the go cue
 % same plots as plotSelectivityExplained
 
-stitch_dist = 0.025; % in seconds, stitch together movement bouts shorter than this
-purge_dist = 0.1; % in seconds, remove move bouts shorter than this value, after stitching complete
-tbout = 0.3; % move/non-move bout/transition required to be at least this long in seconds
+stitch_dist = 0.05; % in seconds, stitch together movement bouts shorter than this % 0.025
+purge_dist = 0.1; % in seconds, remove move bouts shorter than this value, after stitching complete % 0.1
+tbout = 0.3; % move/non-move bout/transition required to be at least this long in seconds % 0.3
 [dat.mdat,dat.mdat_leg,dat.qdat,dat.qdat_leg,newme] = nonGC_moveTransitions(obj,me,params,stitch_dist,purge_dist,tbout);
 
 %%
 close all
 
+sav = 0;
+
+% TODO: rewrite these functions to be more general
+
 dim = 1; % dim to plot (most to least variance explained)
+
 % plot_nonGC_moveTransitions_singleTrials(dat,obj,newme,rez,params,dim,meta)
+
 % plot_nonGC_moveTransitions_singleTrials_v2(dat,obj,newme,rez,params,dim,meta) % random sampling of move to quiet bouts
-plot_nonGC_moveTransitions_singleTrials_v3(dat,obj,newme,rez,params,dim,meta) % random sampling of quiet to move bouts
+% plot_nonGC_moveTransitions_singleTrials_v3(dat,obj,newme,rez,params,dim,meta) % random sampling of quiet to move bouts
+
+ndims = 10;
+% plot_nonGC_moveTransitions_singleTrials_v4(dat,obj,newme,rez,params,ndims,meta,sav) % all bouts heat map, move to quiet 
+% plot_nonGC_moveTransitions_singleTrials_v5(dat,obj,newme,rez,params,ndims,meta,sav) % all bouts heat map, quiet to move
 
 ndims = 10;
 % plot_nonGC_moveTransitions_trialAvg(dat,obj,newme,rez,params,meta,ndims) % separate tiles for each dimension
+
 % plot_nonGC_moveTransitions_trialAvg_v2(dat,obj,newme,rez,params,meta,ndims) % all dimensions plotted on same axis, 
+
 % plot_nonGC_moveTransitions_trialAvg_v3(dat,obj,newme,rez,params,meta,ndims) % mean,stderr across dimensions
+
 % plot_nonGC_moveTransitions_trialAvg_v4(dat,obj,newme,rez,params,meta,ndims) % var across dimensions, move to quiet
 % plot_nonGC_moveTransitions_trialAvg_v5(dat,obj,newme,rez,params,meta,ndims) % var across dimensions, quiet to move
 
+plot_nonGC_moveTransitions_trialAvg_v6(dat,obj,newme,rez,params,meta,ndims) % sumsqmag across dimensions, move to quiet
+plot_nonGC_moveTransitions_trialAvg_v7(dat,obj,newme,rez,params,meta,ndims) % sumsqmag across dimensions, quiet to move
 
+
+
+%% cross corr me and potent space
+clear dat
+
+maxlag = int64( 5 / params(1).dt );
+
+
+for sessix = 1:numel(rez)
+    dat.null.ts = rez(sessix).N_null;
+    dat.potent.ts = rez(sessix).N_potent;
+    dat.me = zscore(me(sessix).data);
+    
+    for dimix = 1:size(dat.null.ts,3)
+        for trix = 1:size(dat.null.ts,2)
+            [dat.null.xc{sessix}(:,trix,dimix),dat.lags] = xcorr(dat.me(:,trix), dat.null.ts(:,trix,dimix), maxlag, 'normalized');
+            [dat.potent.xc{sessix}(:,trix,dimix),dat.lags] = xcorr(dat.me(:,trix), dat.potent.ts(:,trix,dimix), maxlag, 'normalized');
+        end
+    end
+    
+end
+
+
+dat.null.xc_mean_across_trials = cellfun(@(x) squeeze(nanmean(x,2)), dat.null.xc ,'UniformOutput',false);
+dat.potent.xc_mean_across_trials = cellfun(@(x) squeeze(nanmean(x,2)), dat.potent.xc ,'UniformOutput',false);
+
+dat.null.xc_mean_across_dims = cellfun(@(x) squeeze(nanmean(x,2)),dat.null.xc_mean_across_trials,'UniformOutput',false);
+dat.potent.xc_mean_across_dims = cellfun(@(x) squeeze(nanmean(x,2)),dat.potent.xc_mean_across_trials,'UniformOutput',false);
+
+dat.null.xc_meanall = cell2mat(dat.null.xc_mean_across_dims);
+dat.potent.xc_meanall = cell2mat(dat.potent.xc_mean_across_dims);
+
+%% plot lags against neurons for trial-averaged data
+close all
+
+
+tm = dat.lags .* params(1).dt;
+ix1 = find(tm>=-1,1,'first');
+ix2 = find(tm<=1,1,'last');
+
+% null
+
+f = figure;
+t = tiledlayout('flow');
+for i = 1:numel(dat.null.xc_mean_across_trials)
+    ax = nexttile;
+    temp = dat.null.xc_mean_across_trials{i};
+    [~,ix] = sort(mean(temp(ix1:ix2,:),1));
+    
+    imagesc(tm ,1:size(temp,2),temp(:,ix)')
+    title([meta(i).anm '_' meta(i).date],'Interpreter','none')
+end
+xlabel(t,'lags (s)')
+ylabel(t,'dims')
+title(t,'Null, cross correlation b/w motion energy and single trial fr')
+
+% potent
+
+f = figure;
+t = tiledlayout('flow');
+for i = 1:numel(dat.potent.xc_mean_across_trials)
+    ax = nexttile;
+    temp = dat.potent.xc_mean_across_trials{i};
+    [~,ix] = sort(mean(temp(ix1:ix2,:),1));
+    
+    imagesc(tm ,1:size(temp,2),temp(:,ix)')
+    title([meta(i).anm '_' meta(i).date],'Interpreter','none')
+end
+xlabel(t,'lags (s)')
+ylabel(t,'dims')
+title(t,'Potent, cross correlation b/w motion energy and single trial fr')
+
+%% mean lag for all dims
+
+close all
+
+xlims = [-1 1];
+
+% null
+
+tm = dat.lags .* params(1).dt;
+
+rr_mean = mean(dat.null.xc_meanall,2,'omitnan');
+rr_err = std(dat.null.xc_meanall,[],2,'omitnan') ./ numel(meta);
+
+[maxs,imaxs] = max(abs(dat.null.xc_meanall)); 
+tmaxs = tm(imaxs);
+
+meanalph = 0.5;
+linealph = 0.8;
+lw = 2;
+cols = linspecer(size(dat.null.xc_meanall,2));
+
+f = figure; hold on;
+ax = gca;
+% ax = subplot(2,1,1);
+% hold on;
+% for i = 1:size(dat.null.xc_meanall,2)
+%     patchline(tm,dat.null.xc_meanall(:,i),'EdgeColor',cols(i,:),'LineWidth',1,'EdgeAlpha',linealph)
+%     scatter(tmaxs(i),dat.null.xc_meanall(imaxs(i),i),60,'MarkerEdgeColor','none','MarkerFaceColor',cols(i,:))
+% end
+shadedErrorBar(tm,rr_mean,rr_err,{'Color',[62, 168, 105]./255,'LineWidth',lw},meanalph,ax)
+% xlim(xlims)
+xlabel('Time shift (s)')
+ylabel('correlation')
+
+% title('null')
+
+% potent
+
+tm = dat.lags .* params(1).dt;
+
+rr_mean = mean(dat.potent.xc_meanall,2,'omitnan');
+rr_err = std(dat.potent.xc_meanall,[],2,'omitnan') ./ numel(meta);
+
+[maxs,imaxs] = max(abs(dat.potent.xc_meanall)); 
+tmaxs = tm(imaxs);
+
+meanalph = 0.5;
+linealph = 0.8;
+lw = 2;
+cols = linspecer(size(dat.potent.xc_meanall,2));
+
+% f = figure; 
+% ax = gca;
+% ax = subplot(2,1,1);
+% hold on;
+% for i = 1:size(dat.potent.xc_meanall,2)
+%     patchline(tm,dat.potent.xc_meanall(:,i),'EdgeColor',cols(i,:),'LineWidth',1,'EdgeAlpha',linealph)
+%     scatter(tmaxs(i),dat.potent.xc_meanall(imaxs(i),i),60,'MarkerEdgeColor','none','MarkerFaceColor',cols(i,:))
+% end
+shadedErrorBar(tm,rr_mean,rr_err,{'Color',[255, 56, 140]./255,'LineWidth',lw},meanalph,ax)
+% xlim(xlims)
+xlabel('Time shift (s)')
+ylabel('correlation')
+
+
+% title('potent')
+
+% 
+% % potent - null
+% 
+% tm = dat.lags .* params(1).dt;
+% 
+% pn_minus = dat.potent.xc_meanall - dat.null.xc_meanall;
+% 
+% rr_mean = mean(pn_minus,2,'omitnan');
+% rr_err = std(pn_minus,[],2,'omitnan') ./ numel(meta);
+% 
+% [maxs,imaxs] = max(abs(pn_minus)); 
+% tmaxs = tm(imaxs);
+% 
+% meanalph = 0.5;
+% linealph = 0.2;
+% lw = 2;
+% cols = linspecer(size(pn_minus,2));
+% 
+% f = figure; 
+% ax = gca;
+% shadedErrorBar(tm,rr_mean,rr_err,{'Color','k','LineWidth',lw},meanalph,ax)
+% % xlim([-0.1 0.1])
+% xlabel('Time shift (s)')
+% ylabel('correlation')
+% 
+% title('potent - null')
+
+
+%% cross corr me and potent space (ssm)
+clear dat
+
+maxlag = int64( 5 / params(1).dt );
+
+
+for sessix = 1:numel(rez)
+    dat.null.ts = sum(rez(sessix).N_null.^2,3);
+    dat.potent.ts = rez(sessix).N_potent;
+    dat.me = zscore(me(sessix).data);
+
+    for trix = 1:size(dat.null.ts,2)
+        [dat.null.xc{sessix}(:,trix),dat.lags] = xcorr(dat.me(:,trix), dat.null.ts(:,trix), maxlag, 'normalized');
+        [dat.potent.xc{sessix}(:,trix),dat.lags] = xcorr(dat.me(:,trix), dat.potent.ts(:,trix), maxlag, 'normalized');
+    end
+
+end
+
+
+dat.null.xc_mean_across_trials = cellfun(@(x) squeeze(nanmean(x,2)), dat.null.xc ,'UniformOutput',false);
+dat.potent.xc_mean_across_trials = cellfun(@(x) squeeze(nanmean(x,2)), dat.potent.xc ,'UniformOutput',false);
+
+
+dat.null.xc_meanall = cell2mat(dat.null.xc_mean_across_trials);
+dat.potent.xc_meanall = cell2mat(dat.potent.xc_mean_across_trials);
+
+
+%%
+close all
+
+xlims = [-1 1];
+
+% null
+
+tm = dat.lags .* params(1).dt;
+
+rr_mean = mean(dat.null.xc_meanall,2,'omitnan');
+rr_err = std(dat.null.xc_meanall,[],2,'omitnan') ./ numel(meta);
+
+[maxs,imaxs] = max(abs(dat.null.xc_meanall)); 
+tmaxs = tm(imaxs);
+
+meanalph = 0.5;
+linealph = 0.8;
+lw = 2;
+cols = linspecer(size(dat.null.xc_meanall,2));
+
+f = figure; hold on;
+ax = gca;
+% ax = subplot(2,1,1);
+% hold on;
+% for i = 1:size(dat.null.xc_meanall,2)
+%     patchline(tm,dat.null.xc_meanall(:,i),'EdgeColor',cols(i,:),'LineWidth',1,'EdgeAlpha',linealph)
+%     scatter(tmaxs(i),dat.null.xc_meanall(imaxs(i),i),60,'MarkerEdgeColor','none','MarkerFaceColor',cols(i,:))
+% end
+shadedErrorBar(tm,rr_mean,rr_err,{'Color',[62, 168, 105]./255,'LineWidth',lw},meanalph,ax)
+xlim(xlims)
+xlabel('Time shift (s)')
+ylabel('correlation')
+
+% title('null')
+
+% potent
+
+tm = dat.lags .* params(1).dt;
+
+rr_mean = mean(dat.potent.xc_meanall,2,'omitnan');
+rr_err = std(dat.potent.xc_meanall,[],2,'omitnan') ./ numel(meta);
+
+[maxs,imaxs] = max(abs(dat.potent.xc_meanall)); 
+tmaxs = tm(imaxs);
+
+meanalph = 0.5;
+linealph = 0.8;
+lw = 2;
+cols = linspecer(size(dat.potent.xc_meanall,2));
+
+% f = figure; 
+% ax = gca;
+% ax = subplot(2,1,1);
+% hold on;
+% for i = 1:size(dat.potent.xc_meanall,2)
+%     patchline(tm,dat.potent.xc_meanall(:,i),'EdgeColor',cols(i,:),'LineWidth',1,'EdgeAlpha',linealph)
+%     scatter(tmaxs(i),dat.potent.xc_meanall(imaxs(i),i),60,'MarkerEdgeColor','none','MarkerFaceColor',cols(i,:))
+% end
+shadedErrorBar(tm,rr_mean,rr_err,{'Color',[255, 56, 140]./255,'LineWidth',lw},meanalph,ax)
+xlim(xlims)
+xlabel('Time shift (s)')
+ylabel('correlation')
 
 
 

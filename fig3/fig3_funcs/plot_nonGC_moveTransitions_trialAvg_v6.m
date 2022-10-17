@@ -94,7 +94,8 @@ for sessix = 1:numel(me)
 
     ylims = ax.YLim;
 
-    meanme = squeeze(normalize(nanmean(allme,2),'range',[ylims(1)+0.1 ylims(2)-0.1]));
+%     meanme = squeeze(normalize(nanmean(allme,2),'range',[ylims(1)+0.1 ylims(2)-0.1]));
+    meanme = squeeze(nanmean(allme,2));
 %     meanme = squeeze(nanmean(allme,2));
     meanme = meanme(:,1);
     yyaxis(ax,'right')

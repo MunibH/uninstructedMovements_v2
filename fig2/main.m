@@ -57,14 +57,16 @@ datapth = '/Users/Munib/Documents/Economo-Lab/data/';
 meta = [];
 
 % --- ALM --- 
-meta = loadJEB6_ALMVideo(meta,datapth);
-meta = loadJEB7_ALMVideo(meta,datapth);
-meta = loadEKH1_ALMVideo(meta,datapth);
-meta = loadEKH3_ALMVideo(meta,datapth);
-meta = loadJGR2_ALMVideo(meta,datapth);
-meta = loadJGR3_ALMVideo(meta,datapth);
+% meta = loadJEB6_ALMVideo(meta,datapth);
+% meta = loadJEB7_ALMVideo(meta,datapth);
+% meta = loadEKH1_ALMVideo(meta,datapth);
+% meta = loadEKH3_ALMVideo(meta,datapth);
+% meta = loadJGR2_ALMVideo(meta,datapth);
+% meta = loadJGR3_ALMVideo(meta,datapth);
 meta = loadJEB14_ALMVideo(meta,datapth);
-meta = loadJEB15_ALMVideo(meta,datapth);
+% meta = loadJEB15_ALMVideo(meta,datapth);
+
+meta = meta(2);
 
 % --- M1TJ ---
 % meta = loadJEB14_M1TJVideo(meta,datapth);
@@ -98,7 +100,7 @@ cond2proj = [2 3 4 5];
 proj_trialdat = 1;
 rez = getCodingDimensions(obj,params,cond2use,cond2proj,proj_trialdat);
 
-allrez = concatRezAcrossSessions(rez);
+% allrez = concatRezAcrossSessions(rez);
 
 %% PLOTS
 close all
@@ -118,6 +120,61 @@ plotCorrelation_Cddelay_ME_v2(obj,params,rez,me,meta,cond2use);
 % plotSelectivity(allrez,rez,sav)
 % plotSelectivityExplained(allrez,rez,sav)
 
+%% cd vs me (tavg)
 
+close all
+
+cols = getColors();
+clrs{1} = cols.lhit;
+clrs{2} = cols.rhit;
+
+cond2use = [2 3];
+xlims = [-1 0.05];
+
+sample = mode(obj.bp.ev.sample) - 2.5;
+delay = mode(obj.bp.ev.delay) - 2.5;
+
+figure; 
+ax = gca; hold on;
+for i = 1:numel(cond2use)
+    trix = params.trialid{cond2use(i)};
+    plotme = me.data(:,trix);
+    shadedErrorBar(obj.time,mean(plotme,2),std(plotme,[],2)./sqrt(numel(trix)/2), {'Color',clrs{i},'LineWidth',2},0.5,ax);
+end
+ys = ax.YLim;
+p = patch([-0.9 0 0 -0.9],[ys(1) ys(1) ys(2) ys(2)],'k');
+p.EdgeColor = 'none';
+% p.FaceColor = [120 120 120]./255;
+p.FaceColor = [62, 168, 105]./255;
+p.FaceAlpha = 0.1
+xline(sample,'k:','LineWidth',2)
+xline(delay,'k:','LineWidth',2)
+xline(0,'k:','LineWidth',2)
+xlabel('Time (s) from go cue')
+ylabel('Motion Energy')
+xlim(xlims)
+ylim([ax.YLim(1)+5 ax.YLim(2)-30])
+
+% cd
+figure; 
+ax = gca; hold on;
+for i = 1:numel(cond2use)
+    trix = params.trialid{cond2use(i)};
+    plotcd = rez.cd_proj_trialdat(:,trix);
+    shadedErrorBar(obj.time,mean(plotcd,2),std(plotcd,[],2)./sqrt(numel(trix)/2), {'Color',clrs{i},'LineWidth',2},0.5,ax);
+end
+ys = ax.YLim;
+p = patch([-0.9 0 0 -0.9],[ys(1) ys(1) ys(2) ys(2)],'k');
+p.EdgeColor = 'none';
+% p.FaceColor = [120 120 120]./255;
+p.FaceColor = [62, 168, 105]./255;
+p.FaceAlpha = 0.1;
+xline(sample,'k:','LineWidth',2)
+xline(delay,'k:','LineWidth',2)
+xline(0,'k:','LineWidth',2)
+xlabel('Time (s) from go cue')
+ylabel('CD Delay')
+xlim(xlims)
+ylim([ax.YLim(1)+10 ax.YLim(2)-30])
 
 

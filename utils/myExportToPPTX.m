@@ -1,6 +1,12 @@
 function myExportToPPTX(params)
 % requires exportToPPTX github repo
 
+% params.fig = figure handle
+% params.figPath = directory
+% params.filename = filename
+% params.newVersion - only use this if just one figure
+% params.slideTitle - 
+
 % change fig background color to white
 params.fig.Color = 'w';
 
@@ -60,8 +66,8 @@ end
 %% Add fig to slide
 
 slideId = pptx.addSlide();
-pptx.addPicture(params.fig);
 pptx.addTextbox(params.slideTitle);
+pptx.addPicture(params.fig);
 
 
 %% Save presentation and close presentation -- overwrite file if it already exists

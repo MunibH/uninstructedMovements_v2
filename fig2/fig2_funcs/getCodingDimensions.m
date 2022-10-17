@@ -1,8 +1,12 @@
 function rez = getCodingDimensions(obj,params,cond2use,cond2proj,proj_trialdat)
-
+% 
 cd_labels = {'early','late','go'};
 cd_epochs = {'delay','goCue','goCue'};
 cd_times = {[-0.42 -0.02], [-0.42 -0.02], [0.02 0.42]}; % in seconds, relative to respective epochs
+
+% cd_labels = {'late'};
+% cd_epochs = {'goCue'};
+% cd_times = {[-0.42 -0.02]}; % in seconds, relative to respective epochs
 
 for sessix = 1:numel(obj)
 

@@ -13,6 +13,7 @@ dims = size(temp); % (time,trials,neurons)
 temp = reshape(temp,dims(1)*dims(2),dims(3));
 
 temp2 = zscore(temp);
+% temp2 = temp ./ max(temp);
 trialdat_zscored = reshape(temp2,dims(1),dims(2),dims(3));
 
 

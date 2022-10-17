@@ -1,4 +1,4 @@
-function plotAvgJawVelocityDuringStim(meta,obj,dfparams,params,kin,kinfeats,feats2plot,cond2plot,sav)
+function plotAvgFeatValDuringStim(meta,obj,dfparams,params,kin,kinfeats,feats2plot,cond2plot,sav)
 
 dfparams.plt.ms = {'.','.','.','.','.','.'};
 

@@ -22,7 +22,8 @@ for sessix = 1:numel(obj)
         [~,ix2] = min(abs(obj(sessix).time - 0));
         trix = params(sessix).trialid{cond2use(cix)};
         cddelayix = find(ismember( rez(sessix).cd_labels,'late'));
-        plotcd = rez(sessix).cd_proj_trialdat(ix1:ix2,trix,cddelayix);
+%         plotcd = rez(sessix).cd_proj_trialdat(ix1:ix2,trix,cddelayix);
+        plotcd = abs(rez(sessix).cd_proj_trialdat(ix1:ix2,trix,cddelayix));
         avgcd =  mean(plotcd,1)';
 
         plotme = me(sessix).data(ix1:ix2,trix);
@@ -32,14 +33,31 @@ for sessix = 1:numel(obj)
         % mdl.Coefficients.Estimate
         %  y ~ 1 + x1
         ax = plot(mdl{cix}); hold on;
-        scatter(avgme,avgcd,70,'MarkerEdgeColor','w','MarkerFaceColor',cols{cix},'MarkerFaceAlpha',1); hold on;
+        scax = scatter(avgme,avgcd,35); hold on;
+        scax.MarkerFaceAlpha = 0.4;
+        scax.MarkerFaceColor = cols{cix};
+        scax.MarkerEdgeColor = 'w';
         ax(1).XData = []; % remove x's plotted by ax=plot(mdl)
         ax(1).YData = [];
         ax(1) = [];
-        ax(1).LineWidth = 0.5;
+        ax(1).LineWidth = 2.5;
         ax(1).Color = cols{cix};
-        ax(2).Color = cols{cix};
-        ax(3).Color = cols{cix};
+        ax(2).Color = 'none';
+        ax(2).LineWidth = 1.5;
+        ax(3).Color = 'none';
+        ax(3).LineWidth = 1.5;
+
+        xs = [ax(2).XData ; ax(3).XData];
+        ys = [ax(2).YData ; ax(3).YData];
+        for i = 1:size(xs,2)-1
+            tx = [xs(1,i) xs(1,i+1) xs(2,i+1) xs(2,i)];
+            ty = [ys(1,i) ys(1,i+1) ys(2,i+1) ys(2,i)];
+            p = patch(tx,ty,cols{cix});
+            p.EdgeColor = 'none';
+            p.FaceAlpha = 0.3;
+        end
+
+
         leg = legend();
         set(leg,'Visible','off')
 
@@ -49,7 +67,8 @@ for sessix = 1:numel(obj)
     ylabel('Late Delay Coding Direction')
 end
 
-
+xlim([6 50])
+ylim([0 70])
 
 % for sessix = 1:numel(rez)
 %
