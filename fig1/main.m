@@ -14,7 +14,7 @@ rmpath(genpath(fullfile(utilspth,'MotionMapper/')))
 addpath(genpath(pwd))
 
 %% PARAMETERS
-params.alignEvent          = 'goCue'; % 'jawOnset' 'goCue'  'moveOnset'  'firstLick'  'lastLick'
+params.alignEvent          = 'firstLick'; % 'jawOnset' 'goCue'  'moveOnset'  'firstLick'  'lastLick'
 
 % time warping only operates on neural data for now.
 % TODO: time warp for video and bpod data
@@ -24,11 +24,16 @@ params.nLicks              = 20; % number of post go cue licks to calculate medi
 params.lowFR               = 1; % remove clusters with firing rates across all trials less than this val
 
 % set conditions to calculate PSTHs for
-params.condition(1)     = {'(hit|miss|no)'};                             % all trials
-params.condition(end+1) = {'L&hit&~stim.enable&~autowater&~early'};             % right hits, no stim, aw off
-params.condition(end+1) = {'R&hit&~stim.enable&~autowater&~early'};             % left hits, no stim, aw off
-params.condition(end+1) = {'L&miss&~stim.enable&~autowater&~early'};            % error right, no stim, aw off
-params.condition(end+1) = {'R&miss&~stim.enable&~autowater&~early'};            % error left, no stim, aw off
+params.condition(1)     = {'(hit|miss|no)'};                                              % all trials       (1)
+params.condition(end+1) = {'R&hit&~stim.enable&~autowater&~early&((1:Ntrials)>20)'};      % right hits, 2afc (2)
+params.condition(end+1) = {'L&hit&~stim.enable&~autowater&~early&((1:Ntrials)>20)'};      % left hit, 2afc   (3)
+params.condition(end+1) = {'R&miss&~stim.enable&~autowater&~early&((1:Ntrials)>20)'};     % right miss, 2afc (4)
+params.condition(end+1) = {'L&miss&~stim.enable&~autowater&~early&((1:Ntrials)>20)'};     % left miss, 2afc  (5)
+params.condition(end+1) = {'hit&~stim.enable&~autowater&~early&((1:Ntrials)>20)'};        % 2afc hits        (6)
+params.condition(end+1) = {'hit&~stim.enable&autowater&~early&((1:Ntrials)>20)'};         % aw hits          (7)
+params.condition(end+1) = {'R&hit&~stim.enable&autowater&~early&((1:Ntrials)>20)'};       % right hits, aw   (8)
+params.condition(end+1) = {'L&hit&~stim.enable&autowater&~early&((1:Ntrials)>20)'};       % left hits, aw    (9)
+
 
 params.tmin = -2.5;
 params.tmax = 2.5;
@@ -63,8 +68,8 @@ meta = loadEKH1_ALMVideo(meta,datapth);
 meta = loadEKH3_ALMVideo(meta,datapth);
 meta = loadJGR2_ALMVideo(meta,datapth);
 meta = loadJGR3_ALMVideo(meta,datapth);
-meta = loadJEB14_ALMVideo(meta,datapth);
-meta = loadJEB15_ALMVideo(meta,datapth);
+% meta = loadJEB14_ALMVideo(meta,datapth);
+% meta = loadJEB15_ALMVideo(meta,datapth);
 
 % --- M1TJ ---
 % meta = loadJEB14_M1TJVideo(meta,datapth);
@@ -85,23 +90,81 @@ sel_corr_mat = getSelectivityCorrelationMatrix(obj,cond2use);
 
 clearvars -except obj meta params sel_corr_mat
 
+% % 2afc (early, late, go)
 cond2use = [2 3]; % left hit, right hit
-cond2proj = [2 3 4 5];
-rez = getCodingDimensions(obj,params,cond2use,cond2proj);
+cond2proj = [2 3 4 5 8 9];
+rez_2afc = getCodingDimensions_2afc(obj,params,cond2use,cond2proj);
 
-allrez = concatRezAcrossSessions(rez);
+% % aw (context mode)
+cond2use = [6 7]; % hit 2afc, hit aw
+cond2proj = [2 3 4 5 8 9];
+rez_aw = getCodingDimensions_aw(obj,params,cond2use,cond2proj);
+
+
+allrez = concatRezAcrossSessions(rez_2afc,rez_aw);
 
 %% PLOTS
 close all
 
 sav = 0; % 1=save, 0=no_save
 
-plotSelectivityCorrMatrix(obj(1),sel_corr_mat,params(1).alignEvent,sav)
-plotmiss = 1;
-plotCDProj(allrez,rez,sav,plotmiss)
-plotCDVarExp(allrez,sav)
-plotSelectivity(allrez,rez,sav)
-plotSelectivityExplained(allrez,rez,sav)
+% plotSelectivityCorrMatrix(obj(1),sel_corr_mat,params(1).alignEvent,sav)
+
+plotmiss = 0;
+plotaw = 1;
+plotCDProj(allrez,rez_2afc,sav,plotmiss,plotaw,params(1).alignEvent)
+
+% plotCDVarExp(allrez,sav)
+% plotSelectivity(allrez,rez,sav)
+% plotSelectivityExplained(allrez,rez,sav)
+
+
+
+
+
+%% heatmap for context
+close all
+for sessix = 1:numel(rez_aw)
+%     trix = sort(cell2mat(params(sessix).trialid([6 7])')); % 2afc and aw hits
+    trix = 1:obj(sessix).bp.Ntrials;
+    trialdat = obj(sessix).trialdat(:,:,trix);
+    trialdat = permute(trialdat, [1 3 2]); % time trials clu
+    dims = size(trialdat);
+    temp = reshape(trialdat, dims(1)*dims(2), dims(3));
+    temp = zscore(temp);
+
+    proj = temp * rez_aw(sessix).cd_mode_orth;
+    proj = reshape(proj, dims(1), dims(2));
+
+    figure; imagesc(1:numel(trix), obj(sessix).time, proj)
+    set(gca,'YDir','normal')
+    xlabel('Trials')
+    ylabel(['Time (s) from ' params(sessix).alignEvent])
+    title('Context Mode')
+    c = colorbar;
+    c.Limits(1) = c.Limits(1) ./ 3;
+    ylim([-1 -0.2])
+
+%     temp = mean(proj(1:150,:),1);
+%     figure; plot(mySmooth(temp,31))
+
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -55,12 +55,12 @@ datapth = '/Users/Munib/Documents/Economo-Lab/data/';
 
 meta = [];
 % 
-meta = loadJEB6_ALMVideo(meta,datapth);
-meta = loadJEB7_ALMVideo(meta,datapth);
-meta = loadEKH1_ALMVideo(meta,datapth);
-meta = loadEKH3_ALMVideo(meta,datapth);
-meta = loadJGR2_ALMVideo(meta,datapth);
-meta = loadJGR3_ALMVideo(meta,datapth);
+% meta = loadJEB6_ALMVideo(meta,datapth);
+% meta = loadJEB7_ALMVideo(meta,datapth);
+% meta = loadEKH1_ALMVideo(meta,datapth);
+% meta = loadEKH3_ALMVideo(meta,datapth);
+% meta = loadJGR2_ALMVideo(meta,datapth);
+% meta = loadJGR3_ALMVideo(meta,datapth);
 meta = loadJEB15_ALMVideo(meta,datapth);
 % meta = loadJEB14_ALMVideo(meta,datapth);
 
@@ -106,7 +106,7 @@ for sessix = 1:numel(meta)
 
     % -- null and potent spaces
     cond2use = [2 3 4 5]; % right hit, left hit, right miss, left miss
-    first = 'potent'; % 'null'  'potent'
+    first = 'null'; % 'null'  'potent'
     rez(sessix) = singleTrial_pca_np(trialdat_zscored, obj(sessix), me(sessix), params(sessix), cond2use, first);
 
     % -- coding dimensions
