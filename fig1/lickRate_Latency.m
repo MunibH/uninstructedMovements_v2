@@ -61,7 +61,7 @@ meta = loadEKH1_ALMVideo(meta,datapth);
 meta = loadEKH3_ALMVideo(meta,datapth);
 meta = loadJGR2_ALMVideo(meta,datapth);
 meta = loadJGR3_ALMVideo(meta,datapth);
-meta = loadJEB15_ALMVideo(meta,datapth);
+% meta = loadJEB15_ALMVideo(meta,datapth);
 
 
 params.probe = {meta.probe}; % put probe numbers into params, one entry for element in meta, just so i don't have to change code i've already written
@@ -72,99 +72,161 @@ params.probe = {meta.probe}; % put probe numbers into params, one entry for elem
 [obj,params] = loadSessionData(meta,params);
 
 %% LICK LATENCY
-gocue = mode(obj(1).bp.ev.goCue);
-latency = cell(numel(params(1).condition),1);
-for j = 1:numel(params(1).condition)
-    latency{j} = [];
-    for i = 1:numel(meta)
-        trix = params(i).trialid{j};
-        lickR = obj(i).bp.ev.lickR(trix);
-        lickL = obj(i).bp.ev.lickL(trix);
-        licktimes = cellfun( @(x,y) sort([x,y]), lickR, lickL, 'UniformOutput', false );
-        latency{j} = [latency{j} ; cell2mat(cellfun(@(x) x(1),licktimes, 'UniformOutput',false )) - gocue];
+
+close all
+
+latency = cell(numel(meta),1);
+cond2use = 1:4;
+for sessix = 1:numel(meta)
+    for cix = 1:numel(cond2use)
+        latency{sessix}{cix} = nan((numel(params(sessix).trialid{cond2use(cix)})),1);
+        for trix = 1:numel(params(sessix).trialid{cond2use(cix)})
+            trial = params(sessix).trialid{cond2use(cix)}(trix);
+
+            lickR = obj(sessix).bp.ev.lickR{trial};
+            lickL = obj(sessix).bp.ev.lickL{trial};
+            licktimes = sort([lickR lickL]) - obj(sessix).bp.ev.goCue(trial);
+            licktimes(licktimes <= 0) = [];
+            latency{sessix}{cix}(trix) = licktimes(1);
+        end
     end
-    latency{j}(latency{j}<0) = [];
 end
 
+% concatenate latency for each mouse
+anms = unique({meta.anm});
+latency_by_mouse = cell(numel(unique(anms)),1);
+for i = 1:numel(meta) % preallocating in this loop
+    anmix = find(ismember(anms,meta(i).anm));
+    for cix = 1:numel(cond2use)
+        latency_by_mouse{anmix}{cix} = [];
+    end
+end
+for i = 1:numel(meta)
+    anmix = find(ismember(anms,meta(i).anm));
+    for cix = 1:numel(cond2use)
+        latency_by_mouse{anmix}{cix} = [latency_by_mouse{anmix}{cix} ; latency{i}{cix}];
+    end
+end
+% average across trials/sessions for each mouse
+for i = 1:numel(anms)
+    latencies{i} = cellfun(@(x) mean(x), latency_by_mouse{i}, 'UniformOutput',false);                                                                                                                      
+end
 
-figure; hold on;
-rng(pi) % just to reproduce the random data I used
-div = 1.3;
+% concatenate data 
+lates = zeros(numel(anms),numel(cond2use));
+for sessix = 1:numel(anms)
+    for cix = 1:numel(cond2use)
+        lates(sessix,cix) = latencies{sessix}{cix};
+    end
+end
 
 clrs = getColors();
 fns = fieldnames(clrs);
 for i = 1:numel(fns)
     cols{i} = clrs.(fns{i});
 end
+div = 1.3;
 
+f = figure; hold on;
+f.Position = [680   755   244   223];
 xs = [1 2 4 5];
-for i = 1:numel(latency)
-    b(i) = bar(xs(i),median(latency{i}));
+for i = 1:numel(xs)
+    b(i) = bar(xs(i),mean(lates(:,i)));
     b(i).FaceColor = cols{i};
     b(i).EdgeColor = 'none';
     b(i).FaceAlpha = 0.8;
-%     vs(i) = scatter(xs(i)*ones(size(latency{i})),latency{i},60,'MarkerFaceColor',cols{i}./div,...
-%         'MarkerEdgeColor','k','LineWidth',1,'XJitter','randn','XJitterWidth',0.25);
-    errorbar(b(i).XEndPoints,median(latency{i}),std(latency{i}),'LineStyle','none','Color','k','LineWidth',1)
+    vs(i) = scatter(xs(i)*ones(size(lates(:,i))),lates(:,i),60,'MarkerFaceColor',cols{i}./div,...
+        'MarkerEdgeColor','k','LineWidth',1,'XJitter','randn','XJitterWidth',0.25);
+    errorbar(b(i).XEndPoints,mean(lates(:,i)),std(lates(:,i)),'LineStyle','none','Color','k','LineWidth',1)
 
 
 end
 
-
-xticklabels([" " "Right 2AFC" "Left 2AFC" " " "Right AW" "Left AW"])
+% xticklabels(["Right 2AFC" "Left 2AFC" " " "Right AW" "Left AW"])
 ylabel("First lick latency (s)")
-ylim([0,1])
+% ylim([0,1])
 ax = gca;
 ax.FontSize = 12;
-
+ax.XTick = [];
 
 
 %% LICK RATE
-gocue = mode(obj(1).bp.ev.goCue);
-lickrate = cell(numel(params(1).condition),1);
-for j = 1:numel(params(1).condition)
-    lickrate{j} = [];
-    for i = 1:numel(meta)
-        trix = params(i).trialid{j};
-        lickR = obj(i).bp.ev.lickR(trix);
-        lickL = obj(i).bp.ev.lickL(trix);
-        licktimes = cellfun( @(x,y) sort([x,y])-gocue, lickR, lickL, 'UniformOutput', false );
-        licktimes = cellfun(@(x) x(x>0),licktimes, 'UniformOutput',false);
-        lr = 1./cell2mat(cellfun(@(x) mean(diff(x)), licktimes, 'UniformOutput',false)); % hz
-        lickrate{j} = [lickrate{j} ; lr];
+
+lickrate = cell(numel(meta),1);
+cond2use = 1:4;
+for sessix = 1:numel(meta)
+    for cix = 1:numel(cond2use)
+        lickrate{sessix}{cix} = nan((numel(params(sessix).trialid{cond2use(cix)})),1);
+        for trix = 1:numel(params(sessix).trialid{cond2use(cix)})
+            trial = params(sessix).trialid{cond2use(cix)}(trix);
+
+            lickR = obj(sessix).bp.ev.lickR{trial};
+            lickL = obj(sessix).bp.ev.lickL{trial};
+            licktimes = sort([lickR lickL]) - obj(sessix).bp.ev.goCue(trial);
+            licktimes(licktimes <= 0) = [];
+            lickrate{sessix}{cix}(trix) = 1 ./ mean(diff(licktimes)); % hz
+        end
     end
 end
 
+% concatenate rates for each mouse
+anms = unique({meta.anm});
+rates_by_mouse = cell(numel(unique(anms)),1);
+for i = 1:numel(meta) % preallocating in this loop
+    anmix = find(ismember(anms,meta(i).anm));
+    for cix = 1:numel(cond2use)
+        rates_by_mouse{anmix}{cix} = [];
+    end
+end
+for i = 1:numel(meta)
+    anmix = find(ismember(anms,meta(i).anm));
+    for cix = 1:numel(cond2use)
+        rates_by_mouse{anmix}{cix} = [rates_by_mouse{anmix}{cix} ; lickrate{i}{cix}];
+    end
+end
+% average across trials/sessions for each mouse
+for i = 1:numel(anms)
+    rates{i} = cellfun(@(x) mean(x), rates_by_mouse{i}, 'UniformOutput',false);                                                                                                                      
+end
 
-figure; hold on;
-rng(pi) % just to reproduce the random data I used
-div = 1.3;
+% concatenate data 
+rates_ = zeros(numel(anms),numel(cond2use));
+for sessix = 1:numel(anms)
+    for cix = 1:numel(cond2use)
+        rates_(sessix,cix) = rates{sessix}{cix};
+    end
+end
 
 clrs = getColors();
 fns = fieldnames(clrs);
 for i = 1:numel(fns)
     cols{i} = clrs.(fns{i});
 end
+div = 1.3;
+
+f = figure; hold on;
+f.Position = [680   755   244   223];
 
 xs = [1 2 4 5];
-for i = 1:numel(lickrate)
-    b(i) = bar(xs(i),nanmean(lickrate{i}));
+for i = 1:numel(xs)
+    b(i) = bar(xs(i),nanmean(rates_(:,i)));
     b(i).FaceColor = cols{i};
     b(i).EdgeColor = 'none';
     b(i).FaceAlpha = 0.8;
-%     vs(i) = scatter(xs(i)*ones(size(lickrate{i})),lickrate{i},60,'MarkerFaceColor',cols{i}./div,...
-%         'MarkerEdgeColor','k','LineWidth',1,'XJitter','randn','XJitterWidth',0.25);
-    errorbar(b(i).XEndPoints,nanmean(lickrate{i}),nanstd(lickrate{i}),'LineStyle','none','Color','k','LineWidth',1)
+    vs(i) = scatter(xs(i)*ones(size(rates_(:,i))),rates_(:,i),60,'MarkerFaceColor',cols{i}./div,...
+        'MarkerEdgeColor','k','LineWidth',1,'XJitter','randn','XJitterWidth',0.25);
+    errorbar(b(i).XEndPoints,nanmean(rates_(:,i)),nanstd(rates_(:,i)),'LineStyle','none','Color','k','LineWidth',1)
 
 
 end
 
-
-xticklabels([" " "Right 2AFC" "Left 2AFC" " " "Right AW" "Left AW"])
+% xticklabels(["Right 2AFC" "Left 2AFC" " " "Right AW" "Left AW"])
 ylabel("Lick rate (Hz)")
 % ylim([0,1])
 ax = gca;
 ax.FontSize = 12;
+ax.XTick = [];
+
 
 
 

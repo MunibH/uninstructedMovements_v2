@@ -14,7 +14,7 @@ rmpath(genpath(fullfile(utilspth,'MotionMapper/')))
 addpath(genpath(pwd))
 
 %% PARAMETERS
-params.alignEvent          = 'firstLick'; % 'jawOnset' 'goCue'  'moveOnset'  'firstLick'  'lastLick'
+params.alignEvent          = 'goCue'; % 'jawOnset' 'goCue'  'moveOnset'  'firstLick'  'lastLick'
 
 % time warping only operates on neural data for now.
 % TODO: time warp for video and bpod data
@@ -68,8 +68,8 @@ meta = loadEKH1_ALMVideo(meta,datapth);
 meta = loadEKH3_ALMVideo(meta,datapth);
 meta = loadJGR2_ALMVideo(meta,datapth);
 meta = loadJGR3_ALMVideo(meta,datapth);
-% meta = loadJEB14_ALMVideo(meta,datapth);
-% meta = loadJEB15_ALMVideo(meta,datapth);
+meta = loadJEB14_ALMVideo(meta,datapth);
+meta = loadJEB15_ALMVideo(meta,datapth);
 
 % --- M1TJ ---
 % meta = loadJEB14_M1TJVideo(meta,datapth);
@@ -111,9 +111,9 @@ sav = 0; % 1=save, 0=no_save
 % plotSelectivityCorrMatrix(obj(1),sel_corr_mat,params(1).alignEvent,sav)
 
 plotmiss = 0;
-plotaw = 1;
+plotaw = 0;
 plotCDProj(allrez,rez_2afc,sav,plotmiss,plotaw,params(1).alignEvent)
-
+set(gcf,'Position',[249   558   349   238])
 % plotCDVarExp(allrez,sav)
 % plotSelectivity(allrez,rez,sav)
 % plotSelectivityExplained(allrez,rez,sav)

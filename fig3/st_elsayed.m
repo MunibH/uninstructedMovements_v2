@@ -19,7 +19,7 @@ params.alignEvent          = 'goCue'; % 'jawOnset' 'goCue'  'moveOnset'  'firstL
 params.timeWarp            = 0;  % piecewise linear time warping - each lick duration on each trial gets warped to median lick duration for that lick across trials
 params.nLicks              = 20; % number of post go cue licks to calculate median lick duration for and warp individual trials to
 
-params.lowFR               = 1; % remove clusters with firing rates across all trials less than this val
+params.lowFR               = 0; % remove clusters with firing rates across all trials less than this val
 
 % set conditions to calculate PSTHs for
 params.condition(1)     = {'(hit|miss|no)'};                             % all trials
@@ -29,7 +29,7 @@ params.condition(end+1) = {'R&miss&~stim.enable&~autowater'};            % error
 params.condition(end+1) = {'L&miss&~stim.enable&~autowater'};            % error left, no stim, aw off
 
 params.tmin = -2.5;
-params.tmax = 2.5;
+params.tmax = 7;
 params.dt = 1/100;
 
 % smooth with causal gaussian kernel
@@ -37,7 +37,7 @@ params.smooth = 15;
 
 % cluster qualities to use
 params.quality = {'all'}; % accepts any cell array of strings - special character 'all' returns clusters of any quality
-
+% params.quality = {'Excellent','Great','Good','Fair','Multi'};
 
 params.traj_features = {{'tongue','left_tongue','right_tongue','jaw','trident','nose'},...
     {'top_tongue','topleft_tongue','bottom_tongue','bottomleft_tongue','jaw','top_paw','bottom_paw','top_nostril','bottom_nostril'}};
@@ -56,13 +56,13 @@ datapth = '/Users/Munib/Documents/Economo-Lab/data/';
 meta = [];
 
 % --- ALM --- 
-% meta = loadJEB6_ALMVideo(meta,datapth);
-% meta = loadJEB7_ALMVideo(meta,datapth);
-% meta = loadEKH1_ALMVideo(meta,datapth);
-% meta = loadEKH3_ALMVideo(meta,datapth);
-% meta = loadJGR2_ALMVideo(meta,datapth);
-% meta = loadJGR3_ALMVideo(meta,datapth);
-% meta = loadJEB14_ALMVideo(meta,datapth);
+meta = loadJEB6_ALMVideo(meta,datapth);
+meta = loadJEB7_ALMVideo(meta,datapth);
+meta = loadEKH1_ALMVideo(meta,datapth);
+meta = loadEKH3_ALMVideo(meta,datapth);
+meta = loadJGR2_ALMVideo(meta,datapth);
+meta = loadJGR3_ALMVideo(meta,datapth);
+meta = loadJEB14_ALMVideo(meta,datapth);
 meta = loadJEB15_ALMVideo(meta,datapth);
 
 
@@ -93,7 +93,7 @@ end
 
 %% Null and Potent Space
 
-clearvars -except obj meta params me sav
+clearvars -except obj meta params me sav datapth
 
 % -----------------------------------------------------------------------
 % -- Curate Input Data --
@@ -152,6 +152,7 @@ cond2use = [2 3]; % right hits, left hits
 
 % % - ve
 % plotVarianceExplained_NP(rez);
+% plotVarianceExplained_NP_epoch(rez);
 
 % % - ve over time (TODO)
 % % % plotVarianceExplained_NP_overTime(rez);
@@ -182,6 +183,9 @@ plotCDProj(cd_potent_all,cd_potent,sav,titlestring,plotmiss)
 % plotCDVarExp(cd_potent_all,sav,titlestring)
 % plotSelectivity(cd_potent_all,cd_potent,sav,titlestring)
 % plotSelectivityExplained(cd_potent_all,cd_potent,sav,titlestring)
+
+titlestring = 'Null | Potent CDs';
+% plotCDProj_NP(cd_potent_all,cd_null_all,cd_potent,cd_null,sav,titlestring,plotmiss)
 
 
 

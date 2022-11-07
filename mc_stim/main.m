@@ -87,6 +87,7 @@ for sessix = 1:numel(use)
 end
 meta = meta(use);
 
+meta = meta(1);
 
 obj = loadObjs(meta);
 

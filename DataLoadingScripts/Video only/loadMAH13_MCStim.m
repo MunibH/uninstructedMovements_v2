@@ -145,6 +145,72 @@ meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(
 meta(end).stim = 'bilateral';
 meta(end).stimLoc = 'Bi_M1TJ';
 
+%%
+
+meta(end+1).datapth = datapth;
+meta(end).anm = 'MAH13';
+meta(end).date = '2022-10-03';
+meta(end).datafn = findDataFn(meta(end));
+meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(end).datafn);
+meta(end).stim = 'unilateral';
+meta(end).stimLoc = 'R_M1TJ';
+
+meta(end+1).datapth = datapth;
+meta(end).anm = 'MAH13';
+meta(end).date = '2022-10-04';
+meta(end).datafn = findDataFn(meta(end));
+meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(end).datafn);
+meta(end).stim = 'unilateral';
+meta(end).stimLoc = 'R_M1TJ';
+
+meta(end+1).datapth = datapth;
+meta(end).anm = 'MAH13';
+meta(end).date = '2022-10-06';
+meta(end).datafn = findDataFn(meta(end));
+meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(end).datafn);
+meta(end).stim = 'unilateral';
+meta(end).stimLoc = 'L_M1TJ';
+
+meta(end+1).datapth = datapth;
+meta(end).anm = 'MAH13';
+meta(end).date = '2022-10-07';
+meta(end).datafn = findDataFn(meta(end));
+meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(end).datafn);
+meta(end).stim = 'unilateral';
+meta(end).stimLoc = 'L_M1TJ';
+
+meta(end+1).datapth = datapth;
+meta(end).anm = 'MAH13';
+meta(end).date = '2022-10-11';
+meta(end).datafn = findDataFn(meta(end));
+meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(end).datafn);
+meta(end).stim = 'unilateral';
+meta(end).stimLoc = 'L_M1TJ';
+
+meta(end+1).datapth = datapth;
+meta(end).anm = 'MAH13';
+meta(end).date = '2022-10-12';
+meta(end).datafn = findDataFn(meta(end));
+meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(end).datafn);
+meta(end).stim = 'unilateral';
+meta(end).stimLoc = 'L_M1TJ';
+
+meta(end+1).datapth = datapth;
+meta(end).anm = 'MAH13';
+meta(end).date = '2022-10-13';
+meta(end).datafn = findDataFn(meta(end));
+meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(end).datafn);
+meta(end).stim = 'unilateral';
+meta(end).stimLoc = 'R_M1TJ';
+
+meta(end+1).datapth = datapth;
+meta(end).anm = 'MAH13';
+meta(end).date = '2022-10-14';
+meta(end).datafn = findDataFn(meta(end));
+meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(end).datafn);
+meta(end).stim = 'unilateral';
+meta(end).stimLoc = 'R_M1TJ';
+
 
 
 end

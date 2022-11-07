@@ -2,7 +2,7 @@ function plotCDProj(allrez,rez,sav,plotmiss,plotaw,alignEvent)
 
 clrs = getColors();
 lw = 3.5;
-alph = 0.5;
+alph = 0.1;
 
 sample = mode(rez(1).ev.sample - rez(1).align);
 delay = mode(rez(1).ev.delay - rez(1).align);
@@ -30,7 +30,7 @@ for i = 1:numel(allrez.cd_labels) % for each coding direction
     end
 
 %     xlim([rez(1).time(1);rez(1).time(end)])
-    xlim([rez(1).time(1);2])
+    xlim([rez(1).time(5);2])
 
     title(allrez.cd_labels{i})
     xlabel(['Time (s) from ' alignEvent])

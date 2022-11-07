@@ -35,7 +35,7 @@ meta(end).datapth = datapth;
 meta(end).anm = 'JEB15';
 meta(end).date = '2022-07-29';
 meta(end).datafn = findDataFn(meta(end));
-meta(end).probe = [1 2]; 
+meta(end).probe = 2; % removed probe 1 b/c no qualities, doesn't seem to be sorted 
 meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(end).datafn);
 
 end

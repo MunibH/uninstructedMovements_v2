@@ -5,7 +5,7 @@ pptx.newVersions = [1 0 0]; % 1 - creates new version of pptx, 0 - add to existi
 
 clrs = getColors();
 lw = 3.5;
-alph = 0.5;
+alph = 0.2;
 
 sample = mode(rez(1).ev.sample - rez(1).align);
 delay = mode(rez(1).ev.delay - rez(1).align);
@@ -28,7 +28,7 @@ for i = 1:numel(rez(1).cd_labels) % for each coding direction
     end
 
 %     xlim([rez(1).time(1);rez(1).time(end)])
-    xlim([rez(1).time(1);2])
+    xlim([rez(1).time(5);2])
 
     title([rez(1).cd_labels{i} ' | ' spacename])
     xlabel('Time (s) from go cue')

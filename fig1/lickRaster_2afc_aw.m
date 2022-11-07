@@ -55,12 +55,12 @@ datapth = '/Users/Munib/Documents/Economo-Lab/data/';
 
 meta = [];
 
-% meta = loadJEB6_ALMVideo(meta,datapth);
+meta = loadJEB6_ALMVideo(meta,datapth);
 meta = loadJEB7_ALMVideo(meta,datapth);
-% meta = loadEKH1_ALMVideo(meta,datapth);
-% meta = loadEKH3_ALMVideo(meta,datapth);
-% meta = loadJGR2_ALMVideo(meta,datapth);
-% meta = loadJGR3_ALMVideo(meta,datapth);
+meta = loadEKH1_ALMVideo(meta,datapth);
+meta = loadEKH3_ALMVideo(meta,datapth);
+meta = loadJGR2_ALMVideo(meta,datapth);
+meta = loadJGR3_ALMVideo(meta,datapth);
 % meta = loadJEB15_ALMVideo(meta,datapth);
 
 
@@ -69,20 +69,22 @@ params.probe = {meta.probe}; % put probe numbers into params, one entry for elem
 
 %% LOAD DATA
 
-meta = meta(1);
-params.probe = params.probe(1);
 [obj,params] = loadSessionData(meta,params);
 
 %% PERFORMANCE
-
 rez = getPerformanceByCondition(meta,obj,params);
 
-cond2use = 1:4;
-perf = rez(1).perf(cond2use);
-for i = 2:numel(rez)
-    perf = cat(1,perf,rez(i).perf(cond2use));
+% concatenate perf for each mouse
+anms = unique({meta.anm});
+perf = cell(numel(unique(anms)),1);
+for i = 1:numel(meta)
+    anmix = find(ismember(anms,meta(i).anm));
+    perf{anmix} = [perf{anmix} ; rez(i).perf];
 end
-perf = perf .* 100;
+% average across sessions for each mouse
+perf = cellfun(@(x) mean(x,1)*100, perf, 'UniformOutput',false);
+
+perf = cell2mat(perf);
 
 figure; hold on;
 rng(pi) % just to reproduce the random data I used
@@ -117,6 +119,9 @@ ax.FontSize = 12;
 %%
 close all
 
+sessix = 2; % jeb7 4-29
+
+
 clrs = getColors();
 fns = fieldnames(clrs);
 for i = 1:numel(fns)
@@ -130,35 +135,34 @@ lw = 1.5;
 ms = 10;
 
 goCue = 0;
-sample = mode(obj(1).bp.ev.sample) - mode(obj(1).bp.ev.goCue);
-delay = mode(obj(1).bp.ev.delay) - mode(obj(1).bp.ev.goCue);
+sample = mode(obj(sessix).bp.ev.sample) - mode(obj(sessix).bp.ev.goCue);
+delay = mode(obj(sessix).bp.ev.delay) - mode(obj(sessix).bp.ev.goCue);
 
 
 
-nTrials = min(numel(params.trialid{1}),numel(params.trialid{2}));
+nTrials{1} = numel(params(sessix).trialid{3});
+nTrials{2} = numel(params(sessix).trialid{1});
+
 
 
 f = figure; hold on;
 f.Position = [520   480   314   499];
 trialOffset = 1;
-for cix = 1:numel(params.trialid)
-    if cix < 3
-        clrs.rhit = cols{1};
-        clrs.lhit = cols{2};
-    else
-        clrs.rhit = cols{3};
-        clrs.lhit = cols{4};
-    end
-    
 
-    for trix = 1:numel(params.trialid{cix})
+
+% right trials (2afc + aw)
+cond2use = [3 1];
+for cix = 1:numel(cond2use)
+    if cix > 1; trialOffset = trialOffset + 10; end
+
+    for trix = 1:nTrials{cix}
         check1 = 0;
         check2 = 0;
 
-        trial = params.trialid{cix}(trix);
-        lickL =  obj.bp.ev.lickL{trial} - obj.bp.ev.goCue(trial);
+        trial = params(sessix).trialid{cond2use(cix)}(trix);
+        lickL =  obj(sessix).bp.ev.lickL{trial} - obj(sessix).bp.ev.goCue(trial);
         lickL(lickL > 2) = [];
-        lickR =  obj.bp.ev.lickR{trial} - obj.bp.ev.goCue(trial);
+        lickR =  obj(sessix).bp.ev.lickR{trial} - obj(sessix).bp.ev.goCue(trial);
         lickR(lickR > 2) = [];
 
         plot([sample sample], trialOffset+[-0.5 0.5], 'k:', 'LineWidth', lw);
@@ -166,20 +170,20 @@ for cix = 1:numel(params.trialid)
         plot([goCue goCue], trialOffset+[-0.5 0.5], 'k:', 'LineWidth', lw);
 
         if ~isempty(lickL)
-            plot(lickL, trialOffset*ones(size(lickL)), '.', 'Color', clrs.lhit, 'MarkerSize',ms);
+            plot(lickL, trialOffset*ones(size(lickL)), '.', 'Color', cols{cond2use(cix)+1}, 'MarkerSize',ms);
             check1 = 1;
         end
 
         if ~isempty(lickR)
-            plot(lickR, trialOffset*ones(size(lickR)), '.', 'Color', clrs.rhit, 'MarkerSize',ms);
+            plot(lickR, trialOffset*ones(size(lickR)), '.', 'Color', cols{cond2use(cix)}, 'MarkerSize',ms);
             check2 = 1;
         end
 
-        if obj.bp.hit(trial)
+        if obj(sessix).bp.hit(trial)
             fill([2.4 2.65 2.65 2.4], [trialOffset-0.5 trialOffset-0.5 trialOffset+0.5 trialOffset+0.5], [150 150 150]./255,'EdgeColor','none')
-        elseif obj.bp.miss(trial)
+        elseif obj(sessix).bp.miss(trial)
             fill([2.4 2.65 2.65 2.4], [trialOffset-0.5 trialOffset-0.5 trialOffset+0.5 trialOffset+0.5], [0 0 0]./255,'EdgeColor','none')
-        elseif obj.bp.no(trial)
+        elseif obj(sessix).bp.no(trial)
             %         fill([2.4 2.65 2.65 2.4], [trialOffset trialOffset trialOffset+1 trialOffset+1], [1 1 1]./255,'EdgeColor','k')
         end
 
@@ -191,10 +195,76 @@ for cix = 1:numel(params.trialid)
 
 end
 xlim([-2.5 2.7]);
+ylim([0 160])
 xlabel('Time (s) from go cue')
 ylabel('Trials')
 ax = gca;
 ax.FontSize = 12;
+
+%
+
+nTrials{1} = numel(params(sessix).trialid{4});
+nTrials{2} = numel(params(sessix).trialid{2});
+
+
+f = figure; hold on;
+f.Position = [520   480   314   499];
+trialOffset = 1;
+
+% left trials (2afc + aw)
+cond2use = [4 2];
+for cix = 1:numel(cond2use)
+    if cix > 1; trialOffset = trialOffset + 10; end
+
+    for trix = 1:nTrials{cix}
+        check1 = 0;
+        check2 = 0;
+
+        trial = params(sessix).trialid{cond2use(cix)}(trix);
+        lickL =  obj(sessix).bp.ev.lickL{trial} - obj(sessix).bp.ev.goCue(trial);
+        lickL(lickL > 2) = [];
+        lickR =  obj(sessix).bp.ev.lickR{trial} - obj(sessix).bp.ev.goCue(trial);
+        lickR(lickR > 2) = [];
+
+        plot([sample sample], trialOffset+[-0.5 0.5], 'k:', 'LineWidth', lw);
+        plot([delay delay], trialOffset+[-0.5 0.5], 'k:', 'LineWidth', lw);
+        plot([goCue goCue], trialOffset+[-0.5 0.5], 'k:', 'LineWidth', lw);
+
+        if ~isempty(lickL)
+            plot(lickL, trialOffset*ones(size(lickL)), '.', 'Color', cols{cond2use(cix)}, 'MarkerSize',ms);
+            check1 = 1;
+        end
+
+        if ~isempty(lickR)
+            plot(lickR, trialOffset*ones(size(lickR)), '.', 'Color', cols{cond2use(cix)-1}, 'MarkerSize',ms);
+            check2 = 1;
+        end
+
+        if obj(sessix).bp.hit(trial)
+            fill([2.4 2.65 2.65 2.4], [trialOffset-0.5 trialOffset-0.5 trialOffset+0.5 trialOffset+0.5], [150 150 150]./255,'EdgeColor','none')
+        elseif obj(sessix).bp.miss(trial)
+            fill([2.4 2.65 2.65 2.4], [trialOffset-0.5 trialOffset-0.5 trialOffset+0.5 trialOffset+0.5], [0 0 0]./255,'EdgeColor','none')
+        elseif obj(sessix).bp.no(trial)
+            %         fill([2.4 2.65 2.65 2.4], [trialOffset trialOffset trialOffset+1 trialOffset+1], [1 1 1]./255,'EdgeColor','k')
+        end
+
+        if check1 || check2
+            trialOffset = trialOffset + 1;
+        end
+
+    end
+
+end
+xlim([-2.5 2.7]);
+ylim([0 110])
+xlabel('Time (s) from go cue')
+ylabel('Trials')
+ax = gca;
+ax.FontSize = 12;
+
+
+
+
 
 
 
