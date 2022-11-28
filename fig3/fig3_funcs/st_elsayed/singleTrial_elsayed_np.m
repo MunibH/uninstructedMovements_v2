@@ -1,4 +1,4 @@
-function rez = singleTrial_elsayed_np(input_data,obj,me,params,cond2use, nullalltime)
+function rez = singleTrial_elsayed_np(input_data,obj,me,params,cond2use, cond2proj, nullalltime)
 warning('off', 'manopt:getHessian:approx')
 
 %% trials to use
@@ -80,11 +80,15 @@ rez.covPotent = cov(N.potent);
 % assign num dims by amount of PCs needed to explain some amount of
 % variance defined in params (capped at 10 dims)
 rez.varToExplain = params.N_varToExplain;
-[rez.dPrep,rez.dMove] = getNumDims(N,rez.varToExplain);
-if rez.dPrep > 10; rez.dPrep = 10; end
-if rez.dMove > 10; rez.dMove = 10; end
-if rez.dPrep == 1; rez.dPrep = 10; end
-if rez.dMove == 1; rez.dMove = 10; end
+% [rez.dPrep,rez.dMove] = getNumDims(N,rez.varToExplain);
+% if rez.dPrep > 10; rez.dPrep = 10; end
+% if rez.dMove > 10; rez.dMove = 10; end
+% if rez.dPrep == 1; rez.dPrep = 10; end
+% if rez.dMove == 1; rez.dMove = 10; end
+rez.dPrep = floor(size(rez.covNull,1)/2);
+rez.dMove = ceil(size(rez.covNull,1)/2);
+if rez.dPrep > 20; rez.dPrep = 20; end
+if rez.dMove > 20; rez.dMove = 20; end
 
 % method 2 - keep reducing var2explain until dMove+dPrep <= full dim
 % check = 1;
@@ -119,7 +123,7 @@ rez = var_exp_NP(trials_cond,input_data,rez);
 
 %% trial average projections
 
-rez = ta_projectNP(input_data,rez,cond2use,params);
+rez = ta_projectNP(input_data,rez,cond2proj,params);
 
 
 

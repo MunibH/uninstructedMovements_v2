@@ -22,7 +22,12 @@ meta(end).datafn = findDataFn(meta(end));
 meta(end).probe = 2; 
 meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(end).datafn);
 
-
+meta(end+1).datapth = datapth;
+meta(end).anm = 'JEB14';
+meta(end).date = '2022-08-25';
+meta(end).datafn = findDataFn(meta(end));
+meta(end).probe = 2; 
+meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(end).datafn);
 
 end
 

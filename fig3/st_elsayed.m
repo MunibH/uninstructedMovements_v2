@@ -27,9 +27,11 @@ params.condition(end+1) = {'R&hit&~stim.enable&~autowater'};             % right
 params.condition(end+1) = {'L&hit&~stim.enable&~autowater'};             % left hits, no stim, aw off
 params.condition(end+1) = {'R&miss&~stim.enable&~autowater'};            % error right, no stim, aw off
 params.condition(end+1) = {'L&miss&~stim.enable&~autowater'};            % error left, no stim, aw off
+params.condition(end+1) = {'R&no&~stim.enable&~autowater'};            % no right, no stim, aw off
+params.condition(end+1) = {'L&no&~stim.enable&~autowater'};            % no left, no stim, aw off
 
 params.tmin = -2.5;
-params.tmax = 7;
+params.tmax = 2.5;
 params.dt = 1/100;
 
 % smooth with causal gaussian kernel
@@ -67,7 +69,7 @@ meta = loadJEB15_ALMVideo(meta,datapth);
 
 
 % --- M1TJ ---
-% meta = loadJEB14_M1TJVideo(meta,datapth);
+% meta = loadJEB13_M1TJVideo(meta,datapth);
 
 params.probe = {meta.probe}; % put probe numbers into params, one entry for element in meta, just so i don't have to change code i've already written
 
@@ -111,12 +113,13 @@ for sessix = 1:numel(meta)
 
     % -- null and potent spaces
     cond2use = [2 3 4 5]; % right hit, left hit, right miss, left miss
+    cond2proj = [2:7];
     nullalltime = 0; % use all time points to estimate null space if 1
-    rez(sessix) = singleTrial_elsayed_np(trialdat_zscored, obj(sessix), me(sessix), params(sessix), cond2use, nullalltime);
+    rez(sessix) = singleTrial_elsayed_np(trialdat_zscored, obj(sessix), me(sessix), params(sessix), cond2use, cond2proj, nullalltime);
 
     % -- coding dimensions
     cond2use = [1 2]; % right hits, left hits (corresponding to null/potent psths in rez)
-    cond2proj = [1:4]; % right hits, left hits, right miss, left miss (corresponding to null/potent psths in rez)
+    cond2proj = [1:6]; % right hits, left hits, right miss, left miss (corresponding to null/potent psths in rez)
     cond2use_trialdat = [2 3]; % for calculating selectivity explained in full neural pop
     cd_null(sessix) = getCodingDimensions(rez(sessix).N_null_psth,trialdat_zscored,obj(sessix),params(sessix),cond2use,cond2use_trialdat, cond2proj);
     cd_potent(sessix) = getCodingDimensions(rez(sessix).N_potent_psth,trialdat_zscored,obj(sessix),params(sessix),cond2use,cond2use_trialdat, cond2proj);
@@ -170,23 +173,24 @@ cond2plot = [1 2]; % right hit, left hit
 % -----------------------------------------------------------------------
 % -- Coding Dimensions --
 % -----------------------------------------------------------------------
-plotmiss = 1;
+plotmiss = 0;
+plotno = 0;
 
 titlestring = 'Null';
-plotCDProj(cd_null_all,cd_null,sav,titlestring,plotmiss)
+plotCDProj(cd_null_all,cd_null,sav,titlestring,plotmiss,plotno)
 % plotCDVarExp(cd_null_all,sav,titlestring)
 % plotSelectivity(cd_null_all,cd_null,sav,titlestring)
 % plotSelectivityExplained(cd_null_all,cd_null,sav,titlestring)
 
 titlestring = 'Potent';
-plotCDProj(cd_potent_all,cd_potent,sav,titlestring,plotmiss)
+plotCDProj(cd_potent_all,cd_potent,sav,titlestring,plotmiss,plotno)
 % plotCDVarExp(cd_potent_all,sav,titlestring)
 % plotSelectivity(cd_potent_all,cd_potent,sav,titlestring)
 % plotSelectivityExplained(cd_potent_all,cd_potent,sav,titlestring)
 
 titlestring = 'Null | Potent CDs';
 % plotCDProj_NP(cd_potent_all,cd_null_all,cd_potent,cd_null,sav,titlestring,plotmiss)
-
+% plotSelectivityExplained_NP(cd_potent_all,cd_null_all,cd_potent,cd_null,sav,titlestring)
 
 
 %% t=0 is the go cue, but only on trials where the animals were not moving PRIOR to the go cue

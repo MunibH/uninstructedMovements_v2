@@ -3,7 +3,7 @@ pptx.newVersions = [1 0 0]; % 1 - creates new version of pptx, 0 - add to existi
 
 
 clrs = getColors();
-lw = 2;
+lw = 1;
 alph = 0.12;
 
 sample = mode(rez_potent(1).ev.sample - rez_potent(1).align);

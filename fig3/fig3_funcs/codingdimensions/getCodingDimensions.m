@@ -4,6 +4,10 @@ cd_labels = {'early','late','go'};
 cd_epochs = {'delay','goCue','goCue'};
 cd_times = {[-0.42 -0.02], [-0.42 -0.02], [0.02 0.42]}; % in seconds, relative to respective epochs
 
+% cd_labels = {'late','go'};
+% cd_epochs = {'goCue','goCue'};
+% cd_times = {[-0.42 -0.02], [0.02 0.42]}; % in seconds, relative to respective epochs
+
 
 %-------------------------------------------
 % --setup results struct--
@@ -78,6 +82,7 @@ rez.selectivity_squared(:,4) = sum(rez.selectivity_squared,2);
 % temp = (obj.psth(:,:,2) - obj.psth(:,:,3)).^2;
 temp = squeeze(mean(trialdat_zscored(:,params.trialid{cond2use_trialdat(1)},:),2)) - squeeze(mean(trialdat_zscored(:,params.trialid{cond2use_trialdat(2)},:),2));
 rez.selectivity_squared(:,5) = sum(temp.^2,2); % full neural pop
+
 
 % ------------------------------------------
 % --selectivity explained--

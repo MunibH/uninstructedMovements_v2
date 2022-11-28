@@ -35,7 +35,7 @@ xline(delay,'k--','LineWidth',2)
 xline(0,'k--','LineWidth',2)
 
 xlabel('Time (s) from go cue')
-ylabel('Selectivity Explained')
+ylabel('Selectivity Ratio')
 title(spacename)
 % legend('Total selectivity','early','late','go','early + late + go')
 xlim([rez(1).time(1),2])

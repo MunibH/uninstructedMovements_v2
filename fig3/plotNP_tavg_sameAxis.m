@@ -15,7 +15,7 @@ clrs{3} = [101, 88, 245] ./ 255;
 % clrs{3} = cols.lhit_aw;
 % clrs{4} = cols.lhit;
 
-for sessix = 14%:numel(meta)
+for sessix = 1:numel(meta)
     trix{1} = params(sessix).trialid{2};
     trix{2} = params(sessix).trialid{3};
 
@@ -64,6 +64,6 @@ for sessix = 14%:numel(meta)
     xline(sample,'k:')
     xline(delay,'k:')
     xlim([obj(sessix).time(5) 2])
-    ylim([0 250])
+%     ylim([0 250])
 
 end

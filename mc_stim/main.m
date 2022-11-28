@@ -50,10 +50,21 @@ dfparams.cond(end+1) = {'L&hit&stim.enable&~autowater&~autolearn'};  % left hit 
 % dfparams.cond(end+1) = {'L&miss&stim.enable&~autowater&~autolearn'};  % left hit trials, stim, no autowater
 
 % -- stim types --
-dfparams.stim.types = {'Bi_MC','Right_MC','Left_MC','Bi_ALM','Bi_M1TJ','Right_ALM','Right_M1TJ','Left_ALM','Left_M1TJ'}; % ALM_Bi is MC_Bi
-% dfparams.stim.num   = logical([0 0 0 1 0 0 0 0 0]); % Bi_ALM
-% dfparams.stim.num   = logical([0 0 0 0 1 0 0 0 0]); % Bi_M1TJ
-dfparams.stim.num   = logical([1 0 0 0 0 0 0 0 0]); % Bi_MC
+dfparams.stim.types = {'Bi_MC','Right_MC','Left_MC','Bi_ALM','Bi_M1TJ','Right_ALM','Right_M1TJ','Left_ALM','Left_M1TJ'}; 
+dfparams.stim.num   = logical([1 1 1 1 1 1 1 1 1]);   % ALL
+% dfparams.stim.num   = logical([0 0 0 0 0 1 1 1 1]);   % Right_ALM / Left_ALM / Right_M1TJ / Left_M1TJ
+% dfparams.stim.num   = logical([0 0 0 1 0 0 0 0 0]);   % Bi_ALM
+% dfparams.stim.num   = logical([0 0 0 0 1 0 0 0 0]);   % Bi_M1TJ
+% dfparams.stim.num   = logical([1 0 0 0 0 0 0 0 0]);   % Bi_MC
+% dfparams.stim.num   = logical([0 0 0 1 1 0 0 0 0]);   % Bi_M1TJ Bi_ALM
+% dfparams.stim.num   = logical([0 1 1 0 0 0 0 0 0]);   % Right_MC
+% dfparams.stim.num   = logical([0 0 1 0 0 0 0 0 0]);   % Left_MC
+% dfparams.stim.num   = logical([0 0 0 0 0 1 0 0 0]);   % Right_ALM
+
+
+dfparams.stim.pow.types = [1.08, 3.14, 8]; % mW, 3.14 for all unilateral sessions and most bilateral sessions
+dfparams.stim.pow.num = logical([1 1 1]);
+
 
 % -- plotting params --
 dfparams.plt.color{1}     = [10, 10, 10];
@@ -72,7 +83,7 @@ dfparams.plt.ms = {'.','.','x','x','o','o'};
 datapth = '/Users/Munib/Documents/Economo-Lab/data/';
 
 meta = [];
-meta = loadMAH13_MCStim(meta,datapth);
+% meta = loadMAH13_MCStim(meta,datapth);
 meta = loadMAH14_MCStim(meta,datapth);
 
 
@@ -87,7 +98,13 @@ for sessix = 1:numel(use)
 end
 meta = meta(use);
 
-meta = meta(1);
+% subset based on stim pow
+pow2use = dfparams.stim.pow.types(dfparams.stim.pow.num);
+pows = [meta(:).stimPow];
+use = ismember(pows,pow2use);
+meta = meta(use);
+
+disp('Loading ')
 
 obj = loadObjs(meta);
 
@@ -98,10 +115,10 @@ for i = 1:numel(meta)
     params(i).trialid = findTrials(obj(i), dfparams.cond);
 end
 
-%%
-if dfparams.warp
-    obj = warpData(obj,params);
-end
+% %%
+% if dfparams.warp
+%     obj = warpData(obj,params);
+% end
 
 %% behavioral performance
 close all

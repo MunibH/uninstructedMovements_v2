@@ -28,7 +28,7 @@ for k = 1:numel(featix)
             end
 
             temp = nanmean(temp,1);
-            toplot{k}{j} = [toplot{k}{j} ; temp'];
+            toplot{k}{j} = [toplot{k}{j} ; temp']; % (ntrials*nObjs,1)
         end
     end
 end
@@ -43,18 +43,16 @@ t = tiledlayout('flow');
 for k = 1:numel(featix)
     for j = 1:numel(cond2plot)
         ax(j) = nexttile; hold on;
-        h{j} = histfit(toplot{k}{j},10,'kernel');
-        h{j}(1).EdgeColor = 'none';
-        h{j}(1).FaceColor = dfparams.plt.color{cond2plot(j)};
-        h{j}(2).Color = 'k';
-        %         histogram(ax(j),toplot{k}{j},50,'FaceColor',dfparams.plt.color{cond2plot(j)},'EdgeColor','none');
+        h{j} = histogram(toplot{k}{j},30,"Normalization",'probability');
+        h{j}.EdgeColor = 'none';
+        h{j}.FaceColor = dfparams.plt.color{cond2plot(j)};
         ax(j).FontSize = 12;
-        ax(j).XLim = [0 50];
+        ax(j).XLim = [0 60];
     end
 end
 sgtitle('Motion Energy')
-for i = 1:numel(h)
-    ys(:,i) = h{1}(1).YData;
+for i = 1:numel(ax)
+    ys(:,i) = ax(i).YLim;
 end
 mn = 0;
 mx = max(ys(:));
@@ -62,27 +60,26 @@ for i = 1:numel(ax)
     ax(i).YLim = [mn mx];
 end
 
-f = figure; hold on;
-t = tiledlayout('flow');
-for j = 1:numel(cond2plot)
-    ax(j) = nexttile; hold on;
-    h{j} = histfit(fracmov{j},10,'kernel');
-    h{j}(1).EdgeColor = 'none';
-    h{j}(1).FaceColor = dfparams.plt.color{cond2plot(j)};
-    h{j}(2).Color = 'k';
-    %     histogram(ax1,fracmov{j},50,'FaceColor',dfparams.plt.color{cond2plot(j)},'EdgeColor','none');
-    ax(j).FontSize = 12;
-    ax(j).XLim = [0 1];
-end
-sgtitle('Frac. time spent moving during delay')
-for i = 1:numel(h)
-    ys(:,i) = h{1}(1).YData;
-end
-mn = 0;
-mx = max(ys(:));
-for i = 1:numel(ax)
-    ax(i).YLim = [mn mx];
-end
+% % frac time spent moving
+% f = figure; hold on;
+% t = tiledlayout('flow');
+% for j = 1:numel(cond2plot)
+%     ax(j) = nexttile; hold on;
+%     h{j} = histogram(fracmov{j},30,"Normalization",'probability');
+%     h{j}.EdgeColor = 'none';
+%     h{j}.FaceColor = dfparams.plt.color{cond2plot(j)};
+%     ax(j).FontSize = 12;
+%     ax(j).XLim = [0 1];
+% end
+% sgtitle('Frac. time spent moving during delay')
+% for i = 1:numel(ax)
+%     ys(:,i) = ax(i).YLim;
+% end
+% mn = 0;
+% mx = max(ys(:));
+% for i = 1:numel(ax)
+%     ax(i).YLim = [mn mx];
+% end
 
 
 if sav

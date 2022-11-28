@@ -1,4 +1,4 @@
-function plotCDProj(allrez,rez,sav,spacename,plotmiss)
+function plotCDProj(allrez,rez,sav,spacename,plotmiss,plotno)
 
 pptx.newVersions = [1 0 0]; % 1 - creates new version of pptx, 0 - add to existing if already exists, 1 entry for each figure created here
 
@@ -25,6 +25,11 @@ for i = 1:numel(rez(1).cd_labels) % for each coding direction
         sm = 21;
         shadedErrorBar(rez(1).time,mySmooth(tempmean(:,3),sm),mySmooth(temperror(:,3),sm),{'Color',clrs.rhit*0.5,'LineWidth',lw},alph, ax)
         shadedErrorBar(rez(1).time,mySmooth(tempmean(:,4),sm),mySmooth(temperror(:,4),sm),{'Color',clrs.lhit*0.5,'LineWidth',lw},alph, ax)
+    end
+    if plotno
+        sm = 21;
+        shadedErrorBar(rez(1).time,mySmooth(tempmean(:,5),sm),mySmooth(temperror(:,5),sm),{'Color',clrs.rhit*0.5,'LineWidth',lw},alph, ax)
+        shadedErrorBar(rez(1).time,mySmooth(tempmean(:,6),sm),mySmooth(temperror(:,6),sm),{'Color',clrs.lhit*0.5,'LineWidth',lw},alph, ax)
     end
 
 %     xlim([rez(1).time(1);rez(1).time(end)])
