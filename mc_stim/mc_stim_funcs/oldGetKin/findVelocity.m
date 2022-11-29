@@ -52,8 +52,9 @@ for i = 1:numel(trialnums)                        % For each trial
     if contains(feat,'tongue')
         continue
     else
-        xvel(:,i) = fillmissing(xvel(:,i),'nearest');
-        yvel(:,i) = fillmissing(yvel(:,i),'nearest');
+        continue
+%         xvel(:,i) = fillmissing(xvel(:,i),'nearest');
+%         yvel(:,i) = fillmissing(yvel(:,i),'nearest');
     end
 
 

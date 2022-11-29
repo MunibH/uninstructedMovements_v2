@@ -51,19 +51,21 @@ dfparams.cond(end+1) = {'L&hit&stim.enable&~autowater&~autolearn'};  % left hit 
 
 % -- stim types --
 dfparams.stim.types = {'Bi_MC','Right_MC','Left_MC','Bi_ALM','Bi_M1TJ','Right_ALM','Right_M1TJ','Left_ALM','Left_M1TJ'}; 
-dfparams.stim.num   = logical([1 1 1 1 1 1 1 1 1]);   % ALL
+% dfparams.stim.num   = logical([1 1 1 1 1 1 1 1 1]);   % ALL
 % dfparams.stim.num   = logical([0 0 0 0 0 1 1 1 1]);   % Right_ALM / Left_ALM / Right_M1TJ / Left_M1TJ
-% dfparams.stim.num   = logical([0 0 0 1 0 0 0 0 0]);   % Bi_ALM
+dfparams.stim.num   = logical([0 0 0 1 0 0 0 0 0]);   % Bi_ALM
 % dfparams.stim.num   = logical([0 0 0 0 1 0 0 0 0]);   % Bi_M1TJ
 % dfparams.stim.num   = logical([1 0 0 0 0 0 0 0 0]);   % Bi_MC
 % dfparams.stim.num   = logical([0 0 0 1 1 0 0 0 0]);   % Bi_M1TJ Bi_ALM
 % dfparams.stim.num   = logical([0 1 1 0 0 0 0 0 0]);   % Right_MC
 % dfparams.stim.num   = logical([0 0 1 0 0 0 0 0 0]);   % Left_MC
 % dfparams.stim.num   = logical([0 0 0 0 0 1 0 0 0]);   % Right_ALM
-
+% dfparams.stim.num   = logical([0 0 0 0 0 0 0 1 0]);   % Left_ALM
+% dfparams.stim.num   = logical([0 0 0 0 0 0 1 0 0]);   % Right_M1TJ
+% dfparams.stim.num   = logical([0 0 0 0 0 0 0 0 1]);   % Left_M1TJ
 
 dfparams.stim.pow.types = [1.08, 3.14, 8]; % mW, 3.14 for all unilateral sessions and most bilateral sessions
-dfparams.stim.pow.num = logical([1 1 1]);
+dfparams.stim.pow.num = logical([1 0 0]);
 
 
 % -- plotting params --
@@ -83,7 +85,7 @@ dfparams.plt.ms = {'.','.','x','x','o','o'};
 datapth = '/Users/Munib/Documents/Economo-Lab/data/';
 
 meta = [];
-% meta = loadMAH13_MCStim(meta,datapth);
+meta = loadMAH13_MCStim(meta,datapth);
 meta = loadMAH14_MCStim(meta,datapth);
 
 
@@ -104,7 +106,13 @@ pows = [meta(:).stimPow];
 use = ismember(pows,pow2use);
 meta = meta(use);
 
-disp('Loading ')
+disp(' ')
+disp(['Loading ' num2str(numel(meta)) ' sessions with the following parameters:'])
+disp(['Animals: ' unique({meta.anm})])
+disp(['Stim Loc: ' stim2use])
+disp(['    Stim Power: ' num2str(pow2use)])
+disp('')
+
 
 obj = loadObjs(meta);
 
@@ -191,12 +199,12 @@ cond2plot = 1:2;
 % cond2plot = 7:10;
 sav = 0;
 
-plotKinfeats(meta,obj,dfparams,params,kin,kinfeats,feats2plot,cond2plot,sav)
+% plotKinfeats(meta,obj,dfparams,params,kin,kinfeats,feats2plot,cond2plot,sav)
 
 
 
 %% avg jaw velocity during stim
-close all
+% close all
 if strcmpi(dfparams.alignEv,'delay') % function depends on data aligned to delay period, since we use the stim period to measure avgjawvel
 %     feats2plot = {'jaw_ydisp_view1',...
 %         'jaw_yvel_view1',...
@@ -211,134 +219,3 @@ if strcmpi(dfparams.alignEv,'delay') % function depends on data aligned to delay
     plotAvgFeatValDuringStim_singleTrials(meta,obj,dfparams,params,kin,kinfeats,feats2plot,cond2plot,sav)
 end
 
-%%
-
-% %% decode trial type from single trial jaw pos/vel
-% 
-% k = 3; % number of iterations (bootstrap)
-% 
-% binSize = 20; % ms
-% binSize = floor(binSize / (dfparams.dt_vid*1000)); % samples
-% 
-% mdlTime = dfparams.time(1:binSize:numel(dfparams.time));
-% numT = numel(mdlTime);
-% 
-% 
-% feats2use = {'jaw_ydisp_view1',...
-%              'jaw_yvel_view1',...
-%              'motion_energy'};
-% % feats2use = {'jaw_ydisp_view1'};
-% % feats2use = {'motion_energy'};
-% [~,mask] = patternMatchCellArray(kin(1).featLeg,feats2use,'any');
-% featix = find(mask);
-% 
-% train = 0.8; % fraction of trials to use for training (1-train for testing)
-% 
-% 
-% cond2use = [7 9]; % right hit,left hit,
-% acc_nostim = kinChoiceDecoder(meta,numT,k,kinfeats,cond2use,params,train,featix,binSize); % (time,bootiters,sessions)
-% 
-% cond2use = [8 10]; % right stim hit,left stim hit
-% acc_stim = kinChoiceDecoder(meta,numT,k,kinfeats,cond2use,params,train,featix,binSize);
-% 
-% % figure; imagesc(squeeze(acc_nostim)'); colorbar;
-% % figure; imagesc(squeeze(acc_stim)'); colorbar;
-% 
-% 
-% %% plots
-% 
-% 
-% align = mode(obj(1).bp.ev.(dfparams.alignEv));
-% sample = mode(obj(1).bp.ev.sample) - align;
-% delay = mode(obj(1).bp.ev.delay) - align;
-% 
-% f = figure; ax = axes(f); hold on;
-% stderr = std(std(acc_nostim,[],2),[],3) ./ (k*numel(meta));
-% means = mean(mean(acc_nostim,2),3);
-% shadedErrorBar(mdlTime, means, stderr, {'Color',dfparams.plt.color{1},'LineWidth',1.5},1, ax);
-% 
-% stderr = std(std(acc_stim,[],2),[],3) ./ (k*numel(meta));
-% means = mean(mean(acc_stim,2),3);
-% shadedErrorBar(mdlTime, means, stderr, {'Color',dfparams.plt.color{3},'LineWidth',1.5},1, ax);
-% 
-% xline(sample,'k--','LineWidth',2)
-% xline(delay,'k--','LineWidth',2)
-% xline(0,'k--','LineWidth',2)
-% 
-% title('Decode choice from jaw movements')
-% xlabel(['Time (s) from ' dfparams.alignEv])
-% ylabel('Accuracy')
-% ax = gca;
-% ax.FontSize = 20;
-% xlim([mdlTime(5) mdlTime(end)])
-% hold off
-% 
-% % pth = '/Users/Munib/Documents/Economo-Lab/code/uninstructedMovements/fig3/figs/choiceDecoder';
-% % fn = [meta.anm '_' meta.date '_' params.lfads_run '_' 'winsize_' num2str(sm)];
-% % mysavefig(f,pth,fn)
-% 
-% 
-% %% same as above but plotting each session individually
-% 
-% align = mode(obj(1).bp.ev.(dfparams.alignEv));
-% sample = mode(obj(1).bp.ev.sample) - align;
-% delay = mode(obj(1).bp.ev.delay) - align;
-% 
-% f = figure; ax = axes(f); hold on;
-% stderr = squeeze(std(acc_nostim,[],2)) ./ k;
-% means = squeeze(mean(acc_nostim,2));
-% for i = 1:size(means,2)
-%     shadedErrorBar(mdlTime, means(:,i), stderr(:,i), {'Color',dfparams.plt.color{1},'LineWidth',0.5},1, ax);
-% end
-% 
-% stderr = squeeze(std(acc_stim,[],2)) ./ k;
-% means = squeeze(mean(acc_stim,2));
-% for i = 1:size(means,2)
-%     shadedErrorBar(mdlTime, means(:,i), stderr(:,i), {'Color',dfparams.plt.color{3},'LineWidth',0.5},1, ax);
-% end
-% 
-% xline(sample,'k--','LineWidth',2)
-% xline(delay,'k--','LineWidth',2)
-% xline(0,'k--','LineWidth',2)
-% 
-% title('Decode choice from jaw movements')
-% xlabel(['Time (s) from ' dfparams.alignEv])
-% ylabel('Accuracy')
-% ax = gca;
-% ax.FontSize = 20;
-% xlim([mdlTime(5) mdlTime(end)])
-% hold off
-% 
-% 
-% 
-% %% plot single trial traces for a feature (stim vs non-stim)
-% meix = find(ismember(kin(1).featLeg,'motion_energy'));
-% me = kinfeats{1}(:,:,meix);
-% trix1 = params(1).trialid{1};
-% trix2 = params(1).trialid{2};
-% nTrials = numel(trix2);
-% trix1 = randsample(trix1,nTrials);
-% [~,ix1] = min(abs(dfparams.time - 0));
-% [~,ix2] = min(abs(dfparams.time - 0.8));
-% figure; hold on
-% for i = 1:numel(trix1)
-%     subplot(1,2,1)
-%     hold on
-%     plot(dfparams.time(ix1:ix2)   ,me(ix1:ix2,trix1(i)) + i, 'k')
-% end
-% xlim([dfparams.time(ix1) dfparams.time(ix2)])
-% xlabel('Time (s) from delay')
-% ylabel('jaw_ydisp_view1','Interpreter','none')
-% ax = gca;
-% ax.FontSize = 15;
-% 
-% for i = 1:numel(trix2)
-%     subplot(1,2,2)
-%     hold on
-%     plot(dfparams.time(ix1:ix2)   ,me(ix1:ix2,trix2(i)) + i, 'b')
-% end
-% xlim([dfparams.time(ix1) dfparams.time(ix2)])
-% xlabel('Time (s) from delay')
-% ylabel('jaw_ydisp_view1','Interpreter','none')
-% ax = gca;
-% ax.FontSize = 15;

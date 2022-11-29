@@ -37,7 +37,7 @@ for i = 1:numel(meta)
 
     % %     STANDARDIZE FEATURES (ZERO MEAN, UNIT VARIANCE)
     kinfeats_norm{i} = standardizeFeatures(kinfeats{i});
-    kinfeats{i}(1:5,:,:) = kinfeats{i}(1:5,:,:) * 0;
+%     kinfeats{i}(1:5,:,:) = kinfeats{i}(1:5,:,:) * 0;
     kinfeats_norm{i}(1:5,:,:) = kinfeats_norm{i}(1:5,:,:) * 0;
 
 

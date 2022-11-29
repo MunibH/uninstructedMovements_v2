@@ -8,6 +8,11 @@ else
     feats{2} = obj.traj{2}(1).featNames;
 end
 
+[~,mask] = patternMatchCellArray(feats{1},{'lickport'},'any');
+feats{1} = feats{1}(~mask);
+[~,mask] = patternMatchCellArray(feats{2},{'lickport'},'any');
+feats{2} = feats{2}(~mask);
+
 taxis = dfparams.time;
 
 % alignement
@@ -63,7 +68,7 @@ end
 
 kin = cat(3, featMat{:});
 v = cat(2, viewNum{:});
-kin(1:5, :, :) = kin(1:5, :, :).*0; % remove any smoothing artifacts at beginning of trials
+% kin(1:5, :, :) = kin(1:5, :, :).*0; % remove any smoothing artifacts at beginning of trials
 
 allfeats = cat(1, feats{:});
 featLeg = cell(size(kin, 3), 1);

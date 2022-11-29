@@ -252,15 +252,6 @@ meta(end).stim = 'bilateral';
 meta(end).stimLoc = 'Right_MC';
 meta(end).stimPow = 3.14; % mw
 
-% meta(end+1).datapth = datapth;
-% meta(end).anm = 'MAH14';
-% meta(end).date = '2022-10-06';
-% meta(end).datafn = findDataFn(meta(end));
-% meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(end).datafn);
-% meta(end).stim = 'bilateral';
-% meta(end).stimLoc = 'Right_MC';
-% meta(end).stimPow = 3.14; % mw
-
 meta(end+1).datapth = datapth;
 meta(end).anm = 'MAH14';
 meta(end).date = '2022-10-07';
@@ -392,14 +383,14 @@ meta(end).stim = 'bilateral';
 meta(end).stimLoc = 'Bi_ALM';
 meta(end).stimPow = 1.08; % mw
 
-% meta(end+1).datapth = datapth;
-% meta(end).anm = 'MAH14';
-% meta(end).date = '2022-11-18';
-% meta(end).datafn = findDataFn(meta(end));
-% meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(end).datafn);
-% meta(end).stim = 'bilateral';
-% meta(end).stimLoc = 'Bi_ALM';
-% meta(end).stimPow = 1.08; % mw
+meta(end+1).datapth = datapth;
+meta(end).anm = 'MAH14';
+meta(end).date = '2022-11-18';
+meta(end).datafn = findDataFn(meta(end));
+meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(end).datafn);
+meta(end).stim = 'bilateral';
+meta(end).stimLoc = 'Bi_ALM';
+meta(end).stimPow = 1.08; % mw
 
 
 end

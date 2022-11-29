@@ -146,7 +146,7 @@ p = patch([-0.9 0 0 -0.9],[ys(1) ys(1) ys(2) ys(2)],'k');
 p.EdgeColor = 'none';
 % p.FaceColor = [120 120 120]./255;
 p.FaceColor = [62, 168, 105]./255;
-p.FaceAlpha = 0.1
+p.FaceAlpha = 0.1;
 xline(sample,'k:','LineWidth',2)
 xline(delay,'k:','LineWidth',2)
 xline(0,'k:','LineWidth',2)

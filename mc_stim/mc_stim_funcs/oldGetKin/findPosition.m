@@ -44,8 +44,9 @@ for i = 1:numel(trialnums)                        % For each trial
     if contains(feat,'tongue')
         continue
     else
-        xpos(:,i) = fillmissing(xpos(:,i),'nearest');
-        ypos(:,i) = fillmissing(ypos(:,i),'nearest');
+        continue
+%         xpos(:,i) = fillmissing(xpos(:,i),'nearest');
+%         ypos(:,i) = fillmissing(ypos(:,i),'nearest');
     end
 
 end
