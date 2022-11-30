@@ -8,9 +8,6 @@ function meta = loadEKH1_ALMVideo(meta,datapth)
 % meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(end).datafn);
 
 
-
-
-
 meta(end+1).anm = 'EKH1';
 meta(end).datapth = datapth;
 meta(end).date = '2021-08-07';
