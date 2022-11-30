@@ -248,6 +248,17 @@ end
 
 acc_shuf_ = reshape(acc_shuf,size(acc_shuf,1),size(acc_shuf,2)*size(acc_shuf,3));
 
+
+%% t-test
+
+for itime = 1:size(acc,1)
+    [h(itime),p(itime)] = ttest2(acc(itime,:),acc_shuf_(itime,:));
+end
+figure; 
+hold on
+plot(rez.tm(1:end-1),p,'LineWidth',2)
+
+
 %% plot
 
 cols = {'k',[0.6,0.6,0.6]};
