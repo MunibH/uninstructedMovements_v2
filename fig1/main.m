@@ -35,12 +35,13 @@ params.condition(end+1) = {'R&hit&~stim.enable&autowater&~early&((1:Ntrials)>20)
 params.condition(end+1) = {'L&hit&~stim.enable&autowater&~early&((1:Ntrials)>20)'};       % left hits, aw    (9)
 
 
-params.tmin = -2.5;
+params.tmin = -3;
 params.tmax = 2.5;
 params.dt = 1/100;
 
 % smooth with causal gaussian kernel
 params.smooth = 15;
+params.bctype = 'reflect'; % reflect, zeropad, none
 
 % cluster qualities to use
 params.quality = {'all'}; % accepts any cell array of strings - special character 'all' returns clusters of any quality
@@ -113,7 +114,7 @@ sav = 0; % 1=save, 0=no_save
 plotmiss = 0;
 plotaw = 1;
 plotCDProj(allrez,rez_2afc,sav,plotmiss,plotaw,params(1).alignEvent)
-set(gcf,'Position',[249   558   349   238])
+% set(gcf,'Position',[249   558   349   238])
 % plotCDVarExp(allrez,sav)
 % plotSelectivity(allrez,rez,sav)
 % plotSelectivityExplained(allrez,rez,sav)

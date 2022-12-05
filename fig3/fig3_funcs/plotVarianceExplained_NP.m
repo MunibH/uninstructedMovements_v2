@@ -20,10 +20,12 @@ end
 
 %% plot
 
-cols(1,:) = [50 50 50];
-cols(2,:) = [100 100 100];
-cols(3,:) = [128, 0, 0];
-cols(4,:) = [4, 92, 1];
+defcols = getColors();
+
+cols(1,:) = defcols.null * 255 / 2;
+cols(2,:) = defcols.potent * 255 / 2;
+cols(3,:) = defcols.null * 255;
+cols(4,:) = defcols.potent * 255;
 cols(5,:) = cols(4,:);
 cols(6,:) = cols(3,:);
 cols = cols ./ 255;

@@ -154,7 +154,7 @@ cond2use = [2 3]; % right hits, left hits
 % plotVarianceInEpochs(rez,me,params,cond2use);
 
 % % - ve
-% plotVarianceExplained_NP(rez);
+plotVarianceExplained_NP(rez);
 % plotVarianceExplained_NP_epoch(rez);
 
 % % - ve over time (TODO)
@@ -177,13 +177,13 @@ plotmiss = 0;
 plotno = 0;
 
 titlestring = 'Null';
-plotCDProj(cd_null_all,cd_null,sav,titlestring,plotmiss,plotno)
+% plotCDProj(cd_null_all,cd_null,sav,titlestring,plotmiss,plotno)
 % plotCDVarExp(cd_null_all,sav,titlestring)
 % plotSelectivity(cd_null_all,cd_null,sav,titlestring)
 % plotSelectivityExplained(cd_null_all,cd_null,sav,titlestring)
 
 titlestring = 'Potent';
-plotCDProj(cd_potent_all,cd_potent,sav,titlestring,plotmiss,plotno)
+% plotCDProj(cd_potent_all,cd_potent,sav,titlestring,plotmiss,plotno)
 % plotCDVarExp(cd_potent_all,sav,titlestring)
 % plotSelectivity(cd_potent_all,cd_potent,sav,titlestring)
 % plotSelectivityExplained(cd_potent_all,cd_potent,sav,titlestring)
@@ -191,10 +191,6 @@ plotCDProj(cd_potent_all,cd_potent,sav,titlestring,plotmiss,plotno)
 titlestring = 'Null | Potent CDs';
 % plotCDProj_NP(cd_potent_all,cd_null_all,cd_potent,cd_null,sav,titlestring,plotmiss)
 % plotSelectivityExplained_NP(cd_potent_all,cd_null_all,cd_potent,cd_null,sav,titlestring)
-
-
-%% t=0 is the go cue, but only on trials where the animals were not moving PRIOR to the go cue
-% same plots as plotSelectivityExplained
 
 %% t=0 is transitions between non-movement and movement that do not coincide with the go cue
 % same plots as plotSelectivityExplained

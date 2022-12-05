@@ -28,7 +28,7 @@ for i = 1:numel(params.cluid{prbnum})
         end
         N = N(1:end-1);
         
-        obj.psth{prbnum}(:,i,j) = mySmooth(N./numel(trix)./params.dt, params.smooth);  % trial-averaged separated by trial type
+        obj.psth{prbnum}(:,i,j) = mySmooth(N./numel(trix)./params.dt, params.smooth, params.bctype);  % trial-averaged separated by trial type
         
     end
 end
@@ -59,7 +59,7 @@ for i = 1:numel(params.cluid{prbnum})
         end
         
         
-        obj.trialdat{prbnum}(:,i,j) = mySmooth(N./params.dt,params.smooth);
+        obj.trialdat{prbnum}(:,i,j) = mySmooth(N./params.dt,params.smooth, params.bctype);
         
         % raw spikes
         spkN = histc(obj.clu{prbnum}(curClu).trialtm_aligned(spkix), spkedges);
