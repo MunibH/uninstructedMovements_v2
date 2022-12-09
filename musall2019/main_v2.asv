@@ -532,13 +532,13 @@ save(fullfile(vidout.cam0.svpth, 'cvMove.mat'), 'Vmove', 'moveBeta', 'moveR', 'm
 
 %% plot R2
 
-r2 = [mean(fullR2),mean(taskR2),mean(moveR2)];
+r2 = [fullR2,fullR2,fullR2];
 
 %
 figure;
-X = categorical({'Full','Task','Move'});
-h = histogram('Categories', X, 'BinCounts', r2, 'EdgeColor','none');
-ylabel('R2')
+X = categorical({'Full','Unin. Move','In. Move','Task'});
+h = histogram('Categories', X, 'BinCounts', ve, 'EdgeColor','none');
+ylabel('Frac. VE')
 ax = gca;
 ax.FontSize = 13;
 

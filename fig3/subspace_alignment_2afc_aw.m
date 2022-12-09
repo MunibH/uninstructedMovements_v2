@@ -113,7 +113,7 @@ clearvars -except obj meta params me sav datapth
 % potent space from moving time points
 % -- subspace alignment b/w contexts --
 % -----------------------------------------------------------------------
-
+subspace_orth = nan(10,numel(meta)); % max number of dims is 20
 for sessix = 1:numel(meta)
     % -- input data
     trialdat_zscored = zscore_singleTrialNeuralData(obj(sessix).trialdat);
@@ -144,6 +144,15 @@ for sessix = 1:numel(meta)
     sigma.null.afc = sort(eig(C.null.afc),'descend'); sigma.null.afc = sigma.null.afc(1:rez_afc(sessix).dPrep);
     sigma.potent.aw = sort(eig(C.potent.aw),'descend'); sigma.potent.aw = sigma.potent.aw(1:rez_aw(sessix).dMove);
     sigma.potent.afc = sort(eig(C.potent.afc),'descend'); sigma.potent.afc = sigma.potent.afc(1:rez_afc(sessix).dMove);
+    
+    for i = 1:10
+        fullR = cat(2,Q.null.afc,Q.null.aw(:,i));
+        [~, fullQRR] = qr(bsxfun(@rdivide,fullR,sqrt(sum(fullR.^2))),0); %orthogonalize normalized design matrix
+        temp = abs(diag(fullQRR'));
+        subspace_orth(i,sessix) = temp(end); % how orthogonal is current aw dim to all afc dims
+    end
+
+
     ai.null.afc_aw(sessix) = get_alignment_index(Q.null.afc,C.null.aw,sigma.null.aw);
     ai.null.aw_afc(sessix) = get_alignment_index(Q.null.aw,C.null.afc,sigma.null.afc);
     ai.potent.afc_aw(sessix) = get_alignment_index(Q.potent.afc,C.potent.aw,sigma.potent.aw);
@@ -201,12 +210,20 @@ errorbar(h(i).XEndPoints,mean(temp),std(temp)./sqrt(numel(temp)),'LineStyle','no
 ylim([0 1])
 
 
+%%
+close all
+
+figure;
+ax = gca;
+b = boxplot(ax,90 - acosd(subspace_orth'),'Colors','k');
+ylim([0 95]); 
+xlabel('AW Null Dim')
+ylabel('Angle (deg)')
 
 
+temp = cat(2,Q.potent.afc,Q.potent.aw);
 
-
-
-
+writematrix(temp,'potent.csv')
 
 
 

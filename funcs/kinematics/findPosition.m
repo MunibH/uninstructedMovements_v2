@@ -28,7 +28,7 @@ for i = 1:nTrials % for each trial
         ts = traj(trix).ts(:,1:2,featix);
         % if tongue, don't smooth
         if ~contains(feat,'tongue')
-            ts = mySmooth(ts, 21);
+            ts = mySmooth(ts, 1, 'reflect');
         end
         % linear interpolation of frameTimes to taxis
         tsinterp = interp1(traj(trix).frameTimes-0.5-obj.bp.ev.(alignEv)(trix), ts, taxis);

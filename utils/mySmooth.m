@@ -45,7 +45,7 @@ if nargin > 2
         x_filt = cat(1,x(1:N,:),x);
         trim = N + 1;
     elseif strcmpi(bctype,'zeropad')
-        x_filt = cat(1,zeros(N,1),x);
+        x_filt = cat(1,zeros(N,size(x,2)),x);
         trim = N + 1;
     elseif strcmpi(bctype,'none')
         x_filt = x;

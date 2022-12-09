@@ -1,4 +1,4 @@
-function rez = getCodingDimensions(input_data,trialdat_zscored,obj,params,cond2use,cond2use_trialdat,cond2proj)
+function rez = getCodingDimensions(input_data,np_trialdat,trialdat_zscored,obj,params,cond2use,cond2use_trialdat,cond2proj)
 
 cd_labels = {'early','late','go'};
 cd_epochs = {'delay','goCue','goCue'};
@@ -48,6 +48,10 @@ rez.cd_mode_orth = gschmidt(rez.cd_mode);
 % ------------------------------------------
 temp = permute(rez.psth(:,:,cond2proj),[1 3 2]); % (time,cond,neurons), permuting to use tensorprod() on next line for the projection
 rez.cd_proj = tensorprod(temp,rez.cd_mode_orth,3,1); % (time,cond,cd), cond is in same order as con2use variable defined at the top of this function
+
+% single trial n/p projs
+proj = reshape(np_trialdat,size(np_trialdat,1)*size(np_trialdat,2),size(np_trialdat,3)) * rez.cd_mode_orth;
+rez.trialdat = reshape(proj,size(np_trialdat,1),size(np_trialdat,2),size(rez.cd_mode_orth,2));
 
 
 % ------------------------------------------

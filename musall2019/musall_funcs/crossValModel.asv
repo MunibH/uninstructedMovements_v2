@@ -1,0 +1,51 @@
+function [Vm, cBeta, cR, subIdx, cRidge, cLabels, r2] =  crossValModel(fullR, Vc, cLabels, regIdx, regLabels, folds)
+% function to compute cross-validated R^2
+
+cIdx = ismember(regIdx, find(ismember(regLabels,cLabels))); %get index for task regressors
+cLabels = regLabels(sort(find(ismember(regLabels,cLabels)))); %make sure motorLabels is in the right order
+
+%create new regressor index that matches motor labels
+subIdx = regIdx;
+subIdx = subIdx(cIdx);
+temp = unique(subIdx);
+for x = 1 : length(temp)
+    subIdx(subIdx == temp(x)) = x;
+end
+cR = fullR(:,cIdx);
+
+Vm = nan([size(Vc),folds]); %pre-allocate motor-reconstructed V
+rng(1) % for reproducibility
+randIdx = randperm(size(Vc,2)); %generate randum number index
+foldCnt = floor(size(Vc,2) / folds);
+cBeta = cell(1,folds);
+
+for iFolds = 1:folds
+    dataIdx = true(1,size(Vc,2));
+    
+    if folds > 1
+        dataIdx(randIdx(((iFolds - 1)*foldCnt) + (1:foldCnt))) = false; %index for training data
+        if iFolds == 1
+            [cRidge, cBeta{iFolds}] = ridgeMML(Vc(:,dataIdx), cR, true); %get beta weights and ridge penalty for task only model
+        else
+            [~, cBeta{iFolds}] = ridgeMML(Vc(:,dataIdx), cR, true, cRidge); %get beta weights for task only model. ridge value should be the same as in the first run.
+        end
+        
+
+        Vm = (cR * cBeta{iFolds}); %predict remaining data
+        temp = Vc(:,dataIdx); % actual
+        temp = temp(:);
+        temphat = Vm(:);
+        r2() =  1 - sum( (temphat-temp).^2 ) ./ sum( (temp - mean(temp)).^2 );
+        
+        if rem(iFolds,folds/5) == 0
+            fprintf(1, 'Current fold is %d out of %d\n', iFolds, folds);
+        end
+    else
+        [cRidge, cBeta{iFolds}] = ridgeMML(Vc, cR, true); %get beta weights for task-only model.
+        Vm = (cR * cBeta{iFolds}); %predict remaining data
+        disp('Ridgefold is <= 1, fit to complete dataset instead');
+    end
+end
+
+
+end
