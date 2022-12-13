@@ -24,6 +24,7 @@ params.nLicks              = 20; % number of post go cue licks to calculate medi
 params.lowFR               = 1; % remove clusters with firing rates across all trials less than this val
 
 % set conditions to calculate PSTHs for
+
 params.condition(1)     = {'R&hit&~stim.enable&~autowater&((1:Ntrials)>20)&((1:Ntrials)<(Ntrials-20))'};             % right hits, no stim, aw off
 params.condition(end+1) = {'L&hit&~stim.enable&~autowater&((1:Ntrials)>20)&((1:Ntrials)<(Ntrials-20))'};             % left hits, no stim, aw off
 params.condition(end+1) = {'R&hit&~stim.enable&autowater&((1:Ntrials)>20)&((1:Ntrials)<(Ntrials-20))'};             % right hits, no stim, aw on
@@ -76,7 +77,8 @@ params.probe = {meta.probe}; % put probe numbers into params, one entry for elem
 
 close all
 
-rt = firstTongueRT(obj);
+% rt = firstTongueRT(obj);
+rt = firstJawRT(obj);
 
 % group reaction time by mouse, condition, only for trials we want
 anms = unique({meta.anm});
@@ -152,10 +154,12 @@ xticklabels([ "Right 2AFC" "Left 2AFC" "Right AW" "Left AW"])
 
 
 
+%% distribution of rts
 
-
-
-
+allrt = cell2mat(rt');
+figure; 
+histogram(allrt,200,'EdgeColor','none')
+xline(nanmedian(allrt),'k--')
 
 
 

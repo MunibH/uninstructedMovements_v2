@@ -112,9 +112,9 @@ for sessix = 1:numel(rez)
         sgtitle([meta(sessix).anm ' ' meta(sessix).date])
     end
     
-    pth = 'C:\Users\munib\Documents\Economo-Lab\code\uninstructedMovements_v2\fig3\figs\me_np_blocks_by_RT_LR';
-    fn = [meta(sessix).anm '_' meta(sessix).date];
-    mysavefig(f,pth,fn)
+%     pth = 'C:\Users\munib\Documents\Economo-Lab\code\uninstructedMovements_v2\fig3\figs\me_np_blocks_by_RT_LR';
+%     fn = [meta(sessix).anm '_' meta(sessix).date];
+%     mysavefig(f,pth,fn)
 
 
 

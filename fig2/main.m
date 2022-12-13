@@ -25,10 +25,10 @@ params.lowFR               = 1; % remove clusters with firing rates across all t
 
 % set conditions to calculate PSTHs for
 params.condition(1)     = {'(hit|miss|no)'};                             % all trials
-params.condition(end+1) = {'L&hit&~stim.enable&~autowater&~early'};             % right hits, no stim, aw off
-params.condition(end+1) = {'R&hit&~stim.enable&~autowater&~early'};             % left hits, no stim, aw off
-params.condition(end+1) = {'L&miss&~stim.enable&~autowater&~early'};            % error right, no stim, aw off
-params.condition(end+1) = {'R&miss&~stim.enable&~autowater&~early'};            % error left, no stim, aw off
+params.condition(end+1) = {'R&hit&~stim.enable&~autowater&~early'};             % right hits, no stim, aw off
+params.condition(end+1) = {'L&hit&~stim.enable&~autowater&~early'};             % left hits, no stim, aw off
+params.condition(end+1) = {'R&miss&~stim.enable&~autowater&~early'};            % error right, no stim, aw off
+params.condition(end+1) = {'L&miss&~stim.enable&~autowater&~early'};            % error left, no stim, aw off
 
 params.tmin = -2.5;
 params.tmax = 2.5;
@@ -58,15 +58,15 @@ meta = [];
 
 % --- ALM --- 
 % meta = loadJEB6_ALMVideo(meta,datapth);
-% meta = loadJEB7_ALMVideo(meta,datapth);
+meta = loadJEB7_ALMVideo(meta,datapth);
 % meta = loadEKH1_ALMVideo(meta,datapth);
 % meta = loadEKH3_ALMVideo(meta,datapth);
 % meta = loadJGR2_ALMVideo(meta,datapth);
 % meta = loadJGR3_ALMVideo(meta,datapth);
-meta = loadJEB14_ALMVideo(meta,datapth);
+% meta = loadJEB14_ALMVideo(meta,datapth);
 % meta = loadJEB15_ALMVideo(meta,datapth);
 
-meta = meta(2);
+meta = meta(1);
 
 % --- M1TJ ---
 % meta = loadJEB14_M1TJVideo(meta,datapth);
@@ -89,6 +89,16 @@ params.probe = {meta.probe}; % put probe numbers into params, one entry for elem
 % ------------------------------------------
 for sessix = 1:numel(meta)
     me(sessix) = loadMotionEnergy(obj(sessix), meta(sessix), params(sessix), datapth);
+end
+
+% ------------------------------------------
+% -- Kinematics --
+% kin (struct array) - one entry per session
+% TODO - save kin to obj and load them
+% ------------------------------------------
+disp('Loading Kinematics')
+for sessix = 1:numel(meta)
+    kin(sessix) = getKinematics(obj(sessix), me(sessix), params(sessix));
 end
 
 %% CODING DIMENSIONS

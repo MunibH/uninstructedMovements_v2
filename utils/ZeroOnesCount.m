@@ -3,7 +3,7 @@ function [start, iend, len, k1] = ZeroOnesCount(v)
 % Determine the position and length of each 1-string in v,
 % where v is a vector of 1s and 0s
 % Derek O'Connor 21 Sep 2011
-% Adapted by Munib Hasnain
+% Adapted by Munib Hasnain (2022)
 %
 
 % start is index in v where a 1-string starts

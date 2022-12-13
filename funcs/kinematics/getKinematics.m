@@ -21,13 +21,13 @@ end
 % -- Kinematics --
 % (xdisp,ydisp,xvel,yvel) for each dlc feature
 % ----------------------------------------------
-[kin.dat,kin.featLeg] = getKinematicsFromVideo(obj,params);
+[kin.dat,kin.featLeg,kin.nans] = getKinematicsFromVideo(obj,params);
 
 % ----------------------------------------------
 % -- Tongue angle and length --
 % ----------------------------------------------
 if ismember('tongue',params.traj_features{1})
-    [ang,len] = getLickAngleAndLength(kin.featLeg,kin.dat);
+    [ang,len] = getLickAngleAndLength(kin.featLeg,kin.dat,kin.nans);
     kin.featLeg{end+1} = 'tongue_angle';
     kin.featLeg{end+1} = 'tongue_length';
 

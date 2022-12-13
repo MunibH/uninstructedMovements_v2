@@ -13,10 +13,17 @@ for i = 1:size(xpos,2) % for each trial
         yvel(:,i) = yvel(:,i) - basederiv(1);
     end
 
-    % fill missing values for all features except tongue
+    % fill missing values for all features
     if ~contains(feat,'tongue')
         xvel(:,i) = fillmissing(xvel(:,i),'nearest');
         yvel(:,i) = fillmissing(yvel(:,i),'nearest');
+    else
+        tempx = xvel(:,i);
+        tempx(isnan(tempx)) = 0; % set tongue velocity to 0 if not visible
+        xvel(:,i) = tempx;
+        tempy = yvel(:,i);
+        tempy(isnan(tempy)) = 0; % set tonge velocity to 0 if not visible
+        yvel(:,i) = tempy;
     end
 end
 

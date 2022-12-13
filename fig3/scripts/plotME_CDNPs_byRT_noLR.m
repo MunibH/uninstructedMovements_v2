@@ -1,17 +1,18 @@
 
-rt = firstTongueRT(obj);
+% rt = firstTongueRT(obj);
+rt = firstJawRT(obj);
 
 %%
 
 close all
 clear dat cols
 
-nBlocks = 2;
-for sessix = 1:numel(rez)
+nBlocks = 4;
+for sessix = 1:numel(meta)
 
-    t1 = -0.5; t2 = -0.01;
-    [~,ix1] = min(abs(obj(sessix).time - t1));
-    [~,ix2] = min(abs(obj(sessix).time - t2));
+%     t1 = -0.5; t2 = -0.01;
+%     [~,ix1] = min(abs(obj(sessix).time - t1));
+%     [~,ix2] = min(abs(obj(sessix).time - t2));
 
     potent = sum(rez(sessix).N_potent.^2,3);
     cdlatepotent = cd_potent(sessix).trialdat(:,:,2);
@@ -19,6 +20,8 @@ for sessix = 1:numel(rez)
     cdlatenull = cd_null(sessix).trialdat(:,:,2);
     me_ = me(sessix).data;
     thisrt = rt{sessix};
+
+    figure; subplot(2,1,1); histogram(thisrt,40); subplot(2,1,2); plot(thisrt); pause; close all; continue;
 
     % right and left hit trials
     trix.all = cell2mat(params(sessix).trialid(2:3)');
@@ -40,7 +43,9 @@ for sessix = 1:numel(rez)
 
     c = gray(nBlocks*3);
     cols(1,:) = c(1,:);
-    cols(2,:) = c(4,:);
+    cols(2,:) = c(3,:);
+    cols(3,:) = c(5,:);
+    cols(4,:) = c(7,:);
 
     xl.gc = 0;
     xl.sample =  mode(obj(sessix).bp.ev.sample) - mode(obj(sessix).bp.ev.(params(sessix).alignEvent));
@@ -79,9 +84,9 @@ for sessix = 1:numel(rez)
         sgtitle([meta(sessix).anm ' ' meta(sessix).date])
     end
     
-    pth = 'C:\Users\munib\Documents\Economo-Lab\code\uninstructedMovements_v2\fig3\figs\me_np_blocks_by_RT';
-    fn = [meta(sessix).anm '_' meta(sessix).date];
-    mysavefig(f,pth,fn)
+%     pth = 'C:\Users\munib\Documents\Economo-Lab\code\uninstructedMovements_v2\fig3\figs\me_np_blocks_by_RT';
+%     fn = [meta(sessix).anm '_' meta(sessix).date];
+%     mysavefig(f,pth,fn)
 
 
 
