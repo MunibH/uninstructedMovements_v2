@@ -65,7 +65,6 @@ meta = loadJGR3_ALMVideo(meta,datapth);
 meta = loadJEB14_ALMVideo(meta,datapth);
 meta = loadJEB15_ALMVideo(meta,datapth);
 
-
 params.probe = {meta.probe}; % put probe numbers into params, one entry for element in meta, just so i don't have to change code i've already written
 
 
@@ -160,7 +159,9 @@ allrt = cell2mat(rt');
 figure; 
 histogram(allrt,200,'EdgeColor','none')
 xline(nanmedian(allrt),'k--')
-
-
+ax = gca;
+ax.FontSize = 13;
+xlabel('Reaction time (s)')
+ylabel('# of trials')
 
 
