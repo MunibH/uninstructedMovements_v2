@@ -1,5 +1,6 @@
 function [xvel, yvel] = findVelocity(xpos, ypos, feat)
 
+
 for i = 1:size(xpos,2) % for each trial
     tsinterp = [xpos(:,i) ypos(:,i)];
     basederiv = median(diff(tsinterp),'omitnan');

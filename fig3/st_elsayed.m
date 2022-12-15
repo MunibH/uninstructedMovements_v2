@@ -23,12 +23,12 @@ params.lowFR               = 0; % remove clusters with firing rates across all t
 
 % set conditions to calculate PSTHs for
 params.condition(1)     = {'(hit|miss|no)'};                             % all trials
-params.condition(end+1) = {'R&hit&~stim.enable&~autowater&~early'};             % right hits, no stim, aw off
-params.condition(end+1) = {'L&hit&~stim.enable&~autowater&~early'};             % left hits, no stim, aw off
-params.condition(end+1) = {'R&miss&~stim.enable&~autowater&~early'};            % error right, no stim, aw off
-params.condition(end+1) = {'L&miss&~stim.enable&~autowater&~early'};            % error left, no stim, aw off
-params.condition(end+1) = {'R&no&~stim.enable&~autowater&~early'};            % no right, no stim, aw off
-params.condition(end+1) = {'L&no&~stim.enable&~autowater&~early'};            % no left, no stim, aw off
+params.condition(end+1) = {'R&hit&~stim.enable&~autowater'};             % right hits, no stim, aw off
+params.condition(end+1) = {'L&hit&~stim.enable&~autowater'};             % left hits, no stim, aw off
+params.condition(end+1) = {'R&miss&~stim.enable&~autowater'};            % error right, no stim, aw off
+params.condition(end+1) = {'L&miss&~stim.enable&~autowater'};            % error left, no stim, aw off
+params.condition(end+1) = {'R&no&~stim.enable&~autowater'};            % no right, no stim, aw off
+params.condition(end+1) = {'L&no&~stim.enable&~autowater'};            % no left, no stim, aw off
 
 params.tmin = -3.0;
 params.tmax = 2.5;
@@ -155,7 +155,7 @@ cond2use = [2 3]; % right hits, left hits
 % plotVarianceInEpochs(rez,me,params,cond2use);
 
 % % - ve
-plotVarianceExplained_NP(rez);
+% plotVarianceExplained_NP(rez);
 % plotVarianceExplained_NP_epoch(rez);
 
 % % - ve over time (TODO)
@@ -178,19 +178,19 @@ plotmiss = 0;
 plotno = 0;
 
 titlestring = 'Null';
-plotCDProj(cd_null_all,cd_null,sav,titlestring,plotmiss,plotno)
+% plotCDProj(cd_null_all,cd_null,sav,titlestring,plotmiss,plotno)
 % plotCDVarExp(cd_null_all,sav,titlestring)
 % plotSelectivity(cd_null_all,cd_null,sav,titlestring)
 % plotSelectivityExplained(cd_null_all,cd_null,sav,titlestring)
 
 titlestring = 'Potent';
-plotCDProj(cd_potent_all,cd_potent,sav,titlestring,plotmiss,plotno)
+% plotCDProj(cd_potent_all,cd_potent,sav,titlestring,plotmiss,plotno)
 % plotCDVarExp(cd_potent_all,sav,titlestring)
 % plotSelectivity(cd_potent_all,cd_potent,sav,titlestring)
 % plotSelectivityExplained(cd_potent_all,cd_potent,sav,titlestring)
 
 titlestring = 'Null | Potent CDs';
-% plotCDProj_NP(cd_potent_all,cd_null_all,cd_potent,cd_null,sav,titlestring,plotmiss)
+plotCDProj_NP(cd_potent_all,cd_null_all,cd_potent,cd_null,sav,titlestring,plotmiss)
 % plotSelectivityExplained_NP(cd_potent_all,cd_null_all,cd_potent,cd_null,sav,titlestring)
 
 %% t=0 is transitions between non-movement and movement that do not coincide with the go cue

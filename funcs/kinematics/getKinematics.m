@@ -44,11 +44,11 @@ kin.dat(:,:,end+1) = me.data;
 
 % ----------------------------------------------
 % -- Standardize kinematics --
-% commented out b/c pca centers data for us
 % ----------------------------------------------
 for featix = 1:size(kin.dat,3)
     temp = kin.dat(:,:,featix);
-    kin.dat_std(:,:,featix) = (temp - mean(temp,2,'omitnan')) ./ std(temp,[],'omitnan');
+    temp2 = temp(:);
+    kin.dat_std(:,:,featix) = (temp - mean(temp2,'omitnan')) ./ std(temp2,'omitnan'); 
 end
 
 % ----------------------------------------------

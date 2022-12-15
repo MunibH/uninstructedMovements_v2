@@ -58,15 +58,15 @@ meta = [];
 
 % --- ALM --- 
 % meta = loadJEB6_ALMVideo(meta,datapth);
-meta = loadJEB7_ALMVideo(meta,datapth);
+% meta = loadJEB7_ALMVideo(meta,datapth);
 % meta = loadEKH1_ALMVideo(meta,datapth);
 % meta = loadEKH3_ALMVideo(meta,datapth);
 % meta = loadJGR2_ALMVideo(meta,datapth);
 % meta = loadJGR3_ALMVideo(meta,datapth);
 % meta = loadJEB14_ALMVideo(meta,datapth);
-% meta = loadJEB15_ALMVideo(meta,datapth);
+meta = loadJEB15_ALMVideo(meta,datapth);
 
-meta = meta(1);
+meta = meta(3);
 
 % --- M1TJ ---
 % meta = loadJEB14_M1TJVideo(meta,datapth);

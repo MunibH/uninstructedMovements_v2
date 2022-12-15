@@ -109,7 +109,7 @@ end
 clearvars -except datapth kin me meta obj params
 
 % params
-rez.nFolds = 10; % number of iterations (bootstrap)
+rez.nFolds = 2; % number of iterations (bootstrap)
 
 rez.binSize = 50; % ms
 rez.dt = floor(rez.binSize / (params(1).dt*1000)); % samples
@@ -118,7 +118,7 @@ rez.numT = numel(rez.tm);
 
 rez.train = 1; % fraction of trials to use for training (1-train for testing)
 
-rez.nShuffles = 20;
+rez.nShuffles = 2;
 
 % match number of right and left hits, and right and left misses
 cond2use = 2:5;
@@ -287,43 +287,6 @@ leg.Location = 'best';
 
 ax.FontSize = 15;
 
-%% plot
-
-cols = linspecer(size(acc,3));
-
-alph = 0.2;
-
-sample = mode(obj(1).bp.ev.sample) - mode(obj(1).bp.ev.goCue);
-delay = mode(obj(1).bp.ev.delay) - mode(obj(1).bp.ev.goCue);
-
-figure;
-ax = gca;
-hold on;
-for ifeat = 1:size(acc,3)
-    temp = acc(:,:,ifeat);
-    shadedErrorBar(rez.tm(1:end-1),mean(temp,2),std(temp,[],2)./sqrt(numel(obj)),{'Color',cols(ifeat,:),'LineWidth',2},alph,ax)
-    temp = acc_shuffled;
-    shadedErrorBar(rez.tm(1:end-1),mean(temp,2),std(temp,[],2)./sqrt(numel(obj)),{'Color',[0.6,0.6,0.6],'LineWidth',2},alph,ax)
-end
-xline(0,'k:','LineWidth',2)
-xline(sample,'k:','LineWidth',2)
-xline(delay,'k:','LineWidth',2)
-
-ylim([ax.YLim(1) 1])
-
-xlabel('Time (s) from go cue')
-ylabel([num2str(rez.nFolds) '-Fold CV Accuracy'])
-title('Choice Decoding from DLC Features')
-
-h = zeros(numel(featGroups), 1);
-for i = 1:numel(h)
-    h(i) = plot(NaN,NaN,'-','Color',cols(i,:),'LineWidth',2);
-end
-legString = cellfun(@(x) strrep(x{1},'_',' '), featGroups,'UniformOutput',false);
-
-leg = legend(h, legString);
-leg.EdgeColor = 'none';
-leg.Location = 'best';
 
 %% same plot but for each session
 
@@ -368,31 +331,4 @@ end
 xlabel(t,'Time (s) from go cue')
 ylabel(t,[num2str(rez.nFolds) '-Fold CV Accuracy'])
 
-
-%% average over all sessions, features
-
-cols = linspecer(size(acc,3));
-
-alph = 0.5;
-
-sample = mode(obj(1).bp.ev.sample) - mode(obj(1).bp.ev.goCue);
-delay = mode(obj(1).bp.ev.delay) - mode(obj(1).bp.ev.goCue);
-
-temp = mean(temp,3); % each feature
-
-
-figure;
-ax = gca;
-hold on;
-shadedErrorBar(rez.tm(1:end-1),mean(temp,2),std(temp,[],2)./sqrt(numel(obj)),{'Color',cols(1,:),'LineWidth',2},alph,ax)
-
-xline(0,'k:','LineWidth',2)
-xline(sample,'k:','LineWidth',2)
-xline(delay,'k:','LineWidth',2)
-
-ylim([ax.YLim(1) 1])
-
-xlabel('Time (s) from go cue')
-ylabel([num2str(rez.nFolds) '-Fold CV Accuracy'])
-title('Choice Decoding from DLC Features')
 
