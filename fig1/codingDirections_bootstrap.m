@@ -1,17 +1,21 @@
 clear,clc,close all
 
 % add paths for data loading scripts, all fig funcs, and utils
-utilspth = 'C:\Users\munib\Documents\Economo-Lab\code\uninstructedMovements_v2';
+utilspth = 'C:\Users\munib\Documents\Economo-Lab\code\uninstructedMovements_v3';
 addpath(genpath(fullfile(utilspth,'DataLoadingScripts')));
 addpath(genpath(fullfile(utilspth,'funcs')));
 addpath(genpath(fullfile(utilspth,'utils')));
 rmpath(genpath(fullfile(utilspth,'fig3/')))
+rmpath(genpath(fullfile(utilspth,'fig2/')))
+rmpath(genpath(fullfile(utilspth,'figx/')))
 rmpath(genpath(fullfile(utilspth,'mc_stim/')))
 rmpath(genpath(fullfile(utilspth,'MotionMapper/')))
-
+rmpath(genpath(fullfile(utilspth,'musall2919/')))
 
 % add paths for figure specific functions
 addpath(genpath(pwd))
+
+clc
 
 %% PARAMETERS
 params.alignEvent          = 'goCue'; % 'jawOnset' 'goCue'  'moveOnset'  'firstLick'  'lastLick'
@@ -19,7 +23,7 @@ params.alignEvent          = 'goCue'; % 'jawOnset' 'goCue'  'moveOnset'  'firstL
 % time warping only operates on neural data for now.
 % TODO: time warp for video and bpod data
 params.timeWarp            = 0;  % piecewise linear time warping - each lick duration on each trial gets warped to median lick duration for that lick across trials
-params.nLicks              = 20; % number of post go cue licks to calculate median lick duration for and warp individual trials to 
+params.nLicks              = 20; % number of post go cue licks to calculate median lick duration for and warp individual trials to
 
 params.lowFR               = 1; % remove clusters with firing rates across all trials less than this val
 
@@ -48,7 +52,7 @@ params.quality = {'all'}; % accepts any cell array of strings - special characte
 
 
 params.traj_features = {{'tongue','left_tongue','right_tongue','jaw','trident','nose'},...
-                        {'top_tongue','topleft_tongue','bottom_tongue','bottomleft_tongue','jaw','top_paw','bottom_paw','top_nostril','bottom_nostril'}};
+    {'top_tongue','topleft_tongue','bottom_tongue','bottomleft_tongue','jaw','top_paw','bottom_paw','top_nostril','bottom_nostril'}};
 
 params.feat_varToExplain = 80; % num factors for dim reduction of video features should explain this much variance
 
@@ -62,7 +66,7 @@ datapth = '/Users/Munib/Documents/Economo-Lab/data/';
 
 meta = [];
 
-% --- ALM --- 
+% --- ALM ---
 meta = loadJEB6_ALMVideo(meta,datapth);
 meta = loadJEB7_ALMVideo(meta,datapth);
 meta = loadEKH1_ALMVideo(meta,datapth);
@@ -82,92 +86,83 @@ params.probe = {meta.probe}; % put probe numbers into params, one entry for elem
 
 [obj,params] = loadSessionData(meta,params);
 
-%% POPULATION SELECTIVITY CORRELATION MATRIX
+%% BOOTSTRAP
 
-cond2use = [2 3]; % left hit, right hit
-sel_corr_mat = getSelectivityCorrelationMatrix(obj,cond2use);
+clear boot bootobj bootparams
 
-%% CODING DIMENSIONS
+boot.iters = 2; % number of bootstrap iterations (most papers do 1000)
 
-clearvars -except obj meta params sel_corr_mat
+% fraction of each hierarchy to sample
+% (all should be 1, but can subsample by setting any to a fraction less than 1)
+boot.anmfrac = 1;
+boot.sessionfrac = 0.5;
+boot.trialfrac = 1;
 
-% % 2afc (early, late, go)
-cond2use = [2 3]; % left hit, right hit
-cond2proj = [2 3 4 5 8 9];
-rez_2afc = getCodingDimensions_2afc(obj,params,cond2use,cond2proj);
+for iter = 1:boot.iters
+    disp(['Iteration ' num2str(iter) '/' num2str(boot.iters)]);
 
-% % aw (context mode)
-cond2use = [6 7]; % hit 2afc, hit aw
-cond2proj = [2 3 4 5 8 9];
-rez_aw = getCodingDimensions_aw(obj,params,cond2use,cond2proj);
+    clear bootobj bootparams
+    % get meta for current bootstrap iteration
+    boot = hierarchicalBootstrapMeta(boot,meta,params);
 
+    % sample data
+    [bootobj,bootparams] = hierarchicalBootstrapObj(boot,obj,meta,params);
 
-allrez = concatRezAcrossSessions(rez_2afc,rez_aw);
+    % coding dimensions
+   
+    clearvars -except obj meta params boot bootobj bootparams iter allrez
+
+    % % 2afc (early, late, go)
+    cond2use = [2 3]; % left hit, right hit
+    cond2proj = [2 3 4 5 8 9];
+    rez_2afc = getCodingDimensions_2afc(bootobj,bootparams,cond2use,cond2proj);
+
+    % % aw (context mode)
+    cond2use = [6 7]; % hit 2afc, hit aw
+    cond2proj = [2 3 4 5 8 9];
+    rez_aw = getCodingDimensions_aw(bootobj,bootparams,cond2use,cond2proj);
+
+    allrez(iter) = concatRezAcrossSessions(rez_2afc,rez_aw);
+
+end
+
+% CONCAT BOOTSTRAP ITERATIONS
+
+% mean across sessions for each bootstrap iteration
+temp = allrez;
+for i = 1:numel(temp)
+    temp(i).cd_proj = nanmean(temp(i).cd_proj,4);
+    temp(i).cd_varexp = nanmean(temp(i).cd_varexp,1);
+    temp(i).cd_varexp_epoch = nanmean(temp(i).cd_varexp_epoch,1);
+    temp(i).selectivity_squared = nanmean(temp(i).selectivity_squared,3);
+    temp(i).selexp = nanmean(temp(i).selexp,3);
+end
+
+% concatenate bootstrap iterations
+rez = temp(1);
+for i = 2:numel(allrez)
+    rez.cd_proj = cat(4,rez.cd_proj,temp(i).cd_proj);
+    rez.cd_varexp = cat(1,rez.cd_varexp,temp(i).cd_varexp);
+    rez.cd_varexp_epoch = cat(1,rez.cd_varexp_epoch,temp(i).cd_varexp_epoch);
+    rez.selectivity_squared = cat(3,rez.selectivity_squared,temp(i).selectivity_squared);
+    rez.selexp = cat(3,rez.selexp,temp(i).selexp);
+end
+
 
 %% PLOTS
 close all
 
 sav = 0; % 1=save, 0=no_save
 
-% plotSelectivityCorrMatrix(obj(1),sel_corr_mat,params(1).alignEvent,sav)
-
 plotmiss = 0;
 plotaw = 1;
-plotCDProj(allrez,rez_2afc,sav,plotmiss,plotaw,params(1).alignEvent)
-% set(gcf,'Position',[249   558   349   238])
+plotCDProj(rez,obj(1),sav,plotmiss,plotaw,params(1).alignEvent)
+
 % plotCDVarExp(allrez,sav)
 % plotSelectivity(allrez,rez,sav)
 % plotSelectivityExplained(allrez,rez,sav)
 
-
-
-
-
-%% heatmap for context mode
-close all
-
-trialStart = mode(obj(1).bp.ev.bitStart - rez_2afc(1).align);
-sample = mode(obj(1).bp.ev.sample - rez_2afc(1).align);
-for sessix = 5 %1:numel(rez_aw)
-%     trix = sort(cell2mat(params(sessix).trialid([6 7])')); % 2afc and aw hits
-    trix = 1:obj(sessix).bp.Ntrials;
-    trialdat = obj(sessix).trialdat(:,:,trix);
-    trialdat = permute(trialdat, [1 3 2]); % time trials clu
-    dims = size(trialdat);
-    temp = reshape(trialdat, dims(1)*dims(2), dims(3));
-    temp = zscore(temp);
-
-    proj = temp * rez_aw(sessix).cd_mode_orth;
-    proj = reshape(proj, dims(1), dims(2));
-
-    proj(end+1:end+20,:) = repmat((obj(sessix).bp.autowater * max(max(proj)))', 20,1);
-    tm = obj(sessix).time;
-    tm = [tm tm(end)+(1:20)*mode(diff(tm))];
-
-    figure; imagesc(1:numel(trix), tm, proj)
-    set(gca,'YDir','normal')
-    xlabel('Trials')
-    ylabel(['Time (s) from ' params(sessix).alignEvent])
-    title('Context Mode')
-    colormap(flipud(linspecer))
-    c = colorbar;
-%     c.Limits(1) = c.Limits(1) ./ 3;
-%     ylim([trialStart sample])
-    xlim([1 obj(sessix).bp.Ntrials - 40])
-
-    ax = gca;
-    ax.FontSize = 15;
-
-end
-
-
-
-
-
-
-
-
-
+% plotCDContext_singleTrials(obj, params, rez_aw, rez_2afc)
 
 
 

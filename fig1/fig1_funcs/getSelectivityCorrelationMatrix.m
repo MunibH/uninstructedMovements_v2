@@ -2,7 +2,7 @@ function sel_corr_mat = getSelectivityCorrelationMatrix(obj,cond2use)
 
 sel = obj(1).psth(:,:,cond2use); % (time,neurons,cond)
 for sessix = 1:numel(obj)
-    sel = cat(2,sel,obj(sessix).psth(:,:,cond2use));
+    sel = cat(2,sel,obj(sessix).psth(:,:,cond2use)); 
 end
 sel = sel(:,:,1) - sel(:,:,2);
 

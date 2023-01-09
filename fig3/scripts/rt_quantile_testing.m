@@ -7,13 +7,13 @@ rt = firstJawRT(obj);
 close all
 clear dat cols trialsBlock
 
-nQuantiles = 3;
+nQuantiles = 4;
 for sessix = 1:numel(meta)
 
     %     t1 = -0.5; t2 = -0.01;
     %     [~,ix1] = min(abs(obj(sessix).time - t1));
     %     [~,ix2] = min(abs(obj(sessix).time - t2));
-    cddim = 1;
+    cddim = 3;
     cdlatepotent = cd_potent(sessix).trialdat(:,:,cddim);
     cdlatenull = cd_null(sessix).trialdat(:,:,cddim);
     me_ = me(sessix).data;
@@ -28,9 +28,8 @@ for sessix = 1:numel(meta)
 %     med = median(thisrt);
 %     trix.outlierMask = thisrt > 1.1*med | thisrt<=0.0025;
 % %     trix.outlierMask = isoutlier(thisrt)';
-    trix.outlierMask = thisrt > 0.13;
-%     trix.outlierMask = thisrt > 0.12 | thisrt < 0.015;
-%     trix.outlierMask = logical(zeros(size(thisrt)));
+%     trix.outlierMask = thisrt > 0.13;
+    trix.outlierMask = thisrt > 0.1 | thisrt < 0.045;
 
     trix.all = trix.all(~trix.outlierMask);
     thisrt = thisrt(~trix.outlierMask);
@@ -115,7 +114,7 @@ sample = mode(obj(1).bp.ev.sample) - 2.5;
 tstart = mode(obj(1).bp.ev.bitStart) - 2.5;
 delay = mode(obj(1).bp.ev.delay) - 2.5;
 
-sm = 31;
+sm = 51;
 
 xlims = [tstart 1.5];
 
@@ -130,8 +129,7 @@ end
 % cols(end,:) = [0.83 0.83 0.83];
 
 close all
-f = figure;
-f.Position = [680    84   574   894];
+figure;
 for i = 1:nQuantiles
     ax1 = subplot(3,1,1); hold on;
     plot(obj(1).time,mySmooth(nanmean(alldat.cdnullsel{i},2),sm,'reflect'),'LineWidth',2,'Color',cols(i,:));
@@ -154,7 +152,7 @@ for i = 1:nQuantiles
     ylabel('Selectivity (potent)')
 
     subplot(3,1,3); hold on;
-    histogram(alldat.rt{i},'FaceAlpha',0.7,'EdgeColor','none','FaceColor',cols(i,:))
+    histogram(alldat.rt{i},'FaceAlpha',0.5,'EdgeColor','none','FaceColor',cols(i,:))
 %     xlim([0 0.4])
 end
 
@@ -167,7 +165,7 @@ ax2.FontSize = 12;
 ax1.XTick = [];
 ax2.XLabel.String = 'Time (s) from go cue';
 
-% linkaxes([ax1,ax2])
+linkaxes([ax1,ax2])
 
 % L/R plot
 
@@ -186,8 +184,6 @@ for i = 1:nQuantiles
     rcols(i,:) = cright(i*3,:);
 end
 
-sm = 51;
-
 % close all
 figure;
 for i = 1:nQuantiles
@@ -199,7 +195,7 @@ for i = 1:nQuantiles
     xline(tstart,'k--')
     xline(delay,'k--')
     xlim(xlims)
-    ylabel('CD (Null)')
+    ylabel('CDLate (Null)')
 
     ax2 = subplot(2,1,2); hold on;
     plot(obj(1).time,mySmooth(nanmean(alldat.cdpotent.right{i},2),sm,'reflect'),'LineWidth',2,'Color',rcols(i,:));
@@ -209,7 +205,7 @@ for i = 1:nQuantiles
     xline(tstart,'k--')
     xline(delay,'k--')
     xlim(xlims)
-    ylabel('CD (Potent)')
+    ylabel('CDLate (Potent)')
 
 end
 
@@ -221,8 +217,8 @@ ax1.FontSize = 12;
 ax2.FontSize = 12;
 ax1.XTick = [];
 ax2.XLabel.String = 'Time (s) from go cue';
-% 
-% linkaxes([ax1,ax2])
+
+linkaxes([ax1,ax2])
 
 
 %% Helper functions

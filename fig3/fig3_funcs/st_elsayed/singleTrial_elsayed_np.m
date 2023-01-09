@@ -31,7 +31,7 @@ trials = [trialsHit ; trialsMiss]; % (minTrials*numCond,1) vector of trials used
 % trials = trialsHit; % only hit trials
 
 
-% trials = cell2mat(trials_cond'); % all trials from cond2use
+trials = cell2mat(trials_cond'); % all trials from cond2use
 
 
 
@@ -126,20 +126,8 @@ rez = var_exp_NP(trials_cond,input_data,rez);
 rez = ta_projectNP(input_data,rez,cond2proj,params);
 
 
-
 end
 
-% for dim = 1:10
-% figure; 
-% subplot(2,1,1); hold on
-% plot(obj.time,squeeze(rez.N_potent_psth(:,dim,1)),'b')
-% plot(obj.time,squeeze(rez.N_potent_psth(:,dim,2)),'r')
-% subplot(2,1,2); hold on
-% plot(obj.time,squeeze(rez.N_null_psth(:,dim,1)),'b')
-% plot(obj.time,squeeze(rez.N_null_psth(:,dim,2)),'r')
-% end
-
-%% Helper functions
 
 
 

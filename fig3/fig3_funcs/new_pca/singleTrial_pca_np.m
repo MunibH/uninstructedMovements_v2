@@ -1,5 +1,4 @@
-function rez = singleTrial_pca_np(input_data,obj,me,params,cond2use,first)
-warning('off', 'manopt:getHessian:approx')
+function rez = singleTrial_pca_np(input_data,obj,me,params,cond2use,cond2proj,first)
 
 %% trials to use
 % going to use hits and misses (including early), no autowater, no stim
@@ -37,6 +36,8 @@ trials = [trialsHit ; trialsMiss]; % (minTrials*numCond,1) vector of trials used
 
 %% split data into quiet and moving time points
 
+%% split data into quiet and moving time points
+
 % motion energy
 mask = me.move(:,trials);
 mask = mask(:); % (time*trials) , 1 where animal is moving, 0 where animal is quiet
@@ -46,13 +47,12 @@ N.full = input_data(:,trials,:);
 N.dims = size(N.full);
 N.full_reshape = reshape(N.full,N.dims(1)*N.dims(2),N.dims(3));
 
+
 N.null = N.full_reshape(~mask,:);
 
 N.potent = N.full_reshape(mask,:);
 
-
 rez.N = N;
-
 
 %% null and potent spaces
 
@@ -76,11 +76,15 @@ rez.covPotent = cov(N.potent);
 % assign num dims by amount of PCs needed to explain some amount of
 % variance defined in params (capped at 10 dims)
 rez.varToExplain = params.N_varToExplain;
-[rez.dPrep,rez.dMove] = getNumDims(N,rez.varToExplain);
-if rez.dPrep > 10; rez.dPrep = 10; end
-if rez.dMove > 10; rez.dMove = 10; end
-if rez.dPrep == 1; rez.dPrep = 10; end
-if rez.dMove == 1; rez.dMove = 10; end
+% [rez.dPrep,rez.dMove] = getNumDims(N,rez.varToExplain);
+% if rez.dPrep > 10; rez.dPrep = 10; end
+% if rez.dMove > 10; rez.dMove = 10; end
+% if rez.dPrep == 1; rez.dPrep = 10; end
+% if rez.dMove == 1; rez.dMove = 10; end
+rez.dPrep = floor(size(rez.covNull,1)/2);
+rez.dMove = ceil(size(rez.covNull,1)/2);
+if rez.dPrep > 20; rez.dPrep = 20; end
+if rez.dMove > 20; rez.dMove = 20; end
 
 % method 2 - keep reducing var2explain until dMove+dPrep <= full dim
 % check = 1;
@@ -91,7 +95,6 @@ if rez.dMove == 1; rez.dMove = 10; end
 %     end
 %     rez.varToExplain = rez.varToExplain - 1;
 % end
-
 
 
 %% find null and potent spaces
@@ -112,8 +115,8 @@ rez.(['Q' first]) = pca(rez.N.(first),'NumComponents',ndims1);
 % find second space
 
 % project out first space from full data
-modesToKeep = eye(size(rez.(['Q' first]),1)) - (rez.(['Q' first])*rez.(['Q' first])');
-proj_out = rez.N.full_reshape * modesToKeep;
+modesToKeep = eye(size(rez.(['Q' first]),1)) - (rez.(['Q' first])*rez.(['Q' first])'); % I - WW'
+proj_out = rez.N.full_reshape * modesToKeep; % N * (I - WW')  -  
 
 % potent space
 rez.(['Q' second]) = pca(proj_out,'NumComponents',ndims2);
@@ -130,20 +133,11 @@ rez = var_exp_NP(trials_cond,input_data,rez);
 
 %% trial average projections
 
-rez = ta_projectNP(input_data,rez,cond2use,params);
+rez = ta_projectNP(input_data,rez,cond2proj,params);
+
 
 
 end
-
-% for dim = 1:10
-% figure; 
-% subplot(2,1,1); hold on
-% plot(obj.time,squeeze(rez.N_potent_psth(:,dim,1)),'b')
-% plot(obj.time,squeeze(rez.N_potent_psth(:,dim,2)),'r')
-% subplot(2,1,2); hold on
-% plot(obj.time,squeeze(rez.N_null_psth(:,dim,1)),'b')
-% plot(obj.time,squeeze(rez.N_null_psth(:,dim,2)),'r')
-% end
 
 
 

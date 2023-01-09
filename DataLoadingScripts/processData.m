@@ -1,4 +1,12 @@
-function [params,obj] = processData(obj,params,prbnum)
+function [params,obj] = processData(obj,params,prbnum, varargin)
+
+% varargin only accepts one input right now -> params.behav_only. If 1,
+% don't process clusters
+if nargin > 3
+    behav_only = varargin{1};
+else
+    behav_only = 0;
+end
 
 %% STANDARD ROUTINES
 % find trials to use (only need to do this once)
@@ -15,13 +23,16 @@ disp(' ')
 disp('--Clusters Found')
 disp(' ')
 
+if behav_only
+    return
+end
+
 % warp spikes post go cue according to median lick duration for each lick
 if params.timeWarp
     [obj,obj.lick] = timeWarp(obj,params,prbnum);
     disp(' ')
     disp('--Time Warp Finished')
     disp(' ')
-    
 end
 
 % align spikes in every cluster to an event

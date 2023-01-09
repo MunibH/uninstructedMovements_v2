@@ -1,5 +1,14 @@
-function [obj,params] = loadSessionData(meta,params)
+function [obj,params] = loadSessionData(meta,params, varargin)
 
+% varargin only accepts one input right now -> params.behav_only. If 1,
+% don't process clusters
+if nargin > 2
+    behav_only = varargin{1};
+else
+    behav_only = 0;
+end
+
+disp("LOADING ALL DATA OBJECTS")
 obj = loadObjs(meta);
 
 
@@ -11,7 +20,7 @@ for sessix = 1:numel(meta)
 
         prbnum = params.probe{sessix}(prbix);
 
-        [sessparams{sessix,prbix},sessobj{sessix,prbix}] = processData(obj(sessix),params,prbnum);
+        [sessparams{sessix,prbix},sessobj{sessix,prbix}] = processData(obj(sessix),params,prbnum, behav_only);
     end
 end
 
@@ -23,6 +32,11 @@ for sessix = 1:numel(meta)
         params.cluid{sessix} = sessparams{sessix,1}.cluid{params.probe{sessix}};
 
         objs(sessix) = sessobj{sessix,1};
+
+        if behav_only
+            continue;
+        end
+
         objs(sessix).psth = objs(sessix).psth{params.probe{sessix}};
         objs(sessix).trialdat = objs(sessix).trialdat{params.probe{sessix}};
         objs(sessix).presampleFR = objs(sessix).presampleFR{params.probe{sessix}};
@@ -33,10 +47,19 @@ for sessix = 1:numel(meta)
 
         objs(sessix) = sessobj{sessix,1};
 
-        objs(sessix).psth = cat(2, objs(sessix).psth{1}, sessobj{sessix,2}.psth{2}); 
-        objs(sessix).trialdat = cat(2, objs(sessix).trialdat{1}, sessobj{sessix,2}.trialdat{2}); 
-        objs(sessix).presampleFR = cat(1, objs(sessix).presampleFR{1}, sessobj{sessix,2}.presampleFR{2}); 
-        objs(sessix).presampleSigma = cat(1, objs(sessix).presampleSigma{1}, sessobj{sessix,2}.presampleSigma{2}); 
+        if behav_only
+            continue;
+        end
+
+        objs(sessix).psth = cat(2, objs(sessix).psth{1}, sessobj{sessix,2}.psth{2});
+        objs(sessix).trialdat = cat(2, objs(sessix).trialdat{1}, sessobj{sessix,2}.trialdat{2});
+        objs(sessix).presampleFR = cat(1, objs(sessix).presampleFR{1}, sessobj{sessix,2}.presampleFR{2});
+        objs(sessix).presampleSigma = cat(1, objs(sessix).presampleSigma{1}, sessobj{sessix,2}.presampleSigma{2});
+
+        % assign trialtm_aligned for 2nd probe
+        for i = 1:numel(objs(sessix).clu{2})
+            objs(sessix).clu{2}(i).trialtm_aligned = sessobj{sessix,2}.clu{2}(i).trialtm_aligned;
+        end
     end
 end
 

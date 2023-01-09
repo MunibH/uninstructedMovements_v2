@@ -4,6 +4,10 @@ cd_labels = {'early','late','go'};
 cd_epochs = {'delay',params(1).alignEvent,params(1).alignEvent};
 cd_times = {[-0.42 -0.02], [-0.42 -0.02], [0.02 0.42]}; % in seconds, relative to respective epochs
 
+% cd_labels = {'early','late','go'};
+% cd_epochs = {'delay',params(1).alignEvent,params(1).alignEvent};
+% cd_times = {[-0.42 -0.02], [-0.42 -0.02], [0.22 0.62]}; % in seconds, relative to respective epochs
+
 % cd_labels = {'late','go'};
 % cd_epochs = {params(1).alignEvent,params(1).alignEvent};
 % cd_times = {[-0.42 -0.02], [0.02 0.42]}; % in seconds, relative to respective epochs

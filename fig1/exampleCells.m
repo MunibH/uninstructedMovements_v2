@@ -1,4 +1,15 @@
 clear,clc,close all
+
+% add paths for data loading scripts, all fig funcs, and utils
+utilspth = 'C:\Users\munib\Documents\Economo-Lab\code\uninstructedMovements_v3';
+addpath(genpath(fullfile(utilspth,'DataLoadingScripts')));
+addpath(genpath(fullfile(utilspth,'funcs')));
+addpath(genpath(fullfile(utilspth,'utils')));
+rmpath(genpath(fullfile(utilspth,'fig3/')))
+rmpath(genpath(fullfile(utilspth,'mc_stim/')))
+rmpath(genpath(fullfile(utilspth,'MotionMapper/')))
+
+% add paths for figure specific functions
 addpath(genpath(pwd))
 
 %% PARAMETERS
@@ -12,8 +23,10 @@ params.nLicks              = 20; % number of post go cue licks to calculate medi
 params.lowFR               = 1; % remove clusters with firing rates across all trials less than this val
 
 % set conditions to calculate PSTHs for
-params.condition(1) = {'L&hit&~stim.enable&~autowater'};             % right hits, no stim, aw off
-params.condition(end+1) = {'R&hit&~stim.enable&~autowater'};             % left hits, no stim, aw off
+% params.condition(1) = {'R&hit&~stim.enable&~autowater'};             % right hits, no stim, aw off
+% params.condition(end+1) = {'L&hit&~stim.enable&~autowater'};         % left hits, no stim, aw off
+params.condition(1)     = {'hit&~stim.enable&~autowater'};             % afc
+params.condition(end+1) = {'hit&~stim.enable&autowater'};              % aw
 
 params.tmin = -2.5;
 params.tmax = 2.5;
@@ -43,7 +56,7 @@ meta = [];
 
 % --- ALM --- 
 % meta = loadJEB6_ALMVideo(meta,datapth);
-% meta = loadJEB7_ALMVideo(meta,datapth);
+meta = loadJEB7_ALMVideo(meta,datapth);
 % meta = loadEKH1_ALMVideo(meta,datapth);
 % meta = loadEKH3_ALMVideo(meta,datapth);
 % meta = loadJGR2_ALMVideo(meta,datapth);
@@ -52,7 +65,7 @@ meta = [];
 % meta = loadJEB15_ALMVideo(meta,datapth);
 
 % --- M1TJ ---
-meta = loadJEB14_M1TJVideo(meta,datapth);
+% meta = loadJEB14_M1TJVideo(meta,datapth);
 
 
 
@@ -60,11 +73,32 @@ params.probe = {meta.probe}; % put probe numbers into params, one entry for elem
 
 
 %% LOAD DATA
+
 sesh = 1;
 meta = meta(sesh);
 params.probe = params.probe(sesh);
 [obj,params] = loadSessionData(meta,params);
 
+
+%%
+% cells to use for afc_LR selectivity
+% jeb7 4-29 Cell 13
+% JGR3 2021-11-18 | Cell 24
+% cells to use for afc_aw selectivity
+% EKH3 2021-08-11 | Cell 17
+% JEB7 2021-04-30 | Cell 5
+
+close all
+cond2plot = 1:2;
+clrs = getColors;
+
+% cols{1} = clrs.rhit;
+% cols{2} = clrs.lhit;
+cols{1} = clrs.afc;
+cols{2} = clrs.aw;
+
+
+plotSpikeRaster_PSTH(meta,obj,params,cond2plot,cols)
 
 %%
 close all

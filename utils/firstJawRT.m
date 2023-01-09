@@ -116,13 +116,18 @@ for sessix = 1:numel(obj)
 %         plot(tm,jaw(:,2),'r','LineWidth',2)
 %         xline(tm(rtix),'b--')
 %         xline(tm(gcix),'k--')
-%         xlim([tm(gcix)-1 tm(gcix)+1])
+% %         xlim([tm(gcix)-1 tm(gcix)+1])
+%         xlim([tm(1) tm(gcix)+1])
 %         pause
 %         clf
 %         hold off
 
     end
 
+end
+
+if numel(rt) == 1
+    rt = rt{1}; % just return an array rather than a cell if one session
 end
 
 %%

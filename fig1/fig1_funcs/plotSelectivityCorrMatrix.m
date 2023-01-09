@@ -9,15 +9,15 @@ imagesc(obj(1).time,obj(1).time,dat);
 colorbar; 
 % caxis([0 max(max(dat))]);
 
-lw = 2;
-ls = ':';
+lw = 1;
+ls = '--';
 col = [1 1 1] ./ 255;
 xline(sample,ls,'Color',col,'LineWidth',lw); yline(sample,ls,'Color',col,'LineWidth',lw)
 xline(delay,ls,'Color',col,'LineWidth',lw); yline(delay,ls,'Color',col,'LineWidth',lw)
 xline(0,ls,'Color',col,'LineWidth',lw); yline(0,ls,'Color',col,'LineWidth',lw)
 
-xlim([obj.time(1),2]);
-ylim([obj.time(1),2])
+% xlim([-2.5,2]);
+% ylim([-2.5,2])
 xlabel('Time (s) from go cue')
 ylabel('Time (s) from go cue')
 ax = gca;
@@ -28,6 +28,9 @@ a.Label.String = 'Correlation';
 ax.FontSize = 12;
 
 axis(ax,'image')
+
+xlim([-2.5,2]);
+ylim([-2.5,2])
 
 if sav
     pth = '/Users/Munib/Documents/Economo-Lab/code/uninstructedMovements/fig1/figs/selectivity';

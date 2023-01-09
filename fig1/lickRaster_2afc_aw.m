@@ -1,7 +1,7 @@
 clear,clc,close all
 
 % add paths for data loading scripts, all fig funcs, and utils
-utilspth = 'C:\Users\munib\Documents\Economo-Lab\code\uninstructedMovements_v2';
+utilspth = 'C:\Users\munib\Documents\Economo-Lab\code\uninstructedMovements_v3';
 addpath(genpath(fullfile(utilspth,'DataLoadingScripts')));
 addpath(genpath(fullfile(utilspth,'funcs')));
 addpath(genpath(fullfile(utilspth,'utils')));
@@ -48,6 +48,8 @@ params.feat_varToExplain = 80; % num factors for dim reduction of video features
 
 params.advance_movement = 0.0;
 
+params.behav_only = 1;
+
 
 %% SPECIFY DATA TO LOAD
 
@@ -69,54 +71,11 @@ params.probe = {meta.probe}; % put probe numbers into params, one entry for elem
 
 %% LOAD DATA
 
-[obj,params] = loadSessionData(meta,params);
-
-%% PERFORMANCE
-rez = getPerformanceByCondition(meta,obj,params);
-
-% concatenate perf for each mouse
-anms = unique({meta.anm});
-perf = cell(numel(unique(anms)),1);
-for i = 1:numel(meta)
-    anmix = find(ismember(anms,meta(i).anm));
-    perf{anmix} = [perf{anmix} ; rez(i).perf];
-end
-% average across sessions for each mouse
-perf = cellfun(@(x) mean(x,1)*100, perf, 'UniformOutput',false);
-
-perf = cell2mat(perf);
-
-figure; hold on;
-rng(pi) % just to reproduce the random data I used
-div = 1.3;
-
-clrs = getColors();
-fns = fieldnames(clrs);
-for i = 1:numel(fns)
-    cols{i} = clrs.(fns{i});
-end
-
-xs = [1 2 4 5];
-for i = 1:size(perf,2)
-    b(i) = bar(xs(i),mean(perf(:,i)));
-    b(i).FaceColor = cols{i};
-    b(i).EdgeColor = 'none';
-    b(i).FaceAlpha = 0.8;
-    vs(i) = scatter(xs(i)*ones(size(perf(:,i))),perf(:,i),60,'MarkerFaceColor',cols{i}./div,...
-        'MarkerEdgeColor','k','LineWidth',1,'XJitter','randn','XJitterWidth',0.25);
-    errorbar(b(i).XEndPoints,mean(perf(:,i)),std(perf(:,i)),'LineStyle','none','Color','k','LineWidth',1)
+[obj,params] = loadSessionData(meta,params, params.behav_only);
 
 
-end
+%% LICK RASTER
 
-
-xticklabels([" " "Right 2AFC" "Left 2AFC" " " "Right AW" "Left AW"])
-ylabel("Performance (%)")
-ylim([0,100])
-ax = gca;
-ax.FontSize = 12;
-
-%%
 close all
 
 sessix = 2; % jeb7 4-29
@@ -132,7 +91,8 @@ end
 cond2use = 1:4;
 
 lw = 1.5;
-ms = 10;
+lwx = 0.5;
+ms = 3;
 
 goCue = 0;
 sample = mode(obj(sessix).bp.ev.sample) - mode(obj(sessix).bp.ev.goCue);
@@ -146,7 +106,7 @@ nTrials{2} = numel(params(sessix).trialid{1});
 
 
 f = figure; hold on;
-f.Position = [520   480   314   499];
+f.Position = [520   614   189   365];
 trialOffset = 1;
 
 
@@ -165,9 +125,9 @@ for cix = 1:numel(cond2use)
         lickR =  obj(sessix).bp.ev.lickR{trial} - obj(sessix).bp.ev.goCue(trial);
         lickR(lickR > 2) = [];
 
-        plot([sample sample], trialOffset+[-0.5 0.5], 'k:', 'LineWidth', lw);
-        plot([delay delay], trialOffset+[-0.5 0.5], 'k:', 'LineWidth', lw);
-        plot([goCue goCue], trialOffset+[-0.5 0.5], 'k:', 'LineWidth', lw);
+        plot([sample sample], trialOffset+[-0.5 0.5], 'k--', 'LineWidth', lwx);
+        plot([delay delay], trialOffset+[-0.5 0.5], 'k--', 'LineWidth', lwx);
+        plot([goCue goCue], trialOffset+[-0.5 0.5], 'k--', 'LineWidth', lwx);
 
         if ~isempty(lickL)
             plot(lickL, trialOffset*ones(size(lickL)), '.', 'Color', cols{cond2use(cix)+1}, 'MarkerSize',ms);
@@ -199,7 +159,7 @@ ylim([0 160])
 xlabel('Time (s) from go cue')
 ylabel('Trials')
 ax = gca;
-ax.FontSize = 12;
+ax.FontSize = 9;
 
 %
 
@@ -208,7 +168,7 @@ nTrials{2} = numel(params(sessix).trialid{2});
 
 
 f = figure; hold on;
-f.Position = [520   480   314   499];
+f.Position = [520   614   189   365];
 trialOffset = 1;
 
 % left trials (2afc + aw)
@@ -226,9 +186,9 @@ for cix = 1:numel(cond2use)
         lickR =  obj(sessix).bp.ev.lickR{trial} - obj(sessix).bp.ev.goCue(trial);
         lickR(lickR > 2) = [];
 
-        plot([sample sample], trialOffset+[-0.5 0.5], 'k:', 'LineWidth', lw);
-        plot([delay delay], trialOffset+[-0.5 0.5], 'k:', 'LineWidth', lw);
-        plot([goCue goCue], trialOffset+[-0.5 0.5], 'k:', 'LineWidth', lw);
+        plot([sample sample], trialOffset+[-0.5 0.5], 'k--', 'LineWidth', lwx);
+        plot([delay delay], trialOffset+[-0.5 0.5], 'k--', 'LineWidth', lwx);
+        plot([goCue goCue], trialOffset+[-0.5 0.5], 'k--', 'LineWidth', lwx);
 
         if ~isempty(lickL)
             plot(lickL, trialOffset*ones(size(lickL)), '.', 'Color', cols{cond2use(cix)}, 'MarkerSize',ms);
@@ -260,7 +220,7 @@ ylim([0 110])
 xlabel('Time (s) from go cue')
 ylabel('Trials')
 ax = gca;
-ax.FontSize = 12;
+ax.FontSize = 9;
 
 
 
