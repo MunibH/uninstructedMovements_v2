@@ -24,10 +24,10 @@ addpath(genpath(pwd))
 dfparams = [];
 
 % -- time alignment params --
-% dfparams.alignEv = 'goCue';
-% dfparams.times = [-2.5 2.5]; % relative to goCue
-dfparams.alignEv = 'delay';
-dfparams.times = [-1.0 2.5]; % relative to delay
+dfparams.alignEv = 'goCue';
+dfparams.times = [-2.5 2.5]; % relative to goCue
+% dfparams.alignEv = 'delay';
+% dfparams.times = [-1.0 2.5]; % relative to delay
 
 dfparams.dt_vid = 0.0025;
 dfparams.time = dfparams.times(1):dfparams.dt_vid:dfparams.times(2);
@@ -53,9 +53,9 @@ dfparams.cond(end+1) = {'L&hit&stim.enable&~autowater&~autolearn'};  % left hit 
 dfparams.stim.types = {'Bi_MC','Right_MC','Left_MC','Bi_ALM','Bi_M1TJ','Right_ALM','Right_M1TJ','Left_ALM','Left_M1TJ'}; 
 % dfparams.stim.num   = logical([1 1 1 1 1 1 1 1 1]);   % ALL
 % dfparams.stim.num   = logical([0 0 0 0 0 1 1 1 1]);   % Right_ALM / Left_ALM / Right_M1TJ / Left_M1TJ
-dfparams.stim.num   = logical([0 0 0 1 0 0 0 0 0]);   % Bi_ALM
+% dfparams.stim.num   = logical([0 0 0 1 0 0 0 0 0]);   % Bi_ALM
 % dfparams.stim.num   = logical([0 0 0 0 1 0 0 0 0]);   % Bi_M1TJ
-% dfparams.stim.num   = logical([1 0 0 0 0 0 0 0 0]);   % Bi_MC
+dfparams.stim.num   = logical([1 0 0 0 0 0 0 0 0]);   % Bi_MC
 % dfparams.stim.num   = logical([0 0 0 1 1 0 0 0 0]);   % Bi_M1TJ Bi_ALM
 % dfparams.stim.num   = logical([0 1 1 0 0 0 0 0 0]);   % Right_MC
 % dfparams.stim.num   = logical([0 0 1 0 0 0 0 0 0]);   % Left_MC
@@ -65,7 +65,7 @@ dfparams.stim.num   = logical([0 0 0 1 0 0 0 0 0]);   % Bi_ALM
 % dfparams.stim.num   = logical([0 0 0 0 0 0 0 0 1]);   % Left_M1TJ
 
 dfparams.stim.pow.types = [1.08, 3.14, 8]; % mW, 3.14 for all unilateral sessions and most bilateral sessions
-dfparams.stim.pow.num = logical([1 0 0]);
+dfparams.stim.pow.num = logical([1 1 1]);
 
 
 % -- plotting params --
@@ -204,7 +204,7 @@ sav = 0;
 
 
 %% avg jaw velocity during stim
-% close all
+close all
 if strcmpi(dfparams.alignEv,'delay') % function depends on data aligned to delay period, since we use the stim period to measure avgjawvel
 %     feats2plot = {'jaw_ydisp_view1',...
 %         'jaw_yvel_view1',...
@@ -215,7 +215,16 @@ if strcmpi(dfparams.alignEv,'delay') % function depends on data aligned to delay
     cond2plot = 3:6;
     sav = 0;
 
-    plotAvgFeatValDuringStim(meta,obj,dfparams,params,kin,kinfeats,feats2plot,cond2plot,sav)
-    plotAvgFeatValDuringStim_singleTrials(meta,obj,dfparams,params,kin,kinfeats,feats2plot,cond2plot,sav)
+    plotAvgFeatValDuringStim_v2(meta,obj,dfparams,params,kin,kinfeats,feats2plot,cond2plot,sav)
+
+%     plotAvgFeatValDuringStim(meta,obj,dfparams,params,kin,kinfeats,feats2plot,cond2plot,sav)
+%     plotAvgFeatValDuringStim_singleTrials(meta,obj,dfparams,params,kin,kinfeats,feats2plot,cond2plot,sav)
 end
+
+
+
+
+
+
+
 

@@ -45,5 +45,22 @@ for i = 1:rez.dMove
     rez.ve.potent(i) = var_proj(rez.Qpotent(:,i),rez.covPotent,sum(eigvals));
 end
 
+% var exp for delay and response epochs
+[~,eigvals,~] = myPCA(rez.N.delay);
+rez.ve.null_delay = var_proj(rez.Qnull,rez.covDelay,sum(eigvals)); % how much var does null explain of delay activity
+rez.ve.norm.null_delay = var_proj(rez.Qnull,rez.covDelay,sum(eigvals(1:rez.dPrep)));
+
+[~,eigvals,~] = myPCA(rez.N.resp);
+rez.ve.null_resp = var_proj(rez.Qnull,rez.covResp,sum(eigvals));
+rez.ve.norm.null_resp = var_proj(rez.Qnull,rez.covResp,sum(eigvals(1:rez.dMove)));
+
+[~,eigvals,~] = myPCA(rez.N.delay);
+rez.ve.potent_delay = var_proj(rez.Qpotent,rez.covDelay,sum(eigvals));
+rez.ve.norm.potent_delay = var_proj(rez.Qpotent,rez.covDelay,sum(eigvals(1:rez.dPrep)));
+
+[~,eigvals,~] = myPCA(rez.N.resp);
+rez.ve.potent_resp = var_proj(rez.Qpotent,rez.covResp,sum(eigvals));
+rez.ve.norm.potent_resp = var_proj(rez.Qpotent,rez.covResp,sum(eigvals(1:rez.dMove)));
+
 
 end

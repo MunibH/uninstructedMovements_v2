@@ -52,7 +52,31 @@ else
     N.null = N.full_reshape(~mask,:);
 end
 
-N.potent = N.full_reshape(mask,:);
+% sample same number of null time points and potent time points
+if nullalltime
+    nNull = size(N.null,1); % how many null time points
+    maskix = find(mask);
+    mask_ = mask(randsample(maskix,nNull,false));
+else
+    mask_ = mask;
+    N.potent = N.full_reshape(mask_,:);
+end
+
+
+% get delay and response epoch neural activity (only used for variance
+% explained calcs)
+delay_edges = [-0.42 -0.02];
+resp_edges  = [0.02 0.42];
+for i = 1:2
+    [~,delayix(i)] = min(abs(obj(1).time - delay_edges(i)));
+    [~,respix(i)] = min(abs(obj(1).time - resp_edges(i)));
+end
+
+N.delay = N.full(delayix(1):delayix(2),:,:);
+N.resp = N.full(respix(1):respix(2),:,:);
+N.delay = reshape(N.delay,size(N.delay,1)*size(N.delay,2),size(N.delay,3));
+N.resp = reshape(N.resp,size(N.resp,1)*size(N.resp,2),size(N.resp,3));
+
 
 
 rez.N = N;
@@ -73,6 +97,9 @@ rez.N = N;
 % % method 2 - standard method
 rez.covNull = cov(N.null);
 rez.covPotent = cov(N.potent);
+
+rez.covDelay = cov(N.delay);
+rez.covResp = cov(N.resp);
 
 % -----------------------------------------------------------------------
 % -- number of null and potent dims --

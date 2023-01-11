@@ -1,18 +1,19 @@
-clear,clc,close all
+clear,close all
 
 % add paths for data loading scripts, all fig funcs, and utils
-utilspth = 'C:\Users\munib\Documents\Economo-Lab\code\uninstructedMovements_v2';
+utilspth = 'C:\Users\munib\Documents\Economo-Lab\code\uninstructedMovements_v3';
 addpath(genpath(fullfile(utilspth,'DataLoadingScripts')));
 addpath(genpath(fullfile(utilspth,'funcs')));
 addpath(genpath(fullfile(utilspth,'utils')));
 rmpath(genpath(fullfile(utilspth,'fig1/')))
-rmpath(genpath(fullfile(utilspth,'fig3/')))
+rmpath(genpath(fullfile(utilspth,'figNP/')))
 rmpath(genpath(fullfile(utilspth,'mc_stim/')))
 
 
 % add paths for figure specific functions
 addpath(genpath(pwd))
 
+clc
 %% PARAMETERS
 params.alignEvent          = 'goCue'; % 'jawOnset' 'goCue'  'moveOnset'  'firstLick'  'lastLick'
 

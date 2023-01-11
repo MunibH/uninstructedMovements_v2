@@ -22,7 +22,7 @@ for i = 1:rez.dt:(size(X_train,1)-rez.dt) % each timepoint
 
 %     mdl = fitcecoc(x_train,y_train);
 %     mdl = fitclinear(x_train,y_train);
-    mdl = fitcsvm(x_train,y_train,'Standardize',true);
+    mdl = fitcsvm(x_train,y_train,'Standardize',false);
     cv_mdl = crossval(mdl,'KFold',rez.nFolds);
     
     pred = kfoldPredict(cv_mdl);

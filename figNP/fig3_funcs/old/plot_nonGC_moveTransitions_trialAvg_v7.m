@@ -90,25 +90,28 @@ for sessix = 1:numel(me)
     potenterrplot = nanstd(meanpotent,[],2) ./ sqrt(size(allnull,2));
 
     yyaxis(ax,'left')
-    shadedErrorBar(obj(sessix).time,nullmeanplot,nullerrplot,{'Color',[62, 168, 105]./255,'LineWidth',2,'LineStyle','-'},0.5,ax)
-    shadedErrorBar(obj(sessix).time,potentmeanplot,potenterrplot,{'Color',[255, 56, 140]./255,'LineWidth',2,'LineStyle','-'},0.5,ax)
+    alph = 0.1;
+     shadedErrorBar((1:500)./100 - 2.5,nullmeanplot,nullerrplot,{'Color',[62, 168, 105]./255,'LineWidth',2,'LineStyle','-'},alph,ax)
+    shadedErrorBar((1:500)./100 - 2.5,potentmeanplot,potenterrplot,{'Color',[255, 56, 140]./255,'LineWidth',2,'LineStyle','-'},alph,ax)
+%     shadedErrorBar(obj(sessix).time,nullmeanplot,nullerrplot,{'Color',[62, 168, 105]./255,'LineWidth',2,'LineStyle','-'},0.5,ax)
+%     shadedErrorBar(obj(sessix).time,potentmeanplot,potenterrplot,{'Color',[255, 56, 140]./255,'LineWidth',2,'LineStyle','-'},0.5,ax)
     ax.YColor = [100 100 100 ]./255;
     xlabel('Time to move (s)')
     ylabel('SSM - all dims (a.u)')
 
     ylims = ax.YLim;
 
-    meanme = squeeze(normalize(nanmean(allme,2),'range',[ylims(1)+0.1 ylims(2)-0.1]));
+    meanme = squeeze(normalize(nanmean(allme,2),'range',[ylims(1) ylims(2)]));
 %     meanme = squeeze(nanmean(allme,2));
     meanme = meanme(:,1);
     yyaxis(ax,'right')
-    plot(obj(sessix).time,meanme,'Color',[225, 144, 15]./255,'LineWidth',3);
+    plot((1:500)./100 - 2.5,meanme,'Color',[225, 144, 15]./255,'LineWidth',3);
     ax.YColor = [225, 144, 15]./255;
     ylabel('Motion Energy')
 
     xline(0,'k:','LineWidth',2)
 
-    xlim([-0.5 0.5])
+    xlim([-0.25 0.25])
     title([meta(sessix).anm ' - ' meta(sessix).date])
     
 
@@ -118,6 +121,7 @@ for sessix = 1:numel(me)
     h(3) = plot(NaN,NaN,'-','Color',[255, 56, 140]./255);
     legend(h, 'motion energy','null','potent');
     
+%     break
 end
 
 

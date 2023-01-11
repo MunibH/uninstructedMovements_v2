@@ -90,7 +90,7 @@ params.probe = {meta.probe}; % put probe numbers into params, one entry for elem
 
 clear boot bootobj bootparams
 
-boot.iters = 2; % number of bootstrap iterations (most papers do 1000)
+boot.iters = 10; % number of bootstrap iterations (most papers do 1000)
 
 % fraction of each hierarchy to sample
 % (all should be 1, but can subsample by setting any to a fraction less than 1)

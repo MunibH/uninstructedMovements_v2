@@ -65,7 +65,7 @@ meta = [];
 
 
 % autowater sessions—it’s all the sessions from JEB6, JEB7, EKH1, EKH3, JGR2, JGR3
-% --- ALM --- 
+% --- ALM ---
 meta = loadJEB6_ALMVideo(meta,datapth);
 meta = loadJEB7_ALMVideo(meta,datapth);
 meta = loadEKH1_ALMVideo(meta,datapth);
@@ -113,10 +113,9 @@ clearvars -except obj meta params me sav datapth
 % potent space from moving time points
 % -- subspace alignment b/w contexts --
 % -----------------------------------------------------------------------
-subspace_orth = nan(10,numel(meta)); % max number of dims is 20
 for sessix = 1:numel(meta)
     % -- input data
-    trialdat_zscored = zscore_singleTrialNeuralData(obj(sessix).trialdat);
+    trialdat_zscored = zscore_singleTrialNeuralData(obj(sessix).trialdat, obj(sessix));
 
     % -- null and potent spaces
     cond2use = [2 3 4 5]; % right hit, left hit, right miss, left miss (afc)
@@ -144,13 +143,6 @@ for sessix = 1:numel(meta)
     sigma.null.afc = sort(eig(C.null.afc),'descend'); sigma.null.afc = sigma.null.afc(1:rez_afc(sessix).dPrep);
     sigma.potent.aw = sort(eig(C.potent.aw),'descend'); sigma.potent.aw = sigma.potent.aw(1:rez_aw(sessix).dMove);
     sigma.potent.afc = sort(eig(C.potent.afc),'descend'); sigma.potent.afc = sigma.potent.afc(1:rez_afc(sessix).dMove);
-    
-    for i = 1:10
-        fullR = cat(2,Q.null.afc,Q.null.aw(:,i));
-        [~, fullQRR] = qr(bsxfun(@rdivide,fullR,sqrt(sum(fullR.^2))),0); %orthogonalize normalized design matrix
-        temp = abs(diag(fullQRR'));
-        subspace_orth(i,sessix) = temp(end); % how orthogonal is current aw dim to all afc dims
-    end
 
 
     ai.null.afc_aw(sessix) = get_alignment_index(Q.null.afc,C.null.aw,sigma.null.aw);
@@ -160,24 +152,97 @@ for sessix = 1:numel(meta)
 
     % subspace alignment between epochs
     epochai(sessix) = get_alignment_index(Q.potent.afc,C.null.afc,sigma.null.afc);
-    
-% %     ang.null(sessix) = rad2deg(subspace(Q.null.afc,Q.null.aw));
-% %     ang.potent(sessix) = rad2deg(subspace(Q.potent.afc,Q.potent.aw));
+
+    % %     ang.null(sessix) = rad2deg(subspace(Q.null.afc,Q.null.aw));
+    % %     ang.potent(sessix) = rad2deg(subspace(Q.potent.afc,Q.potent.aw));
 
     % cosine similarity b/w cov matrices (1 equal, 0 orthogonal, -1
     % antiequal)
-%     a = C.null.afc(:);
-%     b = C.potent.afc(:);
-%     cosSim(sessix) = dot(a,b)/(norm(a)*norm(b));
+    %     a = C.null.afc(:);
+    %     b = C.potent.afc(:);
+    %     cosSim(sessix) = dot(a,b)/(norm(a)*norm(b));
 
 
-%     % correlation matrix distance 
-%     corrnull = corr(rez_afc(sessix).N.null);
-%     corrpotent = corr(rez_afc(sessix).N.potent);
-%     cmd2(sessix) = 1 - trace(corrnull * corrpotent) ./ ( norm(corrnull,'fro') * norm(corrpotent,'fro')  );
-%     cmd(sessix) = 1 - trace(rez_afc(sessix).covNull * rez_afc(sessix).covPotent) ./ ...
-%           ( norm(rez_afc(sessix).covNull,'fro') * norm(rez_afc(sessix).covPotent,'fro') );
+    %     % correlation matrix distance
+    %     corrnull = corr(rez_afc(sessix).N.null);
+    %     corrpotent = corr(rez_afc(sessix).N.potent);
+    %     cmd2(sessix) = 1 - trace(corrnull * corrpotent) ./ ( norm(corrnull,'fro') * norm(corrpotent,'fro')  );
+    %     cmd(sessix) = 1 - trace(rez_afc(sessix).covNull * rez_afc(sessix).covPotent) ./ ...
+    %           ( norm(rez_afc(sessix).covNull,'fro') * norm(rez_afc(sessix).covPotent,'fro') );
 end
+
+
+%% angle b/w 2afc and aw subspaces
+
+subspace_orth.null = nan(10,numel(meta)); % just using first 10 dims
+subspace_orth.potent = nan(10,numel(meta)); % just using first 10 dims
+for sessix = 1:numel(meta)
+    [~,nullawix] = sort(rez_aw(sessix).ve.null,'descend');
+    [~,nullafcix] = sort(rez_afc(sessix).ve.null,'descend');
+    [~,potentawix] = sort(rez_aw(sessix).ve.potent,'descend');
+    [~,potentafcix] = sort(rez_afc(sessix).ve.potent,'descend');
+
+    Q.null.aw = rez_aw(sessix).Qnull(:,nullawix);
+    Q.null.afc = rez_afc(sessix).Qnull(:,nullafcix);
+    Q.potent.aw = rez_aw(sessix).Qpotent(:,potentawix);
+    Q.potent.afc = rez_afc(sessix).Qpotent(:,potentafcix);
+    % null
+    ang.null{sessix} = subspace_angles(Q.null.aw,Q.null.afc);
+%     potent
+    ang.potent{sessix} = subspace_angles(Q.potent.aw,Q.potent.afc);
+
+
+%     for i = 1:10
+% 
+%         %         % null
+%         %         fullR = cat(2,Q.null.afc,Q.null.aw(:,i));
+%         %         [~, fullQRR] = qr(bsxfun(@rdivide,fullR,sqrt(sum(fullR.^2))),0); %orthogonalize normalized design matrix
+%         %         temp = abs(diag(fullQRR'));
+%         %         subspace_orth.null(i,sessix) = temp(end); % how orthogonal is current aw dim to all afc dims
+%         %
+%         %         % potent
+%         %         fullR = cat(2,Q.potent.afc,Q.potent.aw(:,i));
+%         %         [~, fullQRR] = qr(bsxfun(@rdivide,fullR,sqrt(sum(fullR.^2))),0); %orthogonalize normalized design matrix
+%         %         temp = abs(diag(fullQRR'));
+%         %         subspace_orth.potent(i,sessix) = temp(end); % how orthogonal is current aw dim to all afc dims
+%     end
+end
+
+%% 
+close all
+
+col = getColors;
+
+f = figure;
+ax = gca;
+hold on;
+histogram(cell2mat(ang.null'),10, 'EdgeColor','none', 'FaceColor', col.null, 'FaceAlpha',0.5)
+histogram(cell2mat(ang.potent'),10, 'EdgeColor','none', 'FaceColor', col.potent, 'FaceAlpha',0.3)
+xlabel('Angle between AW and 2AFC subspace (deg)')
+ylabel('Number of dimensions')
+ax.FontSize = 10;
+
+%% plot
+
+
+close all
+
+f = figure;
+ax = gca;
+b = boxplot(ax,90 - acosd(subspace_orth.null'),'Colors','k');
+ylim([0 95]);
+xlabel('AW Null Dim')
+ylabel('Angle (deg)')
+
+f = figure;
+ax = gca;
+b = boxplot(ax,90 - acosd(subspace_orth.potent'),'Colors','k');
+ylim([0 95]);
+xlabel('AW Potent Dim')
+ylabel('Angle (deg)')
+
+
+
 
 
 %% plots
@@ -197,33 +262,19 @@ f=figure; hold on;
 ax = gca;
 div = 1;
 xs = [1];
-i = 1; % potent afc_aw 
+i = 1; % potent afc_aw
 temp = epochai;
 h(i) = bar(xs(i), mean(temp));
 h(i).FaceColor = cols(i,:);
 h(i).EdgeColor = 'none';
 h(i).FaceAlpha = 0.5;
 scatter(xs(i)*ones(size(temp)),temp,60,'MarkerFaceColor',cols(i,:)./div, ...
-        'MarkerEdgeColor','k','LineWidth',1,'XJitter','randn','XJitterWidth',0.25, ...
-        'MarkerFaceAlpha',0.7)
+    'MarkerEdgeColor','k','LineWidth',1,'XJitter','randn','XJitterWidth',0.25, ...
+    'MarkerFaceAlpha',0.7)
 errorbar(h(i).XEndPoints,mean(temp),std(temp)./sqrt(numel(temp)),'LineStyle','none','Color','k','LineWidth',1);
 ylim([0 1])
 
 
-%%
-close all
-
-figure;
-ax = gca;
-b = boxplot(ax,90 - acosd(subspace_orth'),'Colors','k');
-ylim([0 95]); 
-xlabel('AW Null Dim')
-ylabel('Angle (deg)')
-
-
-temp = cat(2,Q.potent.afc,Q.potent.aw);
-
-writematrix(temp,'potent.csv')
 
 
 

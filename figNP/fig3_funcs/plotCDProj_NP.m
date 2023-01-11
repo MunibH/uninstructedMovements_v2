@@ -12,7 +12,7 @@ delay = mode(rez_potent(1).ev.delay - rez_potent(1).align);
 
 for i = 1:numel(rez_potent(1).cd_labels) % for each coding direction
     f = figure; hold on
-%     f.Position = [680   748   396   230];
+    f.Position = [698   436   343   230];
     ax = gca;
 %         ax = nexttile; hold on;
     tempdat = squeeze(allrez_potent.cd_proj(:,:,i,:));

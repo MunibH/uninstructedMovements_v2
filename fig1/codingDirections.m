@@ -115,7 +115,7 @@ plotSelectivityCorrMatrix(obj(1),sel_corr_mat,params(1).alignEvent,sav)
 
 plotmiss = 0;
 plotaw = 1;
-plotCDProj(allrez,rez_2afc,sav,plotmiss,plotaw,params(1).alignEvent)
+plotCDProj(allrez,obj(1),sav,plotmiss,plotaw,params(1).alignEvent)
 
 % plotCDVarExp(allrez,sav)
 % plotSelectivity(allrez,rez,sav)

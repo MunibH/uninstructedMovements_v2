@@ -20,7 +20,7 @@ for sessix = 1:numel(me)
         for i = 1:mcounts
 
             % check if current move bout is longer than tbout
-            if ~(tlen(i) >= tbout)
+            if tlen(i) < tbout
                 continue
             end
 

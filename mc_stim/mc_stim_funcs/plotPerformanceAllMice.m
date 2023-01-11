@@ -26,7 +26,7 @@ for i = 1:size(perf,2)
 end
 
 
-xticklabels([" " "All w/o Stim" "All w/ Stim" " " "Right w/o Stim" "Right w/ Stim" " " "Left w/o Stim" "Left w/ Stim"])
+xticklabels([" " "All ctrl" "All stim" " " "Right ctrl" "Right stim" " " "Left ctrl" "Left stim"])
 ylabel("Performance (%)")
 ylim([0,100])
 ax = gca;

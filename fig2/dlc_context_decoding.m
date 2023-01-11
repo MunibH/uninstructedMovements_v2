@@ -1,12 +1,12 @@
 clear,close all
 
 % add paths for data loading scripts, all fig funcs, and utils
-utilspth = 'C:\Users\munib\Documents\Economo-Lab\code\uninstructedMovements_v2';
+utilspth = 'C:\Users\munib\Documents\Economo-Lab\code\uninstructedMovements_v3';
 addpath(genpath(fullfile(utilspth,'DataLoadingScripts')));
 addpath(genpath(fullfile(utilspth,'funcs')));
 addpath(genpath(fullfile(utilspth,'utils')));
 rmpath(genpath(fullfile(utilspth,'fig1/')))
-rmpath(genpath(fullfile(utilspth,'fig3/')))
+rmpath(genpath(fullfile(utilspth,'figNP/')))
 rmpath(genpath(fullfile(utilspth,'mc_stim/')))
 
 
@@ -14,7 +14,6 @@ rmpath(genpath(fullfile(utilspth,'mc_stim/')))
 addpath(genpath(pwd))
 
 clc
-
 %% PARAMETERS
 params.alignEvent          = 'goCue'; % 'jawOnset' 'goCue'  'moveOnset'  'firstLick'  'lastLick'
 
@@ -31,7 +30,7 @@ params.condition(end+1) = {'L&hit&~stim.enable&~autowater&((1:Ntrials)>20)&((1:N
 params.condition(end+1) = {'R&hit&~stim.enable&autowater&((1:Ntrials)>20)&((1:Ntrials)<(Ntrials-20))'};             % right hits, no stim, aw off
 params.condition(end+1) = {'L&hit&~stim.enable&autowater&((1:Ntrials)>20)&((1:Ntrials)<(Ntrials-20))'};             % left hits, no stim, aw off
 
-params.tmin = -2.5;
+params.tmin = -3;
 params.tmax = 2.5;
 params.dt = 1/100;
 
@@ -110,14 +109,14 @@ clearvars -except datapth kin me meta obj params acc acc_shuf
 % params
 rez.nFolds = 4; % number of iterations (bootstrap)
 
-rez.binSize = 50; % ms
+rez.binSize = 100; % ms
 rez.dt = floor(rez.binSize / (params(1).dt*1000)); % samples
 rez.tm = obj(1).time(1:rez.dt:numel(obj(1).time));
 rez.numT = numel(rez.tm);
 
 rez.train = 1; % fraction of trials to use for training (1-train for testing)
 
-rez.nShuffles = 20;
+rez.nShuffles = 2;
 
 % match number of right and left hits, and right and left misses
 cond2use = 1:4;
@@ -208,7 +207,7 @@ for ifeat = 1:numel(featGroups)
         X = kin(sessix).dat(:,trials.all,rez.featix);
         % fill missing values
         for featix = 1:size(X,3)
-            X(:,:,featix) = fillmissing(X(:,:,featix),"constant",0);
+%             X(:,:,featix) = fillmissing(X(:,:,featix),"constant",0);
         end
 
         % train/test split
@@ -269,36 +268,34 @@ sample = mode(obj(1).bp.ev.sample) - mode(obj(1).bp.ev.goCue);
 delay = mode(obj(1).bp.ev.delay) - mode(obj(1).bp.ev.goCue);
 trialStart = mode(obj(1).bp.ev.bitStart) - mode(obj(1).bp.ev.goCue);
 
-figure;
+f = figure;
 ax = gca;
 hold on;
 
 shadedErrorBar(rez.tm(1:end-1),mean(acc,2),std(acc,[],2)./sqrt(numel(obj)),{'Color',cols{1},'LineWidth',2},alph,ax)
 shadedErrorBar(rez.tm(1:end-1),mean(acc_shuf_,2),std(acc_shuf_,[],2)./sqrt(numel(obj)),{'Color',cols{2},'LineWidth',2},alph,ax)
-% shadedErrorBar(rez.tm(1:end-1),mean(acc,2),getCI(acc),{'Color',cols{1},'LineWidth',2},alph,ax)
-% shadedErrorBar(rez.tm(1:end-1),mean(acc_shuf_,2),getCI(acc_shuf_),{'Color',cols{2},'LineWidth',2},alph,ax)
-xline(0,'k:','LineWidth',2)
-xline(sample,'k:','LineWidth',2)
-xline(delay,'k:','LineWidth',2)
-xline(trialStart,'k:','LineWidth',2)
+xline(0,'k--','LineWidth',1)
+xline(sample,'k--','LineWidth',1)
+xline(delay,'k--','LineWidth',1)
+xline(trialStart,'k--','LineWidth',1)
 xlim([trialStart, params(1).tmax-0.2])
 ylim([ax.YLim(1) 1])
 
 xlabel('Time (s) from go cue')
 ylabel([num2str(rez.nFolds) '-Fold CV Accuracy'])
-title('Context Decoding from DLC Features')
+title('Kinematic choice decoding','FontSize',8)
 
 h = zeros(2, 1);
 for i = 1:numel(h)
     h(i) = plot(NaN,NaN,'-','Color',cols{i},'LineWidth',2);
 end
-legString = {'ctrl','shuf'};
+legString = {'Kinematics','Shuffled labels'};
 
 leg = legend(h, legString);
 leg.EdgeColor = 'none';
 leg.Location = 'best';
-
-ax.FontSize = 15;
+leg.Color = 'none';
+ax.FontSize = 10;
 
 
 %% plot

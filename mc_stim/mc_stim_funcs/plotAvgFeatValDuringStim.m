@@ -37,15 +37,15 @@ for k = 1:numel(featix)
         for j = 1:2:numel(cond2plot)
             s = plot(vel{i}{k}(j),vel{i}{k}(j+1),dfparams.plt.ms{j},'MarkerSize',30,'Color',dfparams.plt.color{cond2plot(j)});
         end
-        title(feats2plot{k}, 'Interpreter','none');
+%         title(feats2plot{k}, 'Interpreter','none', 'FontSize', 8);
         %         xlim([dfparams.times(1) dfparams.times(2)]);
         %         ylim([0 size(temp,2)]);
     end
     %             refline;
 
-    xlabel('Avg No Stim')
-    ylabel('Avg Stim')
-    ax.FontSize = 20;
+    xlabel([feats2plot{k} ', ctrl (a.u.)'],'Interpreter','none')
+    ylabel([feats2plot{k} ', stim (a.u.)'],'Interpreter','none')
+    ax.FontSize = 12;
     axis(ax,'equal')
 
     mins = min([ax.XLim(1) ax.YLim(1)]);
@@ -64,7 +64,7 @@ if sav
     mysavefig(f,pth,fn)
 end
 
-
+return
 
 %% stats
 clear temp
