@@ -248,30 +248,19 @@ pcaNP(meta,obj,params,rez,cond2use)
 % pause, press any key to cycle through sessions
 
 
-%% angle b/w subspaces
+%% selectivity in N/P activity
+close all
 
-% subspace alignment between contexts
-% This procedure reveals the amount of quiet-epoch and movement-epoch
-% variance is shared between contexts
-Q.null.aw = rez_aw(sessix).Qnull;
-Q.null.afc = rez_afc(sessix).Qpotent;
-Q.potent.aw = rez_aw(sessix).Qpotent;
-Q.potent.afc = rez_afc(sessix).Qpotent;
-C.null.aw = rez_aw(sessix).covNull;
-C.null.afc = rez_afc(sessix).covNull;
-C.potent.aw = rez_aw(sessix).covPotent;
-C.potent.afc = rez_afc(sessix).covPotent;
-sigma.null.aw = sort(eig(C.null.aw),'descend'); sigma.null.aw = sigma.null.aw(1:rez_aw(sessix).dPrep);
-sigma.null.afc = sort(eig(C.null.afc),'descend'); sigma.null.afc = sigma.null.afc(1:rez_afc(sessix).dPrep);
-sigma.potent.aw = sort(eig(C.potent.aw),'descend'); sigma.potent.aw = sigma.potent.aw(1:rez_aw(sessix).dMove);
-sigma.potent.afc = sort(eig(C.potent.afc),'descend'); sigma.potent.afc = sigma.potent.afc(1:rez_afc(sessix).dMove);
+cond2use_ta = [1 2]; % right and left hits, corresponding to trial-avg projs onto n/p
+cond2use_st = [2 3]; % right and left hits, corresponding to single-trial projs onto n/p
+plotSelectivityNP(meta,obj,params,rez,cond2use_ta,cond2use_st)
 
-for i = 1:10
-    fullR = cat(2,Q.null.afc,Q.null.aw(:,i));
-    [~, fullQRR] = qr(bsxfun(@rdivide,fullR,sqrt(sum(fullR.^2))),0); %orthogonalize normalized design matrix
-    temp = abs(diag(fullQRR'));
-    subspace_orth(i,sessix) = temp(end); % how orthogonal is current aw dim to all afc dims
-end
+
+
+
+
+
+
 
 
 
