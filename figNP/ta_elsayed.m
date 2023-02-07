@@ -1,7 +1,7 @@
 clear,clc,close all
 
 % add paths for data loading scripts, all fig funcs, and utils
-utilspth = 'C:\Users\munib\Documents\Economo-Lab\code\uninstructedMovements_v2';
+utilspth = 'C:\Users\munib\Documents\Economo-Lab\code\uninstructedMovements_v3';
 addpath(genpath(fullfile(utilspth,'DataLoadingScripts')));
 addpath(genpath(fullfile(utilspth,'funcs')));
 addpath(genpath(fullfile(utilspth,'utils')));
@@ -64,6 +64,7 @@ meta = loadEKH1_ALMVideo(meta,datapth);
 meta = loadEKH3_ALMVideo(meta,datapth);
 meta = loadJGR2_ALMVideo(meta,datapth);
 meta = loadJGR3_ALMVideo(meta,datapth);
+meta = loadJEB13_ALMVideo(meta,datapth);
 meta = loadJEB14_ALMVideo(meta,datapth);
 meta = loadJEB15_ALMVideo(meta,datapth);
 
@@ -229,14 +230,25 @@ for sessix = 1:numel(meta)
 end
 
 
-%% plots
-
+%% variance explained plots
+close all
 
 for sessix = 1:numel(rez)
     ai(1,sessix) = rez(sessix).Qprep_null_ve ./ 100;
     ai(2,sessix) = rez(sessix).Qprep_potent_ve ./ 100;
     ai(3,sessix) = rez(sessix).Qmove_null_ve ./ 100;
     ai(4,sessix) = rez(sessix).Qmove_potent_ve ./ 100;
+end
+
+[objix,uAnm] = groupSessionsByAnimal(meta);
+nAnm = numel(uAnm);
+
+for ianm = 1:nAnm
+    ix = find(objix{ianm});
+    anmVE.null_prep(ianm) = mean(ai(1,ix));
+    anmVE.null_move(ianm) = mean(ai(3,ix));
+    anmVE.potent_prep(ianm) = mean(ai(2,ix));
+    anmVE.potent_move(ianm) = mean(ai(4,ix));
 end
 
 
@@ -247,38 +259,176 @@ cols(3,:) = defcols.null * 255;
 cols(4,:) = defcols.potent * 255;
 cols = cols ./ 255;
 
-figure; ax = gca; hold on;
+fns = fieldnames(anmVE);
+
+f = figure;
+f.Position = [688   501   291   319];
+ax = gca; hold on;
 xs = [1 2 4 5];
-for i = 1:size(ai,1)
-    temp = ai(i,:);
-    h(i) = bar(xs(i),mean(temp));
-    h(i).FaceColor = cols(i,:);
+for i = 1:numel(fns)
+    temp = anmVE.(fns{i});
+    h(i) = bar(xs(i),mean(temp)); % mean across dims and sessions
+    cix = i;
+    h(i).FaceColor = cols(cix,:);
     h(i).EdgeColor = 'none';
     h(i).FaceAlpha = 0.5;
-    scatter(xs(i)*ones(size(temp)),temp,60,'MarkerFaceColor',cols(i,:), ...
-        'MarkerEdgeColor','k','LineWidth',1,'XJitter','randn','XJitterWidth',0.25, ...
-        'MarkerFaceAlpha',0.7)
-    errorbar(h(i).XEndPoints,mean(temp),std(temp)./sqrt(numel(temp)),'LineStyle','none','Color','k','LineWidth',1);
+    %     scatter(xs(i)*ones(size(temp)),temp,10,'MarkerFaceColor','k', ...
+    %         'MarkerEdgeColor','k','LineWidth',1,'XJitter','randn','XJitterWidth',0.25, ...
+    %         'MarkerFaceAlpha',1)
+    e = errorbar(h(i).XEndPoints,mean(temp),std(temp)./sqrt(numel(temp)),'LineStyle','none','Color','k','LineWidth',1);
+    e.LineWidth = 0.5;
+    e.CapSize = 2;
+
+    vs(i) = scatter(randn(nAnm,1) * 0.1 + xs(i)*ones(nAnm,1),temp,10,'MarkerFaceColor','k',...
+        'MarkerEdgeColor','k','LineWidth',1);
+
+
+
+    xs_(:,i) = vs(i).XData';
+    ys_(:,i) = temp;
 end
+
+for i = 1:size(xs_,1)
+    patchline(xs_(i,1:2),ys_(i,1:2),'EdgeAlpha',0.4,'LineWidth',0.1)
+    patchline(xs_(i,3:4),ys_(i,3:4),'EdgeAlpha',0.4,'LineWidth',0.1)
+end
+
 % ylim([-0.001 ax.YLim(2)])
 ax.XTick = xs;
-xlabels  = {'null-delay', 'null-response', 'potent-delay', 'potent-response'};
+xlabels  = strrep(fns,'_','-');
 xticklabels(xlabels);
 
-ylabel('Frac of nVE / Alignment Index')
-ax.FontSize = 15;
+ylabel('Fraction of normVE')
+ax.FontSize = 12;
+
+title('Covariances')
+
+
+%% single trial r2 b/w (me,potent) and (me,null)
+close all
 
 
 
+% correlate magnitude of activity in N/Ps and ME
+% plot by mouse and session
+
+ms = {'o','<','^','v','>','square','diamond','o','<'};
+sz = 50;
+
+[objix,uAnm]  = groupSessionsByAnimal(meta);
+nAnm = numel(uAnm);
+
+cond2use = [2 3];
+
+f = figure;
+ax = gca;
+hold on;
+
+for ianm = 1:nAnm
+    % get sessions for current animal
+    ix = find(objix{ianm});
+
+    % for each session, calculate avg feat value over trials
+    for isess = 1:numel(ix)
+        sessix = ix(isess);
+
+        trix = cell2mat(params(sessix).trialid(cond2use)');
+
+        thisme = me(sessix).data(:,trix);
+        null = rez(sessix).null_ssm;
+        potent = rez(sessix).potent_ssm;
+
+        r2.null{ianm}(isess) = corr(thisme(:),null(:)).^2;
+        r2.potent{ianm}(isess) = corr(thisme(:),potent(:)).^2;
+    end
+
+    mu.potent = nanmean(r2.potent{ianm});
+    mu.null = nanmean(r2.null{ianm});
+    if ianm > 7
+        s = scatter(mu.null,mu.potent,sz, ...
+            'MarkerEdgeColor','k','MarkerFaceColor','none','Marker',ms{ianm});
+    else
+        s = scatter(mu.null,mu.potent,sz, ...
+            'MarkerEdgeColor','w','MarkerFaceColor','k','Marker',ms{ianm});
+    end
+end
+
+xlabel('R2(ME,Null)', 'Interpreter','none')
+ylabel('R2(ME,Potent)', 'Interpreter','none')
+ax.FontSize = 9;
+axis(ax,'equal')
+
+mins = min([ax.XLim(1) ax.YLim(1)]);
+maxs = max([ax.XLim(2) ax.YLim(2)]);
+
+xlim([0 maxs])
+ylim([0 maxs])
+ax = gca;
+plot(ax.XLim,ax.YLim,'k--','LineWidth',2)
+% view([90 -90])
 
 
+h = zeros(nAnm, 1);
+for ianm = 1:numel(h)
+    if ianm > 7
+        h(ianm) = scatter(NaN,NaN,sz,'MarkerEdgeColor','k','MarkerFaceColor','none','Marker',ms{ianm});
+    else
+        h(ianm) = scatter(NaN,NaN,sz,'MarkerEdgeColor','none','MarkerFaceColor','k','Marker',ms{ianm});
+    end
+
+end
+legString = uAnm;
+
+leg = legend(h, legString);
+leg.EdgeColor = 'none';
+leg.Color = 'none';
+leg.Location = 'best';
 
 
+%% single trial cross-corr b/w (me,potent) and (me,null)
+close all
+clear r
+
+dt = params(1).dt;
+
+maxlag = int64(3 ./ dt);
+
+cond2use = [2 3];
+for sessix = 1:numel(meta)
+
+    trix = cell2mat(params(sessix).trialid(cond2use)');
+
+    thisme = zscore(me(sessix).data(:,trix));
+    null = rez(sessix).null_ssm;
+    potent = rez(sessix).potent_ssm;
+
+    for t = 1:numel(trix)
+
+        [r.null{sessix}(:,t),lagtm] = xcorr(thisme(:,t),null(:,t),maxlag,'normalized');
+        r.potent{sessix}(:,t) = xcorr(thisme(:,t),potent(:,t),maxlag,'normalized');
+    end
 
 
+end
 
+mu.null = cellfun(@(x) squeeze(nanmean(x,2)),r.null,'UniformOutput',false); % mean across trials for each session
+mu.potent = cellfun(@(x) squeeze(nanmean(x,2)),r.potent,'UniformOutput',false);
+nullcc = cell2mat(mu.null);
+potentcc = cell2mat(mu.potent);
 
+%%
+col = getColors();
+lw = 2;
+alph = 0.2;
+f = figure;
+ax = gca;
+hold on;
+shadedErrorBar(lagtm*dt,mean(nullcc,2),getCI(nullcc),{'Color',col.null,'LineWidth',lw},alph,ax);
+shadedErrorBar(lagtm*dt,mean(potentcc,2),getCI(potentcc),{'Color',col.potent,'LineWidth',lw},alph,ax);
 
+xlabel('lags (s)')
+ylabel('cross corr')
+title('ta-elsayed')
 
 
 

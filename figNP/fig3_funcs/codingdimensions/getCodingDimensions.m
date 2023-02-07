@@ -1,13 +1,22 @@
-function rez = getCodingDimensions(input_data,np_trialdat,trialdat_zscored,obj,params,cond2use,cond2use_trialdat,cond2proj)
+function rez = getCodingDimensions(input_data,np_trialdat,trialdat_zscored,obj,params,cond2use,cond2use_trialdat,cond2proj,rampcond)
 
-cd_labels = {'early','late','go'};
-cd_epochs = {'delay','goCue','goCue'};
-cd_times = {[-0.42 -0.02], [-0.42 -0.02], [0.02 0.42]}; % in seconds, relative to respective epochs
+% cd_labels = {'early','late','go'};
+% cd_epochs = {'delay','goCue','goCue'};
+% cd_times = {[-0.42 -0.02], [-0.42 -0.02], [0.02 0.42]}; % in seconds, relative to respective epochs
 
 % cd_labels = {'late','go'};
 % cd_epochs = {'goCue','goCue'};
 % cd_times = {[-0.42 -0.02], [0.02 0.42]}; % in seconds, relative to respective epochs
 
+% cd_labels = {'late_error','go'};
+% cd_epochs = {'goCue','goCue'};
+% cd_times = {[-0.42 -0.02], [0.02 0.42]}; % in seconds, relative to respective epochs
+
+cd_labels = {'late','go','ramping'};
+cd_epochs = {'goCue','goCue'};
+cd_times = {[-0.42 -0.02], [0.02 0.42]}; % in seconds, relative to respective epochs
+ramp_epochs = {'delay','goCue'};
+ramp_times = {[-0.4 -0.02], [-0.5 -0.02]}; % in seconds, relative to respective epochs
 
 %-------------------------------------------
 % --setup results struct--
@@ -28,12 +37,35 @@ rez.ev.goCue = obj.bp.ev.goCue;
 % ------------------------------------------
 rez.cd_mode = zeros(size(rez.psth,2),numel(cd_labels)); % (neurons,numCDs)
 for ix = 1:numel(cd_labels)
+    if strcmp(cd_labels{ix},'ramping')
+        % find time points to use
+        e1_start = mode(rez.ev.(ramp_epochs{1})) + ramp_times{1}(1) - rez.align;
+        e1_stop = mode(rez.ev.(ramp_epochs{1})) + ramp_times{1}(2) - rez.align;
+        times.ramp_lateSamp = rez.time>e1_start & rez.time<e1_stop;
+
+        e2_start = mode(rez.ev.(ramp_epochs{2})) + ramp_times{2}(1) - rez.align;
+        e2_stop = mode(rez.ev.(ramp_epochs{2})) + ramp_times{2}(2) - rez.align;
+        times.ramp_lateDel = rez.time>e2_start & rez.time<e2_stop;
+        % calculate ramping mode
+        rez.cd_mode(:,ix) = calcRampingMode(rez.psth,times,rampcond);
+        continue
+    end
     % find time points to use
     e1 = mode(rez.ev.(cd_epochs{ix})) + cd_times{ix}(1) - rez.align;
     e2 = mode(rez.ev.(cd_epochs{ix})) + cd_times{ix}(2) - rez.align;
     times.(cd_labels{ix}) = rez.time>e1 & rez.time<e2;
     % calculate coding direction
-    rez.cd_mode(:,ix) = calcCD(rez.psth,times.(cd_labels{ix}),cond2use);
+    if ~strcmpi(cd_labels{ix},'late_error')
+        rez.cd_mode(:,ix) = calcCD(rez.psth,times.(cd_labels{ix}),cond2use);
+    else % late_error
+        tempdat = rez.psth(:,:,1:4); % right hits, left hits, right miss, left miss
+        mu = squeeze(mean(tempdat(times.(cd_labels{ix}),:,:),1));
+        sd = squeeze(std(tempdat(times.(cd_labels{ix}),:,:),[],1));
+        cd = ( (mu(:,1)-mu(:,3)) + (mu(:,4)-mu(:,2))   ) ./ sqrt(sum(sd.^2,2));
+        cd(isnan(cd)) = 0;
+        cd = cd./sum(abs(cd)); % (ncells,1)
+        rez.cd_mode(:,ix) = cd;
+    end
 end
 
 
@@ -63,6 +95,9 @@ datacov(isnan(datacov)) = 0;
 eigsum = sum(eig(datacov));
 
 for i = 1:numel(cd_labels)
+    if strcmpi(cd_labels{i},'ramping')
+        continue
+    end
     % whole trial
     rez.cd_varexp(i) = var_proj(rez.cd_mode_orth(:,i), datacov, eigsum);
     % respective epoch

@@ -67,6 +67,7 @@ meta = loadEKH1_ALMVideo(meta,datapth);
 meta = loadEKH3_ALMVideo(meta,datapth);
 meta = loadJGR2_ALMVideo(meta,datapth);
 meta = loadJGR3_ALMVideo(meta,datapth);
+meta = loadJEB13_ALMVideo(meta,datapth);
 meta = loadJEB14_ALMVideo(meta,datapth);
 meta = loadJEB15_ALMVideo(meta,datapth);
 
@@ -111,14 +112,14 @@ clearvars -except datapth kin me meta obj params
 % params
 rez.nFolds = 4; % number of iterations (bootstrap)
 
-rez.binSize = 100; % ms
+rez.binSize = 75; % ms
 rez.dt = floor(rez.binSize / (params(1).dt*1000)); % samples
 rez.tm = obj(1).time(1:rez.dt:numel(obj(1).time));
 rez.numT = numel(rez.tm);
 
 rez.train = 1; % fraction of trials to use for training (1-train for testing)
 
-rez.nShuffles = 2;
+rez.nShuffles = 4;
 
 % match number of right and left hits, and right and left misses
 cond2use = 2:5;
@@ -263,8 +264,14 @@ f = figure;
 ax = gca;
 hold on;
 
-shadedErrorBar(rez.tm(1:end-1),mean(acc,2),std(acc,[],2)./sqrt(numel(obj)),{'Color',cols{1},'LineWidth',2},alph,ax)
-shadedErrorBar(rez.tm(1:end-1),mean(acc_shuf_,2),std(acc_shuf_,[],2)./sqrt(numel(obj)),{'Color',cols{2},'LineWidth',2},alph,ax)
+ctrl = mySmooth(acc, 3,'reflect');
+shuffed = mySmooth(acc_shuf_, 15,'reflect');
+
+shadedErrorBar(rez.tm(1:end-1),mean(ctrl,2),getCI(ctrl),{'Color',cols{1},'LineWidth',2},alph,ax)
+shadedErrorBar(rez.tm(1:end-1),mean(shuffed,2),getCI(shuffed),{'Color',cols{2},'LineWidth',2},alph,ax)
+
+% shadedErrorBar(rez.tm(1:end-1),mean(acc,2),std(acc,[],2)./sqrt(numel(obj)),{'Color',cols{1},'LineWidth',2},alph,ax)
+% shadedErrorBar(rez.tm(1:end-1),mean(acc_shuf_,2),std(acc_shuf_,[],2)./sqrt(numel(obj)),{'Color',cols{2},'LineWidth',2},alph,ax)
 xline(0,'k--','LineWidth',1)
 xline(sample,'k--','LineWidth',1)
 xline(delay,'k--','LineWidth',1)
@@ -272,7 +279,7 @@ xline(trialStart,'k--','LineWidth',1)
 xlim([trialStart, params(1).tmax-0.2])
 ylim([ax.YLim(1) 1])
 
-xlabel('Time (s) from go cue')
+xlabel('Time from go cue (s)')
 ylabel([num2str(rez.nFolds) '-Fold CV Accuracy'])
 title('Kinematic choice decoding','FontSize',8)
 

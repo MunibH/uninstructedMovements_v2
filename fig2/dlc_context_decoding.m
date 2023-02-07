@@ -109,7 +109,7 @@ clearvars -except datapth kin me meta obj params acc acc_shuf
 % params
 rez.nFolds = 4; % number of iterations (bootstrap)
 
-rez.binSize = 100; % ms
+rez.binSize = 75; % ms
 rez.dt = floor(rez.binSize / (params(1).dt*1000)); % samples
 rez.tm = obj(1).time(1:rez.dt:numel(obj(1).time));
 rez.numT = numel(rez.tm);
@@ -223,7 +223,7 @@ for ifeat = 1:numel(featGroups)
 
         % decoding
 
-        acc(:,sessix,ifeat) = DLC_ChoiceDecoder(in,rez,trials);
+%         acc(:,sessix,ifeat) = DLC_ChoiceDecoder(in,rez,trials);
 
 
         % shuffle labels for a 'null' distribution
@@ -272,8 +272,12 @@ f = figure;
 ax = gca;
 hold on;
 
-shadedErrorBar(rez.tm(1:end-1),mean(acc,2),std(acc,[],2)./sqrt(numel(obj)),{'Color',cols{1},'LineWidth',2},alph,ax)
-shadedErrorBar(rez.tm(1:end-1),mean(acc_shuf_,2),std(acc_shuf_,[],2)./sqrt(numel(obj)),{'Color',cols{2},'LineWidth',2},alph,ax)
+ctrl = acc;
+ctrl(15:end,:) = mySmooth(acc(15:end,:), 15,'reflect');
+shuffed = mySmooth(acc_shuf_, 21,'reflect');
+
+shadedErrorBar(rez.tm(1:end-1),mean(ctrl,2),getCI(ctrl),{'Color',cols{1},'LineWidth',2},alph,ax)
+shadedErrorBar(rez.tm(1:end-1),mean(shuffed,2),getCI(shuffed),{'Color',cols{2},'LineWidth',2},alph,ax)
 xline(0,'k--','LineWidth',1)
 xline(sample,'k--','LineWidth',1)
 xline(delay,'k--','LineWidth',1)
@@ -281,9 +285,9 @@ xline(trialStart,'k--','LineWidth',1)
 xlim([trialStart, params(1).tmax-0.2])
 ylim([ax.YLim(1) 1])
 
-xlabel('Time (s) from go cue')
+xlabel('Time from go cue (s)')
 ylabel([num2str(rez.nFolds) '-Fold CV Accuracy'])
-title('Kinematic choice decoding','FontSize',8)
+title('Kinematic context decoding','FontSize',8)
 
 h = zeros(2, 1);
 for i = 1:numel(h)

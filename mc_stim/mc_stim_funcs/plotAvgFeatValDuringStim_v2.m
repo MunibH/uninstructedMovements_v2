@@ -1,4 +1,4 @@
-function plotAvgFeatValDuringStim_v2(meta,obj,dfparams,params,kin,kinfeats,feats2plot,cond2plot,sav)
+function plotAvgFeatValDuringStim_v2(meta,obj,dfparams,params,kin,kinfeats,feats2plot,cond2plot,times,sav)
 
 
 % feats to plot
@@ -38,10 +38,11 @@ end
 
 ms = {'o','^','square','pentagram'};
 col = {[0 0 1] ; [1 0 0]};
-sz = 40;
+sz = 15;
 
 % plot each pair of ctrl/stim for l/r against each other
 f = figure;
+f.Position = [680   774   327   204];
 ax = gca;
 hold on;
 for ianm = 1:nAnm
@@ -55,7 +56,7 @@ end
 
 xlabel([feats2plot ', ctrl (a.u.)'],'Interpreter','none')
 ylabel([feats2plot ', stim (a.u.)'],'Interpreter','none')
-ax.FontSize = 12;
+ax.FontSize = 9;
 axis(ax,'equal')
 
 mins = min([ax.XLim(1) ax.YLim(1)]);
@@ -64,7 +65,7 @@ maxs = max([ax.XLim(2) ax.YLim(2)]);
 xlim([0 maxs])
 ylim([0 maxs])
 ax = gca;
-plot(ax.XLim,ax.YLim,'k--','LineWidth',2)
+plot(ax.XLim,ax.YLim,'k--','LineWidth',1)
 % view([90 -90])
 
 

@@ -91,8 +91,8 @@ end
 cond2use = 1:4;
 
 lw = 1.5;
-lwx = 0.5;
-ms = 3;
+lwx = 0.1;
+ms = 6;
 
 goCue = 0;
 sample = mode(obj(sessix).bp.ev.sample) - mode(obj(sessix).bp.ev.goCue);
@@ -106,7 +106,7 @@ nTrials{2} = numel(params(sessix).trialid{1});
 
 
 f = figure; hold on;
-f.Position = [520   614   189   365];
+f.Position = [520   561   234   418];
 trialOffset = 1;
 
 
@@ -125,9 +125,6 @@ for cix = 1:numel(cond2use)
         lickR =  obj(sessix).bp.ev.lickR{trial} - obj(sessix).bp.ev.goCue(trial);
         lickR(lickR > 2) = [];
 
-        plot([sample sample], trialOffset+[-0.5 0.5], 'k--', 'LineWidth', lwx);
-        plot([delay delay], trialOffset+[-0.5 0.5], 'k--', 'LineWidth', lwx);
-        plot([goCue goCue], trialOffset+[-0.5 0.5], 'k--', 'LineWidth', lwx);
 
         if ~isempty(lickL)
             plot(lickL, trialOffset*ones(size(lickL)), '.', 'Color', cols{cond2use(cix)+1}, 'MarkerSize',ms);
@@ -156,19 +153,23 @@ for cix = 1:numel(cond2use)
 end
 xlim([-2.5 2.7]);
 ylim([0 160])
-xlabel('Time (s) from go cue')
+xlabel('Time from go cue (s)')
 ylabel('Trials')
 ax = gca;
 ax.FontSize = 9;
+xline(sample, 'k--', 'LineWidth', lwx);
+xline(delay, 'k--', 'LineWidth', lwx);
+xline(goCue, 'k--', 'LineWidth', lwx);
 
-%
+
+
 
 nTrials{1} = numel(params(sessix).trialid{4});
 nTrials{2} = numel(params(sessix).trialid{2});
 
 
 f = figure; hold on;
-f.Position = [520   614   189   365];
+f.Position = [520   561   234   418];
 trialOffset = 1;
 
 % left trials (2afc + aw)
@@ -186,9 +187,6 @@ for cix = 1:numel(cond2use)
         lickR =  obj(sessix).bp.ev.lickR{trial} - obj(sessix).bp.ev.goCue(trial);
         lickR(lickR > 2) = [];
 
-        plot([sample sample], trialOffset+[-0.5 0.5], 'k--', 'LineWidth', lwx);
-        plot([delay delay], trialOffset+[-0.5 0.5], 'k--', 'LineWidth', lwx);
-        plot([goCue goCue], trialOffset+[-0.5 0.5], 'k--', 'LineWidth', lwx);
 
         if ~isempty(lickL)
             plot(lickL, trialOffset*ones(size(lickL)), '.', 'Color', cols{cond2use(cix)}, 'MarkerSize',ms);
@@ -217,11 +215,13 @@ for cix = 1:numel(cond2use)
 end
 xlim([-2.5 2.7]);
 ylim([0 110])
-xlabel('Time (s) from go cue')
+xlabel('Time from go cue (s)')
 ylabel('Trials')
 ax = gca;
 ax.FontSize = 9;
-
+xline(sample, 'k--', 'LineWidth', lwx);
+xline(delay, 'k--', 'LineWidth', lwx);
+xline(goCue, 'k--', 'LineWidth', lwx);
 
 
 

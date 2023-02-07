@@ -155,25 +155,27 @@ cols{4} = clrs.aw;
 f = figure; hold on;
 f.Position = [680   739   270   239];
 
-xs = 1:size(toplot,2);
+xs = [1 2 4 5];
 for i = 1:numel(xs)
     b(i) = bar(xs(i),nanmean(toplot(:,i)));
     b(i).FaceColor = cols{i};
     b(i).EdgeColor = 'none';
-    b(i).FaceAlpha = 0.5;
+    b(i).FaceAlpha = 1;
 
-    vs(i) = scatter(randn(numel(anms),1) * 0.1 + xs(i)*ones(size(toplot(:,i))),toplot(:,i),30,'MarkerFaceColor',cols{i},...
+    vs(i) = scatter(randn(numel(anms),1) * 0.1 + xs(i)*ones(size(toplot(:,i))),toplot(:,i),5,'MarkerFaceColor','k',...
         'MarkerEdgeColor','k','LineWidth',1);
 
-    errorbar(b(i).XEndPoints,nanmean(toplot(:,i)),nanstd(toplot(:,i)),'LineStyle','none','Color','k','LineWidth',1)
+    e = errorbar(b(i).XEndPoints,nanmean(toplot(:,i)),nanstd(toplot(:,i)),'LineStyle','none','Color','k','LineWidth',1);
+    e.LineWidth = 0.5;
+    e.CapSize = 2;
 
     xs_(:,i) = vs(i).XData';
     ys_(:,i) = toplot(:,i);
 end
 
 for i = 1:size(xs_,1)
-    patchline(xs_(i,1:2),ys_(i,1:2),'EdgeAlpha',0.4)
-    patchline(xs_(i,3:4),ys_(i,3:4),'EdgeAlpha',0.4)
+    patchline(xs_(i,1:2),ys_(i,1:2),'EdgeAlpha',0.4,'LineWidth',0.1)
+    patchline(xs_(i,3:4),ys_(i,3:4),'EdgeAlpha',0.4,'LineWidth',0.1)
 end
 
 ylabel("Time (s)")

@@ -1,4 +1,7 @@
-function rez = getPerformance(meta,obj,params)
+function anmrez = getPerformance(meta,obj,params)
+
+[objix,uAnm] = groupSessionsByAnimal(meta);
+
 
 for i = 1:numel(meta) % for each session
     % get performance for each condition
@@ -6,6 +9,14 @@ for i = 1:numel(meta) % for each session
         nTrialsInCond = numel(params(i).trialid{j});
         hitTrialsInCond = obj(i).bp.hit(params(i).trialid{j});
         rez(i).perf(j) = sum(hitTrialsInCond) ./ nTrialsInCond;
+    end
+end
+
+for ianm = 1:numel(objix) % for each animal
+    objs_anm = find(objix{ianm});
+    anmrez(ianm).perf = zeros(numel(objs_anm),numel(params(i).trialid)); % (sessions,cond)
+    for i = 1:numel(objs_anm)
+        anmrez(ianm).perf(i,:) = rez(objs_anm(i)).perf;
     end
 end
 

@@ -3,23 +3,23 @@ function [corr_me_null, corr_me_potent] = corr_ME_NPMagnitude(meta,obj,params,me
 % correlate magnitude of activity in N/Ps and ME
 % plot by mouse and session
 
-ms = {'o','<','^','v','>','square','diamond','o'};
+ms = {'o','<','^','v','>','square','diamond','o','<'};
 sz = 50;
 
-allanms = {meta(:).anm}; uAnm = unique(allanms); nAnm = numel(uAnm);
-alldates = {meta(:).date};
+[objix,uAnm]  = groupSessionsByAnimal(meta);
+nAnm = numel(uAnm);
 
 f = figure;
 ax = gca;
 hold on;
+
 for ianm = 1:nAnm
     % get sessions for current animal
-    ix = ismember(allanms,uAnm{ianm});
-    sessionDates = {alldates{ix}};
+    ix = find(objix{ianm});
 
     % for each session, calculate avg feat value over trials
-    for isess = 1:numel(sessionDates)
-        sessix = ismember(allanms,uAnm{ianm}) & ismember(alldates,sessionDates{isess});
+    for isess = 1:numel(ix)
+        sessix = ix(isess);
 
         % get data
         tempme = me(sessix).data;
@@ -40,14 +40,16 @@ for ianm = 1:nAnm
         corr_me_potent{ianm}(isess) = corr(tempme,potent)^2;
         corr_me_null{ianm}(isess) = corr(tempme,null)^2;
 
-        if ianm == 8
-            s = scatter(corr_me_null{ianm}(isess),corr_me_potent{ianm}(isess),sz, ...
-                'MarkerEdgeColor','k','MarkerFaceColor','none','Marker',ms{ianm});
-        else
-            s = scatter(corr_me_null{ianm}(isess),corr_me_potent{ianm}(isess),sz, ...
-                'MarkerEdgeColor','w','MarkerFaceColor','k','Marker',ms{ianm});
-        end
-
+    end
+    
+    mu.potent = nanmean(corr_me_potent{ianm});
+    mu.null = nanmean(corr_me_null{ianm});
+    if ianm > 7
+        s = scatter(mu.null,mu.potent,sz, ...
+            'MarkerEdgeColor','k','MarkerFaceColor','none','Marker',ms{ianm});
+    else
+        s = scatter(mu.null,mu.potent,sz, ...
+            'MarkerEdgeColor','w','MarkerFaceColor','k','Marker',ms{ianm});
     end
 end
 
@@ -68,7 +70,7 @@ plot(ax.XLim,ax.YLim,'k--','LineWidth',2)
 
 h = zeros(nAnm, 1);
 for ianm = 1:numel(h)
-    if ianm == 8
+    if ianm > 7
         h(ianm) = scatter(NaN,NaN,sz,'MarkerEdgeColor','k','MarkerFaceColor','none','Marker',ms{ianm});
     else
         h(ianm) = scatter(NaN,NaN,sz,'MarkerEdgeColor','none','MarkerFaceColor','k','Marker',ms{ianm});

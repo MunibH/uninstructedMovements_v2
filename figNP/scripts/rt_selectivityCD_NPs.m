@@ -5,44 +5,51 @@ rt = firstJawRT(obj);
 %%
 
 close all
-clear dat cols trialsBlock
+clear dat cols trialsBlock trix
 
-nQuantiles = 3;
+nQuantiles = 4;
 for sessix = 1:numel(meta)
 
-    %     t1 = -0.5; t2 = -0.01;
-    %     [~,ix1] = min(abs(obj(sessix).time - t1));
-    %     [~,ix2] = min(abs(obj(sessix).time - t2));
+    t1 = -0.02; t2 = 0;
+    [~,ix1] = min(abs(obj(sessix).time - t1));
+    [~,ix2] = min(abs(obj(sessix).time - t2));
+
+
     cddim = 1;
     cdlatepotent = cd_potent(sessix).trialdat(:,:,cddim);
     cdlatenull = cd_null(sessix).trialdat(:,:,cddim);
     me_ = me(sessix).data;
     thisrt = rt{sessix};
+    thisme = nanmean(me(sessix).data(ix1:ix2,:),1);
 
     % right and left hit trials
-    trix.all = cell2mat(params(sessix).trialid(2:3)');
-    trix.right = params(sessix).trialid{2};
-    trix.left = params(sessix).trialid{3};
+    trix.all = cell2mat(params(sessix).trialid(8:9)');
+    trix.right = params(sessix).trialid{8};
+    trix.left = params(sessix).trialid{9};
 
     thisrt = thisrt(trix.all);
 %     med = median(thisrt);
 %     trix.outlierMask = thisrt > 1.1*med | thisrt<=0.0025;
 % %     trix.outlierMask = isoutlier(thisrt)';
-    trix.outlierMask = thisrt > 0.13;
-%     trix.outlierMask = thisrt > 0.12 | thisrt < 0.015;
-%     trix.outlierMask = logical(zeros(size(thisrt)));
+%     trix.outlierMask = thisrt > 0.13;
+%     trix.outlierMask = thisrt < 0.01;
+    trix.outlierMask = logical(zeros(size(thisrt)));
 
     trix.all = trix.all(~trix.outlierMask);
     thisrt = thisrt(~trix.outlierMask);
-
+    
 
     cdlatepotent = cdlatepotent(:,trix.all);
     cdlatenull = cdlatenull(:,trix.all);
     me_ = me_(:,trix.all);
+    thisme = thisme(trix.all);
 
     
     quantiles = quantile(thisrt,nQuantiles);
-    trialsBlock{sessix} = getTrialsByBlock(thisrt,quantiles);
+    trialsBlock{sessix} = getTrialsByRTBlock(thisrt,quantiles);
+
+%     quantiles = quantile(thisme,nQuantiles);
+%     trialsBlock{sessix} = getTrialsByRTBlock(thisme,quantiles);
 
     % divide each entry of trialsBlock into right and left trials
     % each entry is same size as trix.all (logical)
@@ -76,46 +83,55 @@ end
 
 
 
-%
+%%
 
 clear alldat
 
 alldat.rt = cell(nQuantiles,1);
-alldat.me = cell(nQuantiles,1);
+alldat.mesel = cell(nQuantiles,1);
 alldat.cdnullsel = cell(nQuantiles,1);
 alldat.cdpotentsel = cell(nQuantiles,1);
 alldat.cdnull.right = cell(nQuantiles,1); 
 alldat.cdpotent.right = cell(nQuantiles,1);
 alldat.cdnull.left = cell(nQuantiles,1);
 alldat.cdpotent.left = cell(nQuantiles,1);
+alldat.me.right = cell(nQuantiles,1);
+alldat.me.left = cell(nQuantiles,1);
 for qix = 1:nQuantiles
     alldat.rt{qix} = [];
-    alldat.me{qix} = [];
+%     alldat.me{qix} = [];
+    alldat.mesel{qix} = [];
     alldat.cdnullsel{qix} = [];
     alldat.cdpotentsel{qix} = [];
     alldat.cdnull.right{qix} = [];
     alldat.cdpotent.right{qix} = [];
     alldat.cdnull.left{qix} = [];
     alldat.cdpotent.left{qix} = [];
+    alldat.me.right{qix} = [];
+    alldat.me.left{qix} = [];
     for sessix = 1:numel(dat)
         alldat.rt{qix} = [ alldat.rt{qix} ; dat(sessix).rt.right{qix}' ; dat(sessix).rt.left{qix}'];
-        alldat.me{qix} = cat(2, alldat.me{qix} , cat(2, dat(sessix).me.right{qix}, dat(sessix).me.left{qix}) );
         alldat.cdnullsel{qix} = cat(2, alldat.cdnullsel{qix} , nanmean(dat(sessix).cdnull.right{qix},2) - nanmean(dat(sessix).cdnull.left{qix},2) );
         alldat.cdpotentsel{qix} = cat(2, alldat.cdpotentsel{qix} , nanmean(dat(sessix).cdpotent.right{qix},2) - nanmean(dat(sessix).cdpotent.left{qix},2) );
         alldat.cdnull.right{qix} = cat(2, alldat.cdnull.right{qix} , nanmean(dat(sessix).cdnull.right{qix},2)  );
         alldat.cdpotent.right{qix} = cat(2, alldat.cdpotent.right{qix} , nanmean(dat(sessix).cdpotent.right{qix},2)  );
         alldat.cdnull.left{qix} = cat(2, alldat.cdnull.left{qix} , nanmean(dat(sessix).cdnull.left{qix},2)  );
         alldat.cdpotent.left{qix} = cat(2, alldat.cdpotent.left{qix} , nanmean(dat(sessix).cdpotent.left{qix},2)  );
+
+        %         alldat.me{qix} = cat(2, alldat.me{qix} , cat(2, dat(sessix).me.right{qix}, dat(sessix).me.left{qix}) );
+        alldat.me.right{qix} = cat(2, alldat.me.right{qix} , nanmean(dat(sessix).me.right{qix},2)  );
+        alldat.me.left{qix} = cat(2, alldat.me.left{qix} , nanmean(dat(sessix).me.left{qix},2)  );
+        alldat.mesel{qix} = cat(2, alldat.mesel{qix} , nanmean(dat(sessix).me.right{qix},2) - nanmean(dat(sessix).me.left{qix},2) );
     end
 end
 
-% selectivity plot
+%% selectivity plot
 
 sample = mode(obj(1).bp.ev.sample) - 2.5;
 tstart = mode(obj(1).bp.ev.bitStart) - 2.5;
 delay = mode(obj(1).bp.ev.delay) - 2.5;
 
-sm = 31;
+sm = 101;
 
 xlims = [tstart 1.5];
 
@@ -133,8 +149,8 @@ close all
 f = figure;
 f.Position = [680    84   574   894];
 for i = 1:nQuantiles
-    ax1 = subplot(3,1,1); hold on;
-    plot(obj(1).time,mySmooth(nanmean(alldat.cdnullsel{i},2),sm,'reflect'),'LineWidth',2,'Color',cols(i,:));
+    ax1 = subplot(2,1,1); hold on;
+    plot(obj(1).time,mySmooth(nanmean(alldat.cdnullsel{i},2),sm,'zeropad'),'LineWidth',2,'Color',cols(i,:));
     title('null');
     xline(sample,'k--')
     xline(0,'k--')
@@ -143,8 +159,8 @@ for i = 1:nQuantiles
     xlim(xlims)
     ylabel('Selectivity (null)')
 
-    ax2 = subplot(3,1,2); hold on;
-    plot(obj(1).time,mySmooth(nanmean(alldat.cdpotentsel{i},2),sm,'reflect'),'LineWidth',2,'Color',cols(i,:));
+    ax2 = subplot(2,1,2); hold on;
+    plot(obj(1).time,mySmooth(nanmean(alldat.cdpotentsel{i},2),sm,'zeropad'),'LineWidth',2,'Color',cols(i,:));
     title('potent');
     xline(sample,'k--')
     xline(0,'k--')
@@ -153,8 +169,17 @@ for i = 1:nQuantiles
     xlim(xlims)
     ylabel('Selectivity (potent)')
 
-    subplot(3,1,3); hold on;
-    histogram(alldat.rt{i},'FaceAlpha',0.7,'EdgeColor','none','FaceColor',cols(i,:))
+%     ax = subplot(3,1,3); hold on;
+%     plot(obj(1).time,mySmooth(nanmean(alldat.mesel{i},2),sm,'zeropad'),'LineWidth',2,'Color',cols(i,:));
+%     xline(sample,'k--')
+%     xline(0,'k--')
+%     xline(tstart,'k--')
+%     xline(delay,'k--')
+%     xlim(xlims)
+%     ylabel('Motion Energy')
+
+
+%     histogram(alldat.rt{i},'FaceAlpha',0.7,'EdgeColor','none','FaceColor',cols(i,:))
 %     xlim([0 0.4])
 end
 
@@ -186,14 +211,12 @@ for i = 1:nQuantiles
     rcols(i,:) = cright(i*3,:);
 end
 
-sm = 51;
-
 % close all
 figure;
 for i = 1:nQuantiles
     ax1 = subplot(2,1,1); hold on;
-    plot(obj(1).time,mySmooth(nanmean(alldat.cdnull.right{i},2),sm,'reflect'),'LineWidth',2,'Color',rcols(i,:));
-    plot(obj(1).time,mySmooth(nanmean(alldat.cdnull.left{i},2),sm,'reflect'),'LineWidth',2,'Color',lcols(i,:));
+    plot(obj(1).time,mySmooth(nanmean(alldat.cdnull.right{i},2),sm,'zeropad'),'LineWidth',2,'Color',rcols(i,:));
+    plot(obj(1).time,mySmooth(nanmean(alldat.cdnull.left{i},2),sm,'zeropad'),'LineWidth',2,'Color',lcols(i,:));
     xline(sample,'k--')
     xline(0,'k--')
     xline(tstart,'k--')
@@ -202,14 +225,24 @@ for i = 1:nQuantiles
     ylabel('CD (Null)')
 
     ax2 = subplot(2,1,2); hold on;
-    plot(obj(1).time,mySmooth(nanmean(alldat.cdpotent.right{i},2),sm,'reflect'),'LineWidth',2,'Color',rcols(i,:));
-    plot(obj(1).time,mySmooth(nanmean(alldat.cdpotent.left{i},2),sm,'reflect'),'LineWidth',2,'Color',lcols(i,:));
+    plot(obj(1).time,mySmooth(nanmean(alldat.cdpotent.right{i},2),sm,'zeropad'),'LineWidth',2,'Color',rcols(i,:));
+    plot(obj(1).time,mySmooth(nanmean(alldat.cdpotent.left{i},2),sm,'zeropad'),'LineWidth',2,'Color',lcols(i,:));
     xline(sample,'k--')
     xline(0,'k--')
     xline(tstart,'k--')
     xline(delay,'k--')
     xlim(xlims)
     ylabel('CD (Potent)')
+
+%     ax3 = subplot(3,1,3); hold on;
+%     plot(obj(1).time,mySmooth(nanmean(alldat.me.right{i},2),sm,'zeropad'),'LineWidth',2,'Color',rcols(i,:));
+%     plot(obj(1).time,mySmooth(nanmean(alldat.me.left{i},2),sm,'zeropad'),'LineWidth',2,'Color',lcols(i,:));
+%     xline(sample,'k--')
+%     xline(0,'k--')
+%     xline(tstart,'k--')
+%     xline(delay,'k--')
+%     xlim(xlims)
+%     ylabel('Motion Energy')
 
 end
 
@@ -225,19 +258,55 @@ ax2.XLabel.String = 'Time (s) from go cue';
 % linkaxes([ax1,ax2])
 
 
-%% Helper functions
+% f = figure;
+% hold on;
+% for i = 1:nQuantiles
+%     plot(obj(1).time,mySmooth(nanmean(alldat.me.right{i},2),sm,'zeropad'),'LineWidth',2,'Color',rcols(i,:));
+%     plot(obj(1).time,mySmooth(nanmean(alldat.me.left{i},2),sm,'zeropad'),'LineWidth',2,'Color',lcols(i,:));
+%     xline(sample,'k--')
+%     xline(0,'k--')
+%     xline(tstart,'k--')
+%     xline(delay,'k--')
+%     xlim(xlims)
+%     ylabel('Motion Energy')
+% end
+% 
+% f = figure;
+% hold on;
+% for i = 1:nQuantiles
+%     plot(obj(1).time,mySmooth(nanmean(alldat.mesel{i},2),sm,'zeropad'),'LineWidth',2,'Color',cols(i,:));
+%     xline(sample,'k--')
+%     xline(0,'k--')
+%     xline(tstart,'k--')
+%     xline(delay,'k--')
+%     xlim(xlims)
+%     ylabel('Motion Energy')
+% end
+% 
+% f = figure;
+% for i = 1:nQuantiles
+%     ax = subplot(2,1,1);
+%     hold on;
+%     plot(obj(1).time,mySmooth(nanmean(alldat.me.right{i},2),sm,'zeropad'),'LineWidth',2,'Color',rcols(i,:));
+%     xline(sample,'k--')
+%     xline(0,'k--')
+%     xline(tstart,'k--')
+%     xline(delay,'k--')
+%     xlim(xlims)
+%     ylabel('motion energy')
+% 
+%     ax = subplot(2,1,2);
+%     hold on;
+%     plot(obj(1).time,mySmooth(nanmean(alldat.me.left{i},2),sm,'zeropad'),'LineWidth',2,'Color',lcols(i,:));
+%     xline(sample,'k--')
+%     xline(0,'k--')
+%     xline(tstart,'k--')
+%     xline(delay,'k--')
+%     xlim(xlims)
+%     ylabel('motion energy')
+% end
 
-function trialsBlock = getTrialsByBlock(rt,quantiles)
-for i = 1:numel(quantiles)
-    if i == 1
-        trialsBlock{i} = rt<=quantiles(i);
-    elseif i == numel(quantiles)
-        trialsBlock{i} = rt>=quantiles(i);
-    else
-        trialsBlock{i} = rt>quantiles(i-1) & rt<=quantiles(i);
-    end
-end
 
 
 
-end
+

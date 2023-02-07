@@ -25,24 +25,30 @@ for i = 1:numel(allrez.cd_labels) % for each coding direction
         shadedErrorBar(obj(1).time,tempmean(:,4),temperror(:,4),{'Color',clrs.lhit*0.5,'LineWidth',lw},alph, ax)
     end
     if plotaw
-        shadedErrorBar(obj(1).time,tempmean(:,5),temperror(:,5),{'Color',clrs.rhit_aw,'LineWidth',lw},alph, ax)
-        shadedErrorBar(obj(1).time,tempmean(:,6),temperror(:,6),{'Color',clrs.lhit_aw,'LineWidth',lw},alph, ax)
+        if strcmpi(allrez.cd_labels{i},'context')
+            cla
+            shadedErrorBar(obj(1).time,tempmean(:,5),temperror(:,5),{'Color',clrs.afc,'LineWidth',lw},alph, ax)
+            shadedErrorBar(obj(1).time,tempmean(:,6),temperror(:,6),{'Color',clrs.aw,'LineWidth',lw},alph, ax)
+        else
+            shadedErrorBar(obj(1).time,tempmean(:,7),temperror(:,7),{'Color',clrs.rhit_aw,'LineWidth',lw},alph, ax)
+            shadedErrorBar(obj(1).time,tempmean(:,8),temperror(:,8),{'Color',clrs.lhit_aw,'LineWidth',lw},alph, ax)
+        end
     end
 
     %     xlim([rez(1).time(1);rez(1).time(end)])
     xlim([obj(1).time(5);2])
 
     title(allrez.cd_labels{i},'FontSize',8)
-    xlabel(['Time (s) from ' alignEvent])
+    xlabel(['Time from ' alignEvent ' (s)'])
     ylabel('Activity (a.u.)')
     ax.FontSize = 10;
 
-    xline(sample,'k:','LineWidth',2)
-    xline(delay,'k:','LineWidth',2)
-    xline(0,'k:','LineWidth',2)
+    xline(sample,'k--','LineWidth',1)
+    xline(delay,'k--','LineWidth',1)
+    xline(0,'k--','LineWidth',1)
 
     if strcmpi(allrez.cd_labels{i},'context')
-        ax.YLim(1) = ax.YLim(1)+10;
+%         ax.YLim(1) = ax.YLim(1)+10;
     end
 
 

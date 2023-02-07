@@ -16,7 +16,7 @@ rmpath(genpath(fullfile(utilspth,'musall2919/')))
 addpath(genpath(pwd))
 
 %% PARAMETERS
-params.alignEvent          = 'goCue'; % 'jawOnset' 'goCue'  'moveOnset'  'firstLick'  'lastLick'
+params.alignEvent          = 'lastLick'; % 'jawOnset' 'goCue'  'moveOnset'  'firstLick'  'lastLick'
 
 % time warping only operates on neural data for now.
 % TODO: time warp for video and bpod data
@@ -95,12 +95,12 @@ clearvars -except obj meta params sel_corr_mat
 
 % % 2afc (early, late, go)
 cond2use = [2 3]; % left hit, right hit
-cond2proj = [2 3 4 5 8 9];
+cond2proj = [2 3 4 5 6 7 8 9];
 rez_2afc = getCodingDimensions_2afc(obj,params,cond2use,cond2proj);
 
 % % aw (context mode)
 cond2use = [6 7]; % hit 2afc, hit aw
-cond2proj = [2 3 4 5 8 9];
+cond2proj = [2 3 4 5 6 7 8 9];
 rez_aw = getCodingDimensions_aw(obj,params,cond2use,cond2proj);
 
 
@@ -111,7 +111,7 @@ close all
 
 sav = 0; % 1=save, 0=no_save
 
-plotSelectivityCorrMatrix(obj(1),sel_corr_mat,params(1).alignEvent,sav)
+% plotSelectivityCorrMatrix(obj(1),sel_corr_mat,params(1).alignEvent,sav)
 
 plotmiss = 0;
 plotaw = 1;

@@ -90,7 +90,7 @@ params.probe = {meta.probe}; % put probe numbers into params, one entry for elem
 
 clear boot bootobj bootparams
 
-boot.iters = 10; % number of bootstrap iterations (most papers do 1000)
+boot.iters = 1000; % number of bootstrap iterations (most papers do 1000)
 
 % fraction of each hierarchy to sample
 % (all should be 1, but can subsample by setting any to a fraction less than 1)
@@ -114,12 +114,12 @@ for iter = 1:boot.iters
 
     % % 2afc (early, late, go)
     cond2use = [2 3]; % left hit, right hit
-    cond2proj = [2 3 4 5 8 9];
+    cond2proj = [2 3 4 5 6 7 8 9];
     rez_2afc = getCodingDimensions_2afc(bootobj,bootparams,cond2use,cond2proj);
 
     % % aw (context mode)
     cond2use = [6 7]; % hit 2afc, hit aw
-    cond2proj = [2 3 4 5 8 9];
+    cond2proj = [2 3 4 5 6 7 8 9];
     rez_aw = getCodingDimensions_aw(bootobj,bootparams,cond2use,cond2proj);
 
     allrez(iter) = concatRezAcrossSessions(rez_2afc,rez_aw);
@@ -154,8 +154,8 @@ close all
 
 sav = 0; % 1=save, 0=no_save
 
-plotmiss = 0;
-plotaw = 1;
+plotmiss = 1;
+plotaw = 0;
 plotCDProj(rez,obj(1),sav,plotmiss,plotaw,params(1).alignEvent)
 
 % plotCDVarExp(allrez,sav)

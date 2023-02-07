@@ -1,11 +1,11 @@
 clear, clc, close all
 
 % add paths for data loading scripts, all fig funcs, and utils
-utilspth = 'C:\Users\munib\Documents\Economo-Lab\code\uninstructedMovements_v2';
+utilspth = 'C:\Users\munib\Documents\Economo-Lab\code\uninstructedMovements_v3';
 addpath(genpath(fullfile(utilspth,'DataLoadingScripts')));
 addpath(genpath(fullfile(utilspth,'funcs')));
 addpath(genpath(fullfile(utilspth,'utils')));
-rmpath(genpath(fullfile(utilspth,'fig3/')))
+rmpath(genpath(fullfile(utilspth,'figNP/')))
 rmpath(genpath(fullfile(utilspth,'fig1/')))
 rmpath(genpath(fullfile(utilspth,'musall2019/')))
 
@@ -13,6 +13,7 @@ rmpath(genpath(fullfile(utilspth,'musall2019/')))
 % add paths for figure specific functions
 addpath(genpath(pwd))
 
+clc
 
 %% TODO
 % - created new objs from pipeline and nidq data - only use those
@@ -24,10 +25,10 @@ addpath(genpath(pwd))
 dfparams = [];
 
 % -- time alignment params --
-dfparams.alignEv = 'goCue';
-dfparams.times = [-2.5 2.5]; % relative to goCue
-% dfparams.alignEv = 'delay';
-% dfparams.times = [-1.0 2.5]; % relative to delay
+% dfparams.alignEv = 'goCue';
+% dfparams.times = [-2.5 2.5]; % relative to goCue
+dfparams.alignEv = 'delay';
+dfparams.times = [-1.0 2.5]; % relative to delay
 
 dfparams.dt_vid = 0.0025;
 dfparams.time = dfparams.times(1):dfparams.dt_vid:dfparams.times(2);
@@ -36,16 +37,16 @@ dfparams.warp = 0; % 0 means no warping, 1 means warp delay period to
 
 
 % -- trial type params --
-dfparams.cond(1) = {'(hit|miss|no)&~stim.enable&~autowater&~autolearn'}; % all trials, no stim, no autowater, no autolearn
-dfparams.cond(end+1) = {'(hit|miss|no)&stim.enable&~autowater&~autolearn'};  % all trials trials, stim, no autowater, no autolearn
-dfparams.cond(end+1) = {'R&~stim.enable&~autowater&~autolearn'}; % right trials, no stim, no autowater
-dfparams.cond(end+1) = {'R&stim.enable&~autowater&~autolearn'};  % right trials, stim, no autowater
-dfparams.cond(end+1) = {'L&~stim.enable&~autowater&~autolearn'}; % left trials, no stim, no autowater
-dfparams.cond(end+1) = {'L&stim.enable&~autowater&~autolearn'};  % left trials, stim, no autowater
-dfparams.cond(end+1) = {'R&hit&~stim.enable&~autowater&~autolearn'}; % right hit trials, no stim, no autowater
-dfparams.cond(end+1) = {'R&hit&stim.enable&~autowater&~autolearn'};  % right hit trials, stim, no autowater
-dfparams.cond(end+1) = {'L&hit&~stim.enable&~autowater&~autolearn'}; % left hit trials, no stim, no autowater
-dfparams.cond(end+1) = {'L&hit&stim.enable&~autowater&~autolearn'};  % left hit trials, stim, no autowater
+dfparams.cond(1) = {'(hit|miss|no)&~stim.enable&~autowater&~autolearn&~early'}; % all trials, no stim, no autowater, no autolearn
+dfparams.cond(end+1) = {'(hit|miss|no)&stim.enable&~autowater&~autolearn&~early'};  % all trials trials, stim, no autowater, no autolearn
+dfparams.cond(end+1) = {'R&~stim.enable&~autowater&~autolearn&~early'}; % right trials, no stim, no autowater
+dfparams.cond(end+1) = {'R&stim.enable&~autowater&~autolearn&~early'};  % right trials, stim, no autowater
+dfparams.cond(end+1) = {'L&~stim.enable&~autowater&~autolearn&~early'}; % left trials, no stim, no autowater
+dfparams.cond(end+1) = {'L&stim.enable&~autowater&~autolearn&~early'};  % left trials, stim, no autowater
+dfparams.cond(end+1) = {'R&hit&~stim.enable&~autowater&~autolearn&~early'}; % right hit trials, no stim, no autowater
+dfparams.cond(end+1) = {'R&hit&stim.enable&~autowater&~autolearn&~early'};  % right hit trials, stim, no autowater
+dfparams.cond(end+1) = {'L&hit&~stim.enable&~autowater&~autolearn&~early'}; % left hit trials, no stim, no autowater
+dfparams.cond(end+1) = {'L&hit&stim.enable&~autowater&~autolearn&~early'};  % left hit trials, stim, no autowater
 % dfparams.cond(end+1) = {'R&miss&~stim.enable&~autowater&~autolearn'}; % left hit trials, no stim, no autowater
 % dfparams.cond(end+1) = {'L&miss&stim.enable&~autowater&~autolearn'};  % left hit trials, stim, no autowater
 
@@ -87,7 +88,7 @@ datapth = '/Users/Munib/Documents/Economo-Lab/data/';
 meta = [];
 meta = loadMAH13_MCStim(meta,datapth);
 meta = loadMAH14_MCStim(meta,datapth);
-
+% meta = loadMAH17_MCStim(meta,datapth);
 
 % subset based on stim types
 stim2use = dfparams.stim.types(dfparams.stim.num);
@@ -131,7 +132,7 @@ end
 %% behavioral performance
 close all
 
-rez = getPerformance(meta,obj,params);
+rez = getPerformance(meta,obj,params); % rez is struct array, each entyr is an animal. perf is (sessions,conditions)
 
 % plots
 cond2use = 1:6;
@@ -183,7 +184,7 @@ end
 [kin,kinfeats,kinfeats_norm] = getKin(meta,obj,dfparams,params);
 
 %% plot kinematics
-
+close all
 % feats2plot = {'tongue_ydisp_view1',...
 %               'tongue_yvel_view1',...
 %               'jaw_ydisp_view1',...
@@ -199,7 +200,7 @@ cond2plot = 1:2;
 % cond2plot = 7:10;
 sav = 0;
 
-% plotKinfeats(meta,obj,dfparams,params,kin,kinfeats,feats2plot,cond2plot,sav)
+plotKinfeats(meta,obj,dfparams,params,kin,kinfeats,feats2plot,cond2plot,sav)
 
 
 

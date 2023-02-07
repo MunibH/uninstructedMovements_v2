@@ -17,8 +17,7 @@ clc
 %% PARAMETERS
 params.alignEvent          = 'goCue'; % 'jawOnset' 'goCue'  'moveOnset'  'firstLick'  'lastLick'
 
-% time warping only operates on neural data for now.
-% TODO: time warp for video and bpod data
+% time warp params
 params.timeWarp            = 0;  % piecewise linear time warping - each lick duration on each trial gets warped to median lick duration for that lick across trials
 params.nLicks              = 20; % number of post go cue licks to calculate median lick duration for and warp individual trials to
 
@@ -33,12 +32,25 @@ params.condition(end+1) = {'L&miss&~stim.enable&~autowater'};            % error
 params.condition(end+1) = {'R&no&~stim.enable&~autowater'};            % no right, no stim, aw off
 params.condition(end+1) = {'L&no&~stim.enable&~autowater'};            % no left, no stim, aw off
 
-params.tmin = -3.0;
+% for projections
+params.condition(end+1) = {'R&hit&~stim.enable&~autowater&~early'};             % right hits, no stim, aw off
+params.condition(end+1) = {'L&hit&~stim.enable&~autowater&~early'};             % left hits, no stim, aw off
+params.condition(end+1) = {'R&miss&~stim.enable&~autowater&~early'};            % error right, no stim, aw off
+params.condition(end+1) = {'L&miss&~stim.enable&~autowater&~early'};            % error left, no stim, aw off
+
+params.condition(end+1) = {'R&~stim.enable&~autowater&~early'};
+params.condition(end+1) = {'L&~stim.enable&~autowater&~early'};
+
+% for ramping
+params.condition(end+1) = {'hit&~stim.enable&~autowater'};               % all hits, no stim, aw off
+
+params.tmin = -2.5;
 params.tmax = 2.5;
 params.dt = 1/100;
 
 % smooth with causal gaussian kernel
 params.smooth = 15;
+params.bctype = 'reflect';
 
 % cluster qualities to use
 params.quality = {'all'}; % accepts any cell array of strings - special character 'all' returns clusters of any quality
@@ -62,12 +74,13 @@ meta = [];
 
 % --- ALM ---
 meta = loadJEB6_ALMVideo(meta,datapth);
-meta = loadJEB7_ALMVideo(meta,datapth);
-meta = loadEKH1_ALMVideo(meta,datapth);
-meta = loadEKH3_ALMVideo(meta,datapth);
+meta = loadJEB7_ALMVideo(meta,datapth); % selectivity in ME
+meta = loadEKH1_ALMVideo(meta,datapth); % selectivity in ME
+meta = loadEKH3_ALMVideo(meta,datapth); % selectivity in ME
 meta = loadJGR2_ALMVideo(meta,datapth);
 meta = loadJGR3_ALMVideo(meta,datapth);
-meta = loadJEB14_ALMVideo(meta,datapth);
+% meta = loadJEB13_ALMVideo(meta,datapth);
+meta = loadJEB14_ALMVideo(meta,datapth); % selectivity in ME
 meta = loadJEB15_ALMVideo(meta,datapth);
 
 
@@ -99,7 +112,7 @@ end
 
 %% Null and Potent Space
 
-clearvars -except obj meta params me sav datapth kin
+clearvars -except obj meta params me sav datapth kin rt
 
 % -----------------------------------------------------------------------
 % -- Curate Input Data --
@@ -109,26 +122,31 @@ clearvars -except obj meta params me sav datapth kin
 % potent space from moving time points
 % -- Calculate coding directions from null and potent spaces --
 % -----------------------------------------------------------------------
-
+disp('finding null and potent spaces')
 for sessix = 1:numel(meta)
-
+    disp([meta(sessix).anm ' ' meta(sessix).date])
     % -- input data
-    trialdat_zscored = zscore_singleTrialNeuralData(obj(sessix).trialdat,obj(sessix));
+    trialdat_zscored = zscore_singleTrialNeuralData(obj(sessix));
 
     % -- null and potent spaces
     cond2use = [2 3 4 5]; % right hit, left hit, right miss, left miss
-    cond2proj = [2:7];
+    cond2proj = [8:11 14];
     nullalltime = 0; % use all time points to estimate null space if 1
     rez(sessix) = singleTrial_elsayed_np(trialdat_zscored, obj(sessix), me(sessix), params(sessix), cond2use, cond2proj, nullalltime);
 
     % -- coding dimensions
     cond2use = [1 2]; % right hits, left hits (corresponding to null/potent psths in rez)
-    cond2proj = [1:6]; % right hits, left hits, right miss, left miss (corresponding to null/potent psths in rez)
+    cond2proj = [1:4]; % right hits, left hits, right miss, left miss (corresponding to null/potent psths in rez)
     cond2use_trialdat = [2 3]; % for calculating selectivity explained in full neural pop
-    cd_null(sessix) = getCodingDimensions(rez(sessix).N_null_psth,rez(sessix).N_null,trialdat_zscored,obj(sessix),params(sessix),cond2use,cond2use_trialdat, cond2proj);
-    cd_potent(sessix) = getCodingDimensions(rez(sessix).N_potent_psth,rez(sessix).N_potent,trialdat_zscored,obj(sessix),params(sessix),cond2use,cond2use_trialdat, cond2proj);
+    rampcond = 5; % corresponding to cond2proj in null/potent analysis
+    %     cd_null(sessix) = getCodingDimensions(rez(sessix).N_null_psth,rez(sessix).N_null,trialdat_zscored,obj(sessix),params(sessix),cond2use,cond2use_trialdat, cond2proj);
+    %     cd_potent(sessix) = getCodingDimensions(rez(sessix).N_potent_psth,rez(sessix).N_potent,trialdat_zscored,obj(sessix),params(sessix),cond2use,cond2use_trialdat, cond2proj);
 
+    cd_null(sessix) = getCodingDimensions(rez(sessix).recon_psth.null,trialdat_zscored,trialdat_zscored,obj(sessix),params(sessix),cond2use,cond2use_trialdat, cond2proj, rampcond);
+    cd_potent(sessix) = getCodingDimensions(rez(sessix).recon_psth.potent,trialdat_zscored,trialdat_zscored,obj(sessix),params(sessix),cond2use,cond2use_trialdat, cond2proj, rampcond);
 end
+disp('DONE')
+
 
 cd_null_all = concatRezAcrossSessions(cd_null);
 cd_potent_all = concatRezAcrossSessions(cd_potent);
@@ -164,11 +182,22 @@ titlestring = 'Null | Potent CDs';
 % plotCDProj_NP(cd_potent_all,cd_null_all,cd_potent,cd_null,sav,titlestring,plotmiss)
 % plotSelectivityExplained_NP(cd_potent_all,cd_null_all,cd_potent,cd_null,sav,titlestring)
 
+
+%% selectivity in various epochs in cd late hits and errors
+close all
+
+titlestring = 'Null';
+axnull = plotCD_EpochSelectivity(meta,obj,cd_null_all,cd_null,titlestring);
+
+titlestring = 'Potent';
+axpotent = plotCD_EpochSelectivity(meta,obj,cd_potent_all,cd_potent,titlestring);
+
 %% variance explained
+close all
 
-plotVarianceExplained_NP(rez);
-
-plotVarianceExplained_DelayResponse(rez);
+% plotVarExplained_Recon(rez); % R2 (same as VE) using reconstructed data
+% plotVarianceExplained_NP(rez,meta);
+plotVarianceExplained_DelayResponse(rez,meta);
 
 %% single trial magnitude activity in N/P
 close all
@@ -216,7 +245,7 @@ plot_nonGC_moveTransitions_trialAvg_v7(dat,obj,newme,rez,params,meta,ndims) % su
 
 
 
-%% plot NP projections (trial-averaged and single-trials)
+%% plot NP projections (trial-averaged and single-trials) TODO
 
 close all
 
@@ -252,22 +281,136 @@ pcaNP(meta,obj,params,rez,cond2use)
 close all
 
 cond2use_ta = [1 2]; % right and left hits, corresponding to trial-avg projs onto n/p
-cond2use_st = [2 3]; % right and left hits, corresponding to single-trial projs onto n/p
-plotSelectivityNP(meta,obj,params,rez,cond2use_ta,cond2use_st)
+cond2use_st = [8 9]; % right and left hits, corresponding to single-trial projs onto n/p
+% plotSelectivityNP(meta,obj,params,rez,cond2use_ta,cond2use_st)
+
+% hits
+subTrials = 35;
+plotSelectivityNPPref(meta,obj,params,rez,cond2use_ta,cond2use_st, subTrials)
+
+% misses
+% subTrials = 10; % doesn't show anything interesting and also no error trials
+% cond2use_ta = [3 4]; % right,left miss, corresponding to trial-avg projs onto n/p
+% plotSelectivityNPPref(meta,obj,params,rez,cond2use_ta,cond2use_st, subTrials)
+
+%% plot reconstructed PSTHS
+
+plotReconstructedPSTHs(obj,rez,params)
+
+
+%% decode choice from N/P
+
+cv.nFolds = 4; % number of cv folds
+cv.binSize = 50; % ms
+cv.dt = floor(cv.binSize / (params(1).dt*1000)); % samples
+cv.tm = obj(1).time(1:cv.dt:numel(obj(1).time));
+cv.numT = numel(cv.tm);
+cv.train = 1; % fraction of trials to use for training (1-train for testing)
+cv.nShuffles = 2;
+
+cond2use = [8 9]; % right and left hits
+choiceDecoder_v2(obj,rez,params,cv,cond2use)
+
+
+%% decode choice from CD N/P
+
+
+cv.nFolds = 4; % number of cv folds
+cv.binSize = 50; % ms
+cv.dt = floor(cv.binSize / (params(1).dt*1000)); % samples
+cv.tm = obj(1).time(1:cv.dt:numel(obj(1).time));
+cv.numT = numel(cv.tm);
+cv.train = 1; % fraction of trials to use for training (1-train for testing)
+cv.nShuffles = 2;
+
+cond2use = [8 9]; % right and left hits
+cdix = 1; % late (not orthogonal to early)
+choiceDecoder_CD_NP(obj,rez,cd_null,cd_potent,params,cv,cond2use,cdix)
+title('Hits')
+
+% how much better do we get from adding error trials
+% CD_NP_late (not orth to early) would predict that you don't gain any
+% decodability in the null space during delay period, but you would in the
+% potent space
+% cond2use = [8 9 10 11]; % right and left hits
+% cdix = 1; % late (not orthogonal to early)
+% choiceDecoder_CD_NP_withErrors(obj,rez,cd_null,cd_potent,params,cv,cond2use,cdix)
+% title('Hits and Errors')
 
 
 
+%% how much variance does NP_ramping_mode explain of the reconstructed data from NP
+
+plotVarExpRampingNP(cd_null,cd_potent,obj,rez,params)
+
+
+%% ME, Mag_NP, Mag_fullActivity
+% looking at cortical disengagement stuff here
+
+cond2use = [8 9 10 11]; % right, left hits, no early
+
+plotMagnitudeCluPotent_ME(obj,rez,params,me,cond2use)
 
 
 
+%% Reaction time stuff
+
+rt = firstJawRT(obj);
+% rt = firstTongueRT(obj);
+
+% plotRT_ME_singleTrials(obj,params,me,rt)
+
+nQuantiles = 3;
+% cdSelectivityByRTQuartile(obj,cd_null,cd_potent,params,nQuantiles,rt);
+[h,p] = npSelectivityByRTQuartile(meta,obj,rez,params,nQuantiles,rt,me);
+
+%% single trial cross-corr b/w (me,potent) and (me,null)
+close all
+clear r
+
+dt = params(1).dt;
+
+maxlag = int64(3 ./ dt);
+
+cond2use = [2 3];
+for sessix = 1:numel(meta)
+
+    trix = cell2mat(params(sessix).trialid(cond2use)');
+
+    thisme = zscore(me(sessix).data(:,trix));
+    null = sum(rez(sessix).N_null(:,trix,:).^2,3);
+    potent = sum(rez(sessix).N_potent(:,trix,:).^2,3);
+
+    for t = 1:numel(trix)
+
+        [r.null{sessix}(:,t),lagtm] = xcorr(thisme(:,t),null(:,t),maxlag,'normalized');
+        r.potent{sessix}(:,t) = xcorr(thisme(:,t),potent(:,t),maxlag,'normalized');
+    end
 
 
+end
+
+mu.null = cellfun(@(x) squeeze(nanmean(x,2)),r.null,'UniformOutput',false); % mean across trials for each session
+mu.potent = cellfun(@(x) squeeze(nanmean(x,2)),r.potent,'UniformOutput',false);
+nullcc = cell2mat(mu.null);
+potentcc = cell2mat(mu.potent);
+
+%%
+col = getColors();
+lw = 2;
+alph = 0.2;
+f = figure;
+ax = gca;
+hold on;
+% shadedErrorBar(lagtm*dt,mean(nullcc,2),std(nullcc,[],2)./sqrt(numel(meta)),{'Color',col.null,'LineWidth',lw},alph,ax);
+% shadedErrorBar(lagtm*dt,mean(potentcc,2),std(potentcc,[],2)./sqrt(numel(meta)),{'Color',col.potent,'LineWidth',lw},alph,ax);
+shadedErrorBar(lagtm*dt,mean(nullcc,2),getCI(nullcc),{'Color',col.null,'LineWidth',lw},alph,ax);
+shadedErrorBar(lagtm*dt,mean(potentcc,2),getCI(potentcc),{'Color',col.potent,'LineWidth',lw},alph,ax);
 
 
-
-
-
-
+xlabel('lags (s)')
+ylabel('cross corr')
+title('ta-elsayed')
 
 
 

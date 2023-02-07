@@ -35,7 +35,7 @@ end
 
 % get single trial data
 obj.trialdat{prbnum} = zeros(numel(obj.time),numel(params.cluid{prbnum}),obj.bp.Ntrials);
-obj.trialspikes{prbnum} = zeros(numel(spkedges),numel(params.cluid{prbnum}),obj.bp.Ntrials);
+% obj.trialspikes{prbnum} = zeros(numel(spkedges),numel(params.cluid{prbnum}),obj.bp.Ntrials);
 for i = 1:numel(params.cluid{prbnum})
     curClu = params.cluid{prbnum}(i);
     for j = 1:obj.bp.Ntrials
@@ -61,13 +61,13 @@ for i = 1:numel(params.cluid{prbnum})
         
         obj.trialdat{prbnum}(:,i,j) = mySmooth(N./params.dt,params.smooth, params.bctype);
         
-        % raw spikes
-        spkN = histc(obj.clu{prbnum}(curClu).trialtm_aligned(spkix), spkedges);
-        if size(spkN,2) > size(spkN,1)
-            spkN = spkN'; % make sure N is a column vector
-        end
-        spkN(spkN > 1) = 1; % binarize (should only have at most 1 spk in 1 ms bin)
-        obj.trialspikes{prbnum}(:,i,j) = spkN;
+%         % raw spikes
+%         spkN = histc(obj.clu{prbnum}(curClu).trialtm_aligned(spkix), spkedges);
+%         if size(spkN,2) > size(spkN,1)
+%             spkN = spkN'; % make sure N is a column vector
+%         end
+%         spkN(spkN > 1) = 1; % binarize (should only have at most 1 spk in 1 ms bin)
+%         obj.trialspikes{prbnum}(:,i,j) = spkN;
 
     end
 end

@@ -42,7 +42,7 @@ disp('--Spikes Aligned')
 disp(' ')
 
 % get trial avg psth and single trial data
-if ~isfield(params,'bctype')
+if ~isfield(params,'bctype') % boundary condition for smoothing
     params.bctype = 'none';
 end
 obj = getSeq(obj,params,prbnum);

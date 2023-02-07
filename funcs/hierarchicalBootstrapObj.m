@@ -51,7 +51,7 @@ for sessix = 1:numel(bootobj)
 end
 
 disp(' ')
-disp('DATA LOADED AND PROCESSED')
+disp('BOOTSTRAP OBJs PROCESSED')
 disp(' ')
 
 

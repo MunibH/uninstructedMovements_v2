@@ -76,7 +76,7 @@ params.probe = {meta.probe}; % put probe numbers into params, one entry for elem
 
 [obj,params] = loadSessionData(meta,params, params.behav_only);
 
-%% 
+%% absolute
 
 close all
 
@@ -95,7 +95,7 @@ for sessix = 1:numel(obj)
 
 
     f = figure; hold on;
-    f.Position = [680   814   417   164];
+    f.Position = [339   493   549   202];
     ax = gca;
     plot((1:obj(sessix).bp.Ntrials), hitrate{sessix},'k', 'LineWidth',3)
     plot((1:obj(sessix).bp.Ntrials), missrate{sessix},'Color',[0.5 0.5 0.5], 'LineWidth',3)
@@ -145,5 +145,71 @@ end
 
 
 
-%%
+%% moving mean
 
+close all
+
+clrs = getColors();
+cols{1} = clrs.afc;
+cols{2} = clrs.aw;
+
+win = 50;
+
+for sessix = 1:numel(obj)
+    % get hit rate across entire session
+    hits = obj(sessix).bp.hit;
+    miss = obj(sessix).bp.miss;
+    no   = obj(sessix).bp.no;
+
+    hits_ = movmean(hits,win) * 100;
+    miss_ = movmean(miss,win) * 100;
+    no_   = movmean(no,win) * 100;
+
+
+    f = figure; hold on;
+    f.Position = [339   493   549   202];
+    ax = gca;
+    plot((1:obj(sessix).bp.Ntrials), hits_,'k', 'LineWidth',1)
+    plot((1:obj(sessix).bp.Ntrials), miss_,'Color',[0.5 0.5 0.5], 'LineWidth',1)
+    plot((1:obj(sessix).bp.Ntrials), no_,'Color',[50, 168, 82]./255, 'LineWidth',1)
+
+    yy = ax.YLim;
+
+    % aw blocks
+    tt = obj(sessix).bp.autowater; % 1 == aw, 0 == afc
+    [istart, iend] = ZeroOnesCount(tt);
+    for i = 1:numel(istart)
+        xs = [istart(i) iend(i)+1 iend(i)+1 istart(i)];
+        ys = [min(yy) min(yy) max(yy) max(yy)];
+        ff = fill(xs,ys,clrs.aw);
+        ff.FaceAlpha = 0.3;
+        ff.EdgeColor = 'none';
+    end
+    % afc blocks
+    [istart, iend] = ZeroOnesCount(~tt);
+    for i = 1:numel(istart)
+        xs = [istart(i) iend(i)+1 iend(i)+1 istart(i)];
+        ys = [min(yy) min(yy) max(yy) max(yy)];
+        ff = fill(xs,ys,clrs.afc);
+        ff.FaceAlpha = 0.3;
+        ff.EdgeColor = 'none';
+    end
+
+    xlabel('Trial number')
+    ylabel('Rate (%)')
+    title([meta(sessix).anm ' ' meta(sessix).date]);
+    ax.FontSize = 11;
+    ax.Title.FontSize = 7;
+    xlim([1 obj(sessix).bp.Ntrials])
+
+
+    h = zeros(3, 1);
+    h(1) = plot(NaN,NaN,'-','Color',[0 0 0]./255, 'LineWidth',2);
+    h(2) = plot(NaN,NaN,'-','Color',[0.5 0.5 0.5], 'LineWidth',2);
+    h(3) = plot(NaN,NaN,'-','Color',[50, 168, 82]./255, 'LineWidth',2);
+    leg = legend(h, 'Hit','Miss','NR');
+    leg.Location = 'best';
+    leg.FontSize = 8;
+    leg.EdgeColor = 'none';
+    leg.Color = 'none';
+end

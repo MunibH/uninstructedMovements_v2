@@ -14,26 +14,41 @@ for i = 1:numel(obj) % for each session
         align = mode(obj(i).bp.ev.(dfparams.alignEv));
         sample = mode(obj(i).bp.ev.sample) - align;
         delay = mode(obj(i).bp.ev.delay) - align;
+        gc    = mode(obj(i).bp.ev.goCue) - align;
     end
+
     for k = 1:numel(featix)
         f = figure; hold on;
-        f.Position = [680    85   821   893];
-        t = tiledlayout('flow');
-
+        f.Position = [383   598   270   360];
+        ax = gca; 
+        hold on;
+        nTrials = zeros(numel(cond2plot),1);
+        toplot = [];
         for j = 1:numel(cond2plot)
-            ax = nexttile; hold on;
             trials = params(i).trialid{cond2plot(j)};
+            nTrials(j) = numel(trials);
             temp = kinfeats{i}(:,trials,featix(k));
-            imagesc(dfparams.time, 1:size(temp,2), temp');
-            xline(delay,'w--');
-            xline(sample,'w--');
-            xline(0,'w--');
-            title(dfparams.cond{cond2plot(j)});
-            xlim([dfparams.time(10) dfparams.time(end)]);
-            ylim([0 size(temp,2)]);
+            toplot = cat(2,toplot,temp);
         end
-        xlabel(t,['time (s) from ' dfparams.alignEv])
-        sgtitle([meta(i).anm ' ' meta(i).date ' | ' feats2plot{k}], 'Interpreter','none')
+        toplot = mySmooth(toplot,21,'reflect');
+        imagesc(dfparams.time, 1:size(toplot,2), toplot');
+        xline(delay,'w--');
+        xline(sample,'w--');
+        xline(gc,'w--')
+        if delay~=0
+            xline(0,'w--');
+        end
+        title(dfparams.cond{cond2plot(j)});
+        xlim([dfparams.time(10) 1]);
+        ylim([0 size(toplot,2)]);
+        xlabel(['Time from stim/' dfparams.alignEv ' onset (s)'])
+        title([meta(i).anm ' ' meta(i).date ' | ' feats2plot{k}], 'Interpreter','none')
+        ax.YDir = 'reverse';
+        for i = 1:numel(nTrials)-1
+            yline(nTrials(i),'w--')
+        end
+        colormap(linspecer)
+        c = colorbar;
 
         if sav
            pth = [ 'C:\Users\munib\Documents\Economo-Lab\code\uninstructedMovements\mc_stim\figs\' meta(i).anm '\kin'];

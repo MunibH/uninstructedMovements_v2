@@ -23,17 +23,18 @@ params.nLicks              = 20; % number of post go cue licks to calculate medi
 params.lowFR               = 1; % remove clusters with firing rates across all trials less than this val
 
 % set conditions to calculate PSTHs for
-% params.condition(1) = {'R&hit&~stim.enable&~autowater'};             % right hits, no stim, aw off
-% params.condition(end+1) = {'L&hit&~stim.enable&~autowater'};         % left hits, no stim, aw off
-params.condition(1)     = {'hit&~stim.enable&~autowater'};             % afc
-params.condition(end+1) = {'hit&~stim.enable&autowater'};              % aw
+params.condition(1)     = {'R&hit&~stim.enable&~autowater&~early'};             % right hits, no stim, aw off
+params.condition(end+1) = {'L&hit&~stim.enable&~autowater&~early'};         % left hits, no stim, aw off
+params.condition(end+1) = {'hit&~stim.enable&~autowater&~early'};             % afc
+params.condition(end+1) = {'hit&~stim.enable&autowater&~early'};              % aw
 
 params.tmin = -2.5;
 params.tmax = 2.5;
 params.dt = 1/100;
 
 % smooth with causal gaussian kernel
-params.smooth = 15;
+params.smooth = 31;
+params.bctype = 'reflect';
 
 % cluster qualities to use
 params.quality = {'all'}; % accepts any cell array of strings - special character 'all' returns clusters of any quality
@@ -92,10 +93,10 @@ close all
 cond2plot = 1:2;
 clrs = getColors;
 
-% cols{1} = clrs.rhit;
-% cols{2} = clrs.lhit;
-cols{1} = clrs.afc;
-cols{2} = clrs.aw;
+cols{1} = clrs.rhit;
+cols{2} = clrs.lhit;
+% cols{1} = clrs.afc;
+% cols{2} = clrs.aw;
 
 
 plotSpikeRaster_PSTH(meta,obj,params,cond2plot,cols)

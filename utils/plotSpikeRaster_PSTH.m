@@ -17,7 +17,7 @@ set(ax.psth,'Units','normalized','Position',  [0.2  0.15 0.7 .2]);
 % turn off xticks for raster plot
 ax.raster.XTick = [];
 ax.raster.YLabel.String = 'Trials';
-ax.psth.XLabel.String = 'Time (s) from go cue';
+ax.psth.XLabel.String = 'Time from go cue (s)';
 ax.psth.YLabel.String = 'Spikes / s';
 ax.raster.FontSize = 10;
 ax.psth.FontSize = 10;

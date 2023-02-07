@@ -12,6 +12,10 @@ cd_labels = {'late'};
 cd_epochs = {params(1).alignEvent};
 cd_times = {[-0.42 -0.02]}; % in seconds, relative to respective epochs
 
+% cd_labels = {'late_error','go'};
+% cd_epochs = {'goCue','goCue'};
+% cd_times = {[-0.42 -0.02], [0.02 0.42]}; % in seconds, relative to respective epochs
+
 for sessix = 1:numel(obj)
 
     %-------------------------------------------
@@ -19,6 +23,7 @@ for sessix = 1:numel(obj)
     % ------------------------------------------
     rez(sessix).time = obj(sessix).time;
     rez(sessix).psth = standardizePSTH(obj(sessix));
+%     rez(sessix).psth = obj(sessix).psth;
     rez(sessix).condition = params(sessix).condition;
     rez(sessix).trialid = params(sessix).trialid;
     rez(sessix).alignEvent = params(sessix).alignEvent;
@@ -41,7 +46,18 @@ for sessix = 1:numel(obj)
         e2 = mode(rez(sessix).ev.(cd_epochs{ix})) + cd_times{ix}(2) - rez(sessix).align;
         times.(cd_labels{ix}) = rez(sessix).time>e1 & rez(sessix).time<e2;
         % calculate coding direction
-        rez(sessix).cd_mode(:,ix) = calcCD(rez(sessix).psth,times.(cd_labels{ix}),cond2use);
+        if ~strcmpi(cd_labels{ix},'late_error')
+            rez(sessix).cd_mode(:,ix) = calcCD(rez(sessix).psth,times.(cd_labels{ix}),cond2use);
+
+        else
+            tempdat = rez(sessix).psth(:,:,2:5); % right hits, left hits, right miss, left miss
+            mu = squeeze(mean(tempdat(times.(cd_labels{ix}),:,:),1));
+            sd = squeeze(std(tempdat(times.(cd_labels{ix}),:,:),[],1));
+            cd = ( (mu(:,1)-mu(:,3)) + (mu(:,4)-mu(:,2))   ) ./ sqrt(sum(sd.^2,2));
+            cd(isnan(cd)) = 0;
+            cd = cd./sum(abs(cd)); % (ncells,1)
+            rez(sessix).cd_mode(:,ix) = cd;
+        end
     end
 
 
@@ -80,9 +96,9 @@ for sessix = 1:numel(obj)
     % --selectivity--
     % ------------------------------------------
     % coding directions
-    rez(sessix).selectivity_squared = squeeze(rez(sessix).cd_proj(:,1,:) - rez(sessix).cd_proj(:,2,:)).^2; 
+    rez(sessix).selectivity_squared = squeeze(rez(sessix).cd_proj(:,1,:) - rez(sessix).cd_proj(:,2,:)).^2;
     % sum of coding directions
-    rez(sessix).selectivity_squared(:,4) = sum(rez(sessix).selectivity_squared,2); 
+    rez(sessix).selectivity_squared(:,4) = sum(rez(sessix).selectivity_squared,2);
     % full neural pop
     temp = rez(sessix).psth(:,:,cond2use);
     temp = (temp(:,:,1) - temp(:,:,2)).^2;

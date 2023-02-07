@@ -141,17 +141,13 @@ rez.Qnull = Q*P{2};
 
 %% projections
 
-rez = projectNP(trials_cond,input_data,rez);
+rez = ta_projectNP(input_data,rez,cond2proj,params);
 
 %% var exp
 
 rez = var_exp_NP(trials_cond,input_data,rez);
 
-
-%% trial average projections
-
-rez = ta_projectNP(input_data,rez,cond2proj,params);
-
+rez = var_exp_NP_recon(input_data,rez,cond2proj,params, trials, me);
 
 end
 
