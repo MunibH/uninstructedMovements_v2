@@ -1,16 +1,23 @@
-function [plotsel , selDims] = getSortedSelectivityPref(obj,params,rez,edges,cond2use_ta,cond2use_st,modparams,space)
+function [plotsel , selDims, allpref, allnonpref] = getSortedSelectivityPref(obj,params,rez,edges,cond2use_ta,cond2use_st,modparams,space)
 % Find cells that are significantly modulated by context (ranksum test, p-value = 0.01)
 % As in Inagaki et al., Cell, 2022 ('A midbrain-thalamus...')
 % modulatedCells = (1 x nDims) array where 1 means the dim is latedelay-selective and 0 means it is not
 
-[~,ix1] = min(abs(obj(1).time - edges(1)));
-[~,ix2] = min(abs(obj(1).time - edges(2)));
+if ~iscell(edges)
+    [~,ix1] = min(abs(obj(1).time - edges(1)));
+    [~,ix2] = min(abs(obj(1).time - edges(2)));
+end
 
 selectiveDims = [];
 alldat = [];
 allpref = [];
 allve = [];
 for sessix = 1:length(obj)                                           % For every session...
+
+    if iscell(edges)
+        [~,ix1] = min(abs(obj(1).time - edges{sessix}(1)));
+        [~,ix2] = min(abs(obj(1).time - edges{sessix}(2)));
+    end
 
     if strcmpi(space,'null')
         trialdat = rez(sessix).N_null;                                 % Get the trial PSTH (time x trials x dims)

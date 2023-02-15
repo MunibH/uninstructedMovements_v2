@@ -9,17 +9,10 @@ mainCond = 1; % right trials should always be higher
 %%
 
 % % Sort by delay selectivity
-edges = [mode(obj(1).bp.ev.delay) mode(obj(1).bp.ev.goCue)] - 2.5;
-% edges = [-0.4 0]; % (s) relative to go cue
+for i = 1:numel(obj)
+    edges{i} = [mode(obj(i).bp.ev.delay) mode(obj(i).bp.ev.goCue)] - mode(obj(i).bp.ev.goCue);
+end
 
-% sort by late-sample selectivity
-% edges = [mode(obj(1).bp.ev.delay)-0.5 mode(obj(1).bp.ev.delay)] - 2.5;
-
-% % sort by presample-selectivity
-% edges = [mode(obj(1).bp.ev.sample)-0.3 mode(obj(1).bp.ev.sample)] - 2.5;
-
-% % sort by response-selectivity
-% edges = [mode(obj(1).bp.ev.goCue)+0.02 mode(obj(1).bp.ev.goCue)+0.5] - 2.5;
 
 modparams.subTrials = subTrials;
 

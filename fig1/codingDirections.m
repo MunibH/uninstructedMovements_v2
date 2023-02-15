@@ -16,7 +16,7 @@ rmpath(genpath(fullfile(utilspth,'musall2919/')))
 addpath(genpath(pwd))
 
 %% PARAMETERS
-params.alignEvent          = 'lastLick'; % 'jawOnset' 'goCue'  'moveOnset'  'firstLick'  'lastLick'
+params.alignEvent          = 'goCue'; % 'jawOnset' 'goCue'  'moveOnset'  'firstLick'  'lastLick'
 
 % time warping only operates on neural data for now.
 % TODO: time warp for video and bpod data
@@ -65,14 +65,14 @@ datapth = '/Users/Munib/Documents/Economo-Lab/data/';
 meta = [];
 
 % --- ALM --- 
-meta = loadJEB6_ALMVideo(meta,datapth);
+% meta = loadJEB6_ALMVideo(meta,datapth);
 meta = loadJEB7_ALMVideo(meta,datapth);
-meta = loadEKH1_ALMVideo(meta,datapth);
-meta = loadEKH3_ALMVideo(meta,datapth);
-meta = loadJGR2_ALMVideo(meta,datapth);
-meta = loadJGR3_ALMVideo(meta,datapth);
-meta = loadJEB14_ALMVideo(meta,datapth);
-meta = loadJEB15_ALMVideo(meta,datapth);
+% meta = loadEKH1_ALMVideo(meta,datapth);
+% meta = loadEKH3_ALMVideo(meta,datapth);
+% meta = loadJGR2_ALMVideo(meta,datapth);
+% meta = loadJGR3_ALMVideo(meta,datapth);
+% meta = loadJEB14_ALMVideo(meta,datapth);
+% meta = loadJEB15_ALMVideo(meta,datapth);
 
 % --- M1TJ ---
 % meta = loadJEB14_M1TJVideo(meta,datapth);

@@ -24,25 +24,31 @@ params.nLicks              = 20; % number of post go cue licks to calculate medi
 params.lowFR               = 0; % remove clusters with firing rates across all trials less than this val
 
 % set conditions to calculate PSTHs for
-params.condition(1)     = {'(hit|miss|no)'};                             % all trials
-params.condition(end+1) = {'R&hit&~stim.enable&~autowater'};             % right hits, no stim, aw off
-params.condition(end+1) = {'L&hit&~stim.enable&~autowater'};             % left hits, no stim, aw off
-params.condition(end+1) = {'R&miss&~stim.enable&~autowater'};            % error right, no stim, aw off
-params.condition(end+1) = {'L&miss&~stim.enable&~autowater'};            % error left, no stim, aw off
-params.condition(end+1) = {'R&no&~stim.enable&~autowater'};            % no right, no stim, aw off
-params.condition(end+1) = {'L&no&~stim.enable&~autowater'};            % no left, no stim, aw off
+params.condition(1)     = {'(hit|miss|no)'};                             % all trials (1)
+params.condition(end+1) = {'R&hit&~stim.enable&~autowater'};             % right hits, no stim, aw off (2)
+params.condition(end+1) = {'L&hit&~stim.enable&~autowater'};             % left hits, no stim, aw off (3)
+params.condition(end+1) = {'R&miss&~stim.enable&~autowater'};            % error right, no stim, aw off (4)
+params.condition(end+1) = {'L&miss&~stim.enable&~autowater'};            % error left, no stim, aw off (5)
+params.condition(end+1) = {'R&no&~stim.enable&~autowater'};            % no right, no stim, aw off (6)
+params.condition(end+1) = {'L&no&~stim.enable&~autowater'};            % no left, no stim, aw off (7)
 
 % for projections
-params.condition(end+1) = {'R&hit&~stim.enable&~autowater&~early'};             % right hits, no stim, aw off
-params.condition(end+1) = {'L&hit&~stim.enable&~autowater&~early'};             % left hits, no stim, aw off
-params.condition(end+1) = {'R&miss&~stim.enable&~autowater&~early'};            % error right, no stim, aw off
-params.condition(end+1) = {'L&miss&~stim.enable&~autowater&~early'};            % error left, no stim, aw off
+params.condition(end+1) = {'R&hit&~stim.enable&~autowater&~early'};             % right hits, no stim, aw off (8)
+params.condition(end+1) = {'L&hit&~stim.enable&~autowater&~early'};             % left hits, no stim, aw off (9)
+params.condition(end+1) = {'R&miss&~stim.enable&~autowater&~early'};            % error right, no stim, aw off (10)
+params.condition(end+1) = {'L&miss&~stim.enable&~autowater&~early'};            % error left, no stim, aw off (11)
 
-params.condition(end+1) = {'R&~stim.enable&~autowater&~early'};
-params.condition(end+1) = {'L&~stim.enable&~autowater&~early'};
+params.condition(end+1) = {'R&~stim.enable&~autowater&~early'}; % (12)
+params.condition(end+1) = {'L&~stim.enable&~autowater&~early'}; % (13)
 
 % for ramping
-params.condition(end+1) = {'hit&~stim.enable&~autowater'};               % all hits, no stim, aw off
+params.condition(end+1) = {'hit&~stim.enable&~autowater'};               % all hits, no stim, aw off (14)
+
+% autowater
+params.condition(end+1) = {'R&hit&~stim.enable&autowater'};             % right hits, no stim, aw off (15)
+params.condition(end+1) = {'L&hit&~stim.enable&autowater'};             % left hits, no stim, aw off  (16)
+params.condition(end+1) = {'R&miss&~stim.enable&autowater'};             % right hits, no stim, aw off (17)
+params.condition(end+1) = {'L&miss&~stim.enable&autowater'};             % left hits, no stim, aw off  (18)
 
 params.tmin = -2.5;
 params.tmax = 2.5;
@@ -79,8 +85,8 @@ meta = loadEKH1_ALMVideo(meta,datapth); % selectivity in ME
 meta = loadEKH3_ALMVideo(meta,datapth); % selectivity in ME
 meta = loadJGR2_ALMVideo(meta,datapth);
 meta = loadJGR3_ALMVideo(meta,datapth);
-% meta = loadJEB13_ALMVideo(meta,datapth);
-meta = loadJEB14_ALMVideo(meta,datapth); % selectivity in ME
+meta = loadJEB13_ALMVideo(meta,datapth);
+meta = loadJEB14_ALMVideo(meta,datapth); % selectivity in ME % go cue is at 2.3 instead of 2.5 like all other sessions??
 meta = loadJEB15_ALMVideo(meta,datapth);
 
 
@@ -129,18 +135,20 @@ for sessix = 1:numel(meta)
     trialdat_zscored = zscore_singleTrialNeuralData(obj(sessix));
 
     % -- null and potent spaces
-    cond2use = [2 3 4 5]; % right hit, left hit, right miss, left miss
+    cond2use = [2:5 15:18]; % right hit, left hit, right miss, left miss, 2afc and aw
     cond2proj = [8:11 14];
     nullalltime = 0; % use all time points to estimate null space if 1
-    rez(sessix) = singleTrial_elsayed_np(trialdat_zscored, obj(sessix), me(sessix), params(sessix), cond2use, cond2proj, nullalltime);
+    onlyAW = 0; % only use AW trials
+    delayOnly = 0; % only use delay period
+    rez(sessix) = singleTrial_elsayed_np(trialdat_zscored, obj(sessix), me(sessix), params(sessix), cond2use, cond2proj, nullalltime, onlyAW, delayOnly);
 
     % -- coding dimensions
     cond2use = [1 2]; % right hits, left hits (corresponding to null/potent psths in rez)
     cond2proj = [1:4]; % right hits, left hits, right miss, left miss (corresponding to null/potent psths in rez)
     cond2use_trialdat = [2 3]; % for calculating selectivity explained in full neural pop
     rampcond = 5; % corresponding to cond2proj in null/potent analysis
-    %     cd_null(sessix) = getCodingDimensions(rez(sessix).N_null_psth,rez(sessix).N_null,trialdat_zscored,obj(sessix),params(sessix),cond2use,cond2use_trialdat, cond2proj);
-    %     cd_potent(sessix) = getCodingDimensions(rez(sessix).N_potent_psth,rez(sessix).N_potent,trialdat_zscored,obj(sessix),params(sessix),cond2use,cond2use_trialdat, cond2proj);
+%     cd_null(sessix) = getCodingDimensions(rez(sessix).N_null_psth,rez(sessix).N_null,trialdat_zscored,obj(sessix),params(sessix),cond2use,cond2use_trialdat, cond2proj,rampcond);
+%     cd_potent(sessix) = getCodingDimensions(rez(sessix).N_potent_psth,rez(sessix).N_potent,trialdat_zscored,obj(sessix),params(sessix),cond2use,cond2use_trialdat, cond2proj,rampcond);
 
     cd_null(sessix) = getCodingDimensions(rez(sessix).recon_psth.null,trialdat_zscored,trialdat_zscored,obj(sessix),params(sessix),cond2use,cond2use_trialdat, cond2proj, rampcond);
     cd_potent(sessix) = getCodingDimensions(rez(sessix).recon_psth.potent,trialdat_zscored,trialdat_zscored,obj(sessix),params(sessix),cond2use,cond2use_trialdat, cond2proj, rampcond);
@@ -156,7 +164,7 @@ close all
 
 sav = 0;
 
-plotmiss = 0;
+plotmiss = 1;
 plotno = 0;
 
 titlestring = 'Null';
@@ -186,11 +194,11 @@ titlestring = 'Null | Potent CDs';
 %% selectivity in various epochs in cd late hits and errors
 close all
 
-titlestring = 'Null';
-axnull = plotCD_EpochSelectivity(meta,obj,cd_null_all,cd_null,titlestring);
+% titlestring = 'Null';
+axnull = plotCD_EpochSelectivity(meta,obj,cd_null_all,cd_null,cd_potent_all,cd_potent);
 
-titlestring = 'Potent';
-axpotent = plotCD_EpochSelectivity(meta,obj,cd_potent_all,cd_potent,titlestring);
+% titlestring = 'Potent';
+% axpotent = plotCD_EpochSelectivity(meta,obj,cd_potent_all,cd_potent,titlestring);
 
 %% variance explained
 close all
@@ -378,24 +386,35 @@ for sessix = 1:numel(meta)
     trix = cell2mat(params(sessix).trialid(cond2use)');
 
     thisme = zscore(me(sessix).data(:,trix));
-    null = sum(rez(sessix).N_null(:,trix,:).^2,3);
-    potent = sum(rez(sessix).N_potent(:,trix,:).^2,3);
+    %     null = sum(rez(sessix).N_null(:,trix,:).^2,3);
+    %     potent = sum(rez(sessix).N_potent(:,trix,:).^2,3);
 
     for t = 1:numel(trix)
 
-        [r.null{sessix}(:,t),lagtm] = xcorr(thisme(:,t),null(:,t),maxlag,'normalized');
-        r.potent{sessix}(:,t) = xcorr(thisme(:,t),potent(:,t),maxlag,'normalized');
+        % null
+        ndims = rez(sessix).dPrep;
+        for d = 1:ndims
+            null = rez(sessix).N_null(:,trix(t),d).^2;
+            [r.null{sessix}(:,t,d),lagtm] = xcorr(thisme(:,t),null,maxlag,'normalized'); % {session}(time,trial,dim)
+        end
+
+        % potent
+        ndims = rez(sessix).dMove;
+        for d = 1:ndims
+            potent = rez(sessix).N_potent(:,trix(t),d).^2;
+            [r.potent{sessix}(:,t,d),lagtm] = xcorr(thisme(:,t),potent,maxlag,'normalized');
+        end
     end
 
 
 end
 
-mu.null = cellfun(@(x) squeeze(nanmean(x,2)),r.null,'UniformOutput',false); % mean across trials for each session
-mu.potent = cellfun(@(x) squeeze(nanmean(x,2)),r.potent,'UniformOutput',false);
+mu.null = cellfun(@(x) squeeze(nanmean(nanmean(x,3),2)),r.null,'UniformOutput',false); % mean across trials for each session
+mu.potent = cellfun(@(x) squeeze(nanmean(nanmean(x,3),2)),r.potent,'UniformOutput',false);
 nullcc = cell2mat(mu.null);
 potentcc = cell2mat(mu.potent);
 
-%%
+% plots
 col = getColors();
 lw = 2;
 alph = 0.2;
@@ -411,6 +430,84 @@ shadedErrorBar(lagtm*dt,mean(potentcc,2),getCI(potentcc),{'Color',col.potent,'Li
 xlabel('lags (s)')
 ylabel('cross corr')
 title('ta-elsayed')
+
+%% onset of selectivity in potent space and motion energy (just exploring)
+
+close all
+clear null potent me_
+
+cond2use_ta = [1 2]; % right and left hits, corresponding to trial-avg projs onto n/p
+cond2use_st = [8 9]; % right and left hits, corresponding to single-trial projs onto n/p
+% plotSelectivityNP(meta,obj,params,rez,cond2use_ta,cond2use_st)
+
+% hits
+subTrials = 35;
+
+for i = 1:numel(obj)
+    [null{i},potent{i},me_.right{i}, me_.left{i}] = plotSelectivityNPPrefOnset(meta(i),obj(i),params(i),me(i),rez(i),cond2use_ta,cond2use_st, subTrials);
+end
+
+sm = 21;
+smtype = 'reflect';
+null = mySmooth(cell2mat(null),sm,smtype);
+potent = mySmooth(cell2mat(potent),sm,smtype);
+me_.right = mySmooth(cell2mat(me_.right),sm,smtype);
+me_.left = mySmooth(cell2mat(me_.left),sm,smtype);
+
+
+
+xlims = [-2.4 0];
+
+f = figure;
+
+ax = nexttile;
+imagesc(obj(1).time,1:numel(obj),null'); %colormap(linspecer);
+colorbar;
+xlim(xlims);
+
+ax = nexttile;
+imagesc(obj(1).time,1:numel(obj),potent'); %colormap(linspecer);
+colorbar;
+clim([0 4])
+xlim(xlims);
+
+ax = nexttile;
+imagesc(obj(1).time,1:numel(obj),(me_.right - me_.left)'); %colormap(linspecer);
+colorbar;
+xlim(xlims);
+
+ax = nexttile;
+imagesc(obj(1).time,1:numel(obj),me_.right'); %colormap(linspecer);
+xlim(xlims);
+
+ax = nexttile;
+imagesc(obj(1).time,1:numel(obj),me_.left'); %colormap(linspecer);
+xlim(xlims);
+
+% 
+% temp = me_.right - me_.left;
+% for i = 1:numel(obj)
+%     cc.null(i) = corr(temp(:,i),null(:,i));
+%     cc.potent(i) = corr(temp(:,i),potent(:,i));
+% end
+% 
+% col = getColors;
+% f = figure;
+% ax = gca;
+% hold on;
+% nb = 10;
+% histogram(cc.null,nb,'EdgeColor','none','FaceColor',col.null,'FaceAlpha',0.5);
+% histogram(cc.potent,nb,'EdgeColor','none','FaceColor',col.potent,'FaceAlpha',0.5);
+
+
+
+
+
+
+
+
+
+
 
 
 
