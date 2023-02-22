@@ -463,20 +463,17 @@ for sessix = 1:numel(meta)
     ax = gca;
     hold on;
     for c = 1:numel(cond2use)
+        trix = params(sessix).trialid{cond2use(c)};
 
-        null = mySmooth(sum(rez(sessix).proj_null(:,:,c),2),sm,'reflect');
-%         mySmooth(sum(rez(sessix).N_null(:,trix,:).^2,3),sm,'reflect');
-%         mu = nanmean(null,2);
-%         sig = nanstd(null,[],2) ./ sqrt(rez(sessix).dPrep);
-%         shadedErrorBar(obj(1).time,mu,getCI(null),{'Color',col.null{c},'LineWidth',lw},alph,ax)
-        plot(obj(1).time,null,'Color',col.null{c},'LineWidth',2)
+        null = mySmooth(sum(rez(sessix).N_null(:,trix,:).^2,3),sm,'reflect');
+        mu = nanmean(null,2);
+        sig = nanstd(null,[],2) ./ sqrt(numel(trix));
+        shadedErrorBar(obj(1).time,mu,getCI(null),{'Color',col.null{c},'LineWidth',lw},alph,ax)
 
-        potent = mySmooth(sum(rez(sessix).proj_potent(:,:,c),2),sm,'reflect');
-%         potent = mySmooth(sum(rez(sessix).N_potent(:,trix,:).^2,3),sm,'reflect');
-%         mu = nanmean(potent,2);
-%         sig = nanstd(potent,[],2) ./ sqrt(rez(sessix).dMove);
-%         shadedErrorBar(obj(1).time,mu,getCI(potent),{'Color',col.potent{c},'LineWidth',lw},alph,ax)
-        plot(obj(1).time,potent,'Color',col.potent{c},'LineWidth',2)
+        potent = mySmooth(sum(rez(sessix).N_potent(:,trix,:).^2,3),sm,'reflect');
+        mu = nanmean(potent,2);
+        sig = nanstd(potent,[],2) ./ sqrt(numel(trix));
+        shadedErrorBar(obj(1).time,mu,getCI(potent),{'Color',col.potent{c},'LineWidth',lw},alph,ax)
     end
     title([meta(sessix).anm ' ' meta(sessix).date])
     ax.FontSize = 12;
@@ -486,68 +483,9 @@ for sessix = 1:numel(meta)
     xlim(xlims)
     xlabel('Time from go cue (s)')
     ylabel('Activity')
-
 end
 
 
-
-%% plot me np single trial heatmaps
-
-close all
-
-edges = [-0.4 -0.02]; % relative to to go cue
-for i = 1:numel(edges)
-    [~,tix(i)] = min(abs(obj(1).time - edges(i)));
-end
-
-sm = 11;
-
-for sessix = 1:numel(rez)
-    temprez = rez(sessix);
-    trix = cell2mat(params(sessix).trialid(2:3)');
-
-    tempme = me(sessix).data(:,trix);
-    
-    null = rez(sessix).null_ssm;
-    potent = rez(sessix).potent_ssm;
-   
-    [~,ix] = sort(mean(tempme(tix(1):tix(2),:),1),'descend');
-    trix = ix;
-
-    f = figure;
-    f.Position = [510   453   831   336];
-
-    ax1 = subplot(1,3,1);
-    plotme = tempme(:,trix);
-    imagesc(obj(sessix).time,1:numel(trix),plotme');
-    colormap(linspecer)
-    lims = clim;
-%     clim([lims(1) lims(2) / 1])
-    colorbar;
-    ylabel('Trials')
-
-    ax2 = subplot(1,3,2);
-    potent = mySmooth(normalize(potent(:,trix)),sm);
-    imagesc(obj(sessix).time,1:numel(trix),potent');
-    colormap(linspecer);
-    lims = clim;
-%     clim([lims(1) lims(2) / 1.5])
-    colorbar;
-    xlabel('Time from go cue (s)')
-
-    ax3 = subplot(1,3,3);
-    null = mySmooth(normalize(null(:,trix)),sm);
-    imagesc(obj(sessix).time,1:numel(trix), null');
-    colormap(linspecer)
-    lims = clim;
-%     clim([lims(1) lims(2) / 1.5])
-    colorbar;
-
-    sgtitle([meta(sessix).anm ' ' meta(sessix).date])
-    pause
-    close all
-
-end
 
 
 

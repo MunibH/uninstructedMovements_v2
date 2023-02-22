@@ -1,7 +1,13 @@
-function plotCDProj(allrez,obj,sav,plotmiss,plotaw,alignEvent)
+function plotCDProj(allrez,obj,sav,plotmiss,plotaw,alignEvent,varargin)
+
+if nargin > 6
+    stdErrDenom = varargin{1};
+else
+    stdErrDenom = numel(obj);
+end
 
 clrs = getColors();
-lw = 3;
+lw = 2;
 alph = 0.1;
 
 sample = mode(obj(1).bp.ev.sample - obj(1).bp.ev.(alignEvent));
@@ -17,7 +23,11 @@ for i = 1:numel(allrez.cd_labels) % for each coding direction
     %     ax = nexttile; hold on;
     tempdat = squeeze(allrez.cd_proj(:,:,i,:));
     tempmean = nanmean(tempdat,3);
-    temperror = nanstd(tempdat,[],3)./sqrt(numel(obj));
+%     temperror = nanstd(tempdat,[],3)./sqrt(stdErrDenom);
+    for j = 1:size(tempdat,2)
+        temp_ = squeeze(tempdat(:,j,:));
+        temperror(:,j) = getCI(temp_);
+    end
     shadedErrorBar(obj(1).time,tempmean(:,1),temperror(:,1),{'Color',clrs.rhit,'LineWidth',lw},alph, ax)
     shadedErrorBar(obj(1).time,tempmean(:,2),temperror(:,2),{'Color',clrs.lhit,'LineWidth',lw},alph, ax)
     if plotmiss

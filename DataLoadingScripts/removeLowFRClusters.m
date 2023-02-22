@@ -1,5 +1,5 @@
 function [obj,cluid] = removeLowFRClusters(obj,cluid,lowFR,prbnum)
-% % Remove low-firing rate units, e.g., all those firing less than 5
+% % Remove low-firing rate units, e.g., all those firing less than lowFR
 %   spikes per second on average across all trials.
 %   
 %   The fitted observation noise (diagonal element of R) for a

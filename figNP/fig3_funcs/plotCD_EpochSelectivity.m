@@ -75,11 +75,13 @@ for i = 1:numel(fns) % hits/misses
             end
 
             b(i).FaceAlpha = 0.85;
-
-            vs(i) = scatter(randn(nAnm,1) * 0.05 + xs(j,k)*ones(size(temp,2),1),temp,5,'MarkerFaceColor','k',...
+            
+            xx = nAnm;
+%             xx = numel(obj);
+            vs(i) = scatter(randn(xx,1) * 0.05 + xs(j,k)*ones(size(temp,2),1),temp,5,'MarkerFaceColor','k',...
                 'MarkerEdgeColor','k','LineWidth',1);
 
-            b(i).XEndPoints
+            b(i).XEndPoints;
             e = errorbar(b(i).XEndPoints,mu,nanstd(temp)./sqrt(numel(obj)),'LineStyle','none','Color','k','LineWidth',1);
             e.LineWidth = 0.5;
             e.CapSize = 2;
@@ -90,9 +92,10 @@ for i = 1:numel(fns) % hits/misses
 
 
             %         [h(ct),p(ct)] = ttest(temp);
-            [p(ct),h(ct)] = ranksum(temp,zeros(size(temp)));
+%             [p(ct),h(ct)] = ranksum(temp,zeros(size(temp)));
+            [p(ct),h(ct)] = signrank(temp,zeros(size(temp)));
             if h(ct)
-                text(xs(j,k),0,'*','FontSize',30)
+                text(xs(j,k),0,'*','FontSize',30);
             end
             ct = ct + 1;
 

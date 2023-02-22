@@ -25,12 +25,12 @@ params.lowFR               = 0; % remove clusters with firing rates across all t
 
 % set conditions to calculate PSTHs for
 params.condition(1)     = {'(hit|miss|no)'};                             % all trials (1)
-params.condition(end+1) = {'R&hit&~stim.enable&~autowater'};             % right hits, no stim, aw off (2)
-params.condition(end+1) = {'L&hit&~stim.enable&~autowater'};             % left hits, no stim, aw off (3)
-params.condition(end+1) = {'R&miss&~stim.enable&~autowater'};            % error right, no stim, aw off (4)
-params.condition(end+1) = {'L&miss&~stim.enable&~autowater'};            % error left, no stim, aw off (5)
-params.condition(end+1) = {'R&no&~stim.enable&~autowater'};            % no right, no stim, aw off (6)
-params.condition(end+1) = {'L&no&~stim.enable&~autowater'};            % no left, no stim, aw off (7)
+params.condition(end+1) = {'R&hit&~stim.enable&~autowater&~early'};             % right hits, no stim, aw off (2)
+params.condition(end+1) = {'L&hit&~stim.enable&~autowater&~early'};             % left hits, no stim, aw off (3)
+params.condition(end+1) = {'R&miss&~stim.enable&~autowater&~early'};            % error right, no stim, aw off (4)
+params.condition(end+1) = {'L&miss&~stim.enable&~autowater&~early'};            % error left, no stim, aw off (5)
+params.condition(end+1) = {'R&no&~stim.enable&~autowater&~early'};            % no right, no stim, aw off (6)
+params.condition(end+1) = {'L&no&~stim.enable&~autowater&~early'};            % no left, no stim, aw off (7)
 
 % for projections
 params.condition(end+1) = {'R&hit&~stim.enable&~autowater&~early'};             % right hits, no stim, aw off (8)
@@ -194,11 +194,11 @@ titlestring = 'Null | Potent CDs';
 %% selectivity in various epochs in cd late hits and errors
 close all
 
-% titlestring = 'Null';
-axnull = plotCD_EpochSelectivity(meta,obj,cd_null_all,cd_null,cd_potent_all,cd_potent);
+plotCDSelectivity(meta,obj,cd_null_all,cd_null,cd_potent_all,cd_potent);
 
-% titlestring = 'Potent';
-% axpotent = plotCD_EpochSelectivity(meta,obj,cd_potent_all,cd_potent,titlestring);
+
+plotCD_EpochSelectivity(meta,obj,cd_null_all,cd_null,cd_potent_all,cd_potent);
+
 
 %% variance explained
 close all

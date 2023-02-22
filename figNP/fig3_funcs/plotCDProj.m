@@ -29,11 +29,11 @@ for i = 1:numel(rez(1).cd_labels) % for each coding direction
     tempdat = squeeze(allrez.cd_proj(:,:,i,:));
 
     tempmean = nanmean(tempdat,3);
-    temperror = nanstd(tempdat,[],3)./sqrt(numel(rez));
-%     for j = 1:size(tempdat,2)
-%         temp_ = squeeze(tempdat(:,j,:));
-%         temperror(:,j) = getCI(temp_);
-%     end
+%     temperror = nanstd(tempdat,[],3)./sqrt(numel(rez));
+    for j = 1:size(tempdat,2)
+        temp_ = squeeze(tempdat(:,j,:));
+        temperror(:,j) = getCI(temp_);
+    end
     shadedErrorBar(rez(1).time,tempmean(:,1),temperror(:,1),{'Color',clrs.rhit,'LineWidth',lw},alph, ax(i))
     shadedErrorBar(rez(1).time,tempmean(:,2),temperror(:,2),{'Color',clrs.lhit,'LineWidth',lw},alph, ax(i))
     if plotmiss
