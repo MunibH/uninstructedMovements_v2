@@ -28,7 +28,7 @@ params.nLicks              = 20; % number of post go cue licks to calculate medi
 params.lowFR               = 1; % remove clusters with firing rates across all trials less than this val
 
 % set conditions to calculate PSTHs for
-params.condition(1)     = {'(hit|miss|no)'};                                              % all trials       (1)
+params.condition(1)     = {'(hit|miss|no)'};                             % all trials       (1)
 params.condition(end+1) = {'R&hit&~stim.enable&~autowater&~early'};      % right hits, 2afc (2)
 params.condition(end+1) = {'L&hit&~stim.enable&~autowater&~early'};      % left hit, 2afc   (3)
 params.condition(end+1) = {'R&miss&~stim.enable&~autowater&~early'};     % right miss, 2afc (4)
@@ -37,7 +37,10 @@ params.condition(end+1) = {'hit&~stim.enable&~autowater&~early'};        % 2afc 
 params.condition(end+1) = {'hit&~stim.enable&autowater&~early'};         % aw hits          (7)
 params.condition(end+1) = {'R&hit&~stim.enable&autowater&~early'};       % right hits, aw   (8)
 params.condition(end+1) = {'L&hit&~stim.enable&autowater&~early'};       % left hits, aw    (9)
-
+params.condition(end+1) = {'R&no&~stim.enable&~autowater&~early'};       % right no, 2afc   (10)
+params.condition(end+1) = {'L&no&~stim.enable&~autowater&~early'};       % left no, 2afc    (11)
+% for ramping
+params.condition(end+1) = {'hit&~stim.enable&~autowater'};               % all hits, no stim, aw off (12)
 
 params.tmin = -2.5;
 params.tmax = 2.5;
@@ -88,12 +91,22 @@ params.probe = {meta.probe}; % put probe numbers into params, one entry for elem
 
 [obj,params] = loadSessionData(meta,params);
 
+% ------------------------------------------
+% -- Motion Energy --
+% me (struct array) - one entry per session
+% ------------------------------------------
+for sessix = 1:numel(meta)
+    me(sessix) = loadMotionEnergy(obj(sessix), meta(sessix), params(sessix), datapth);
+%     kin(sessix) = getKinematics(obj(sessix), me(sessix), params(sessix));
+end
+
+
 
 %% BOOTSTRAP PARAMS
 
 clear boot bootobj bootparams
 
-boot.iters = 1000; % number of bootstrap iterations (most papers do 1000)
+boot.iters = 100; % number of bootstrap iterations (most papers do 1000)
 
 boot.N.anm = 5; % number of animals to sample w/ replacement
 boot.N.sess = 2; % number of sessions to sample w/ replacement (if Nsessions for an animal is less than this number, sample Nsessions)
@@ -103,7 +116,7 @@ boot.N.clu = 20; % number of neurons to sample w/o replacement
 
 %%
 
-clear samp
+clear samp allrez
 
 for iboot = 1:boot.iters
     disp(['Iteration ' num2str(iboot) '/' num2str(boot.iters)]);
@@ -115,11 +128,12 @@ for iboot = 1:boot.iters
     % randomly sample sessions
     for ianm = 1:boot.N.anm
         objix = find(objixs{ismember(uAnm,samp.anm{ianm})});
-        if numel(objix) == 1 % only one session for the current animal, use that session
-            samp.sessix{ianm} = objix;
-        else % more than one session, sample with replacement
-            samp.sessix{ianm} = randsample(objix,boot.N.sess,true);
-        end
+        samp.sessix{ianm} = randsample(objix,boot.N.sess,true);
+%         if numel(objix) == 1 % only one session for the current animal, use that session
+%             samp.sessix{ianm} = objix;
+%         else % more than one session, sample with replacement
+%             samp.sessix{ianm} = randsample(objix,boot.N.sess,true);
+%         end
     end
 
     % randomly sample trials
@@ -139,31 +153,27 @@ for iboot = 1:boot.iters
                 if numel(trialid{icond}) >= nTrials2Sample % if there are enough trials, sample without replacement
                     samp.trialid{ianm}{isess}{icond} = randsample(trialid{icond},nTrials2Sample,false);
                 else % if there are not enough trials, sample with replacement
-                    samp.trialid{ianm}{isess}{icond} = randsample(trialid{icond},nTrials2Sample,true);
+                    try % catches no response trial types with 0 trials
+                        samp.trialid{ianm}{isess}{icond} = randsample(trialid{icond},nTrials2Sample,true);
+                    catch
+                        samp.trialid{ianm}{isess}{icond} = randsample(trialid{icond},numel(trialid{icond}),true);
+                    end
                 end
             end
         end
     end
 
-    % randomly sample neurons
+    % randomly sample neurons 
     for ianm = 1:boot.N.anm
         for isess = 1:numel(samp.sessix{ianm})
             sessix = samp.sessix{ianm}(isess);
-            cluid = params(sessix).cluid;
-            nProbes = numel(meta(sessix).probe);
-            for iprobe = 1:numel(meta(sessix).probe)
-                prbnum = meta(sessix).probe(iprobe);
-                if nProbes > 1
-                    samp.cluid{ianm}{isess}{prbnum} = randsample(cluid{iprobe},boot.N.clu,false);
-                else
-                    samp.cluid{ianm}{isess}{prbnum} = randsample(cluid,boot.N.clu,false);
-                end
-            end
+            cluid = 1:size(obj(sessix).psth,2); % index of cluster in psth,trialdat,etc 
+            samp.cluid{ianm}{isess} = randsample(cluid,boot.N.clu,false);
         end
     end
 
     samp.trialdat = cell(numel(params(1).condition),1);
-    samp.psth = [];
+    samp.me = cell(numel(params(1).condition),1);
     for ianm = 1:boot.N.anm
         for isess = 1:numel(samp.sessix{ianm})
             sessix = samp.sessix{ianm}(isess);
@@ -176,50 +186,41 @@ for iboot = 1:boot.iters
             bootparams.timeWarp = params(sessix).timeWarp;
             bootparams.smooth = params(sessix).smooth;
             bootparams.bctype = params(sessix).bctype;
-
-            nProbes = numel(meta(sessix).probe);
-            for iprobe = 1:numel(meta(sessix).probe)
-                prbnum = meta(sessix).probe(iprobe);
-
-                bootobj = getSeq(obj(sessix),bootparams,prbnum,true);
-
-                psth = bootobj.psth{prbnum};
-                samp.psth = cat(2,samp.psth,psth);
+            
 
 
-                trialdat = bootobj.trialdat{prbnum};
-                trialid = bootparams.trialid;
-                for icond = 1:numel(trialid)
-                    samp.trialdat{icond} = cat(2,samp.trialdat{icond},trialdat(:,:,trialid{icond}));
-                end
-
-                clear bootobj
+            trialdat = obj(sessix).trialdat(:,samp.cluid{ianm}{isess},:);
+            me_trialdat = me(sessix).data;
+            trialid = bootparams.trialid;
+            for icond = 1:numel(trialid)
+                samp.trialdat{icond} = cat(3,samp.trialdat{icond},trialdat(:,:,trialid{icond}));
+                samp.me{icond} = cat(2,samp.me{icond},me_trialdat(:,trialid{icond}));
             end
         end
     end
 
     for icond = 1:numel(samp.trialdat)
-        samp.psth(:,:,icond) = mean(samp.trialdat{icond},3);
+        samp.psth(:,:,icond) = squeeze(mean(samp.trialdat{icond},3));
+        samp.meavg(:,icond) = mean(samp.me{icond},2);
     end
+    me_(iboot).trialdat = samp.me;
+    me_(iboot).conddat  = samp.meavg;
 
-
-    % sample data
-    bootobj = obj(1);
+    bootobj = rmfield(obj(1),'psth');
     bootobj.psth = samp.psth;
-
-    bootparams = params(1);
-
+    bootparams.alignEvent = params(1).alignEvent;
 
     % coding dimensions
 
     % % 2afc (early, late, go)
     cond2use = [2 3]; % left hit, right hit
-    cond2proj = [2 3 4 5 6 7 8 9];
-    rez_2afc = getCodingDimensions_2afc(bootobj,bootparams,cond2use,cond2proj);
+    cond2proj = [2 3 4 5 6 7 8 9 10 11];
+    rampcond = 12;
+    rez_2afc = getCodingDimensions_2afc(bootobj,bootparams,cond2use,cond2proj,rampcond);
 
     % % aw (context mode)
     cond2use = [6 7]; % hit 2afc, hit aw
-    cond2proj = [2 3 4 5 6 7 8 9];
+    cond2proj = [2 3 4 5 6 7 8 9 10 11];
     rez_aw = getCodingDimensions_aw(bootobj,bootparams,cond2use,cond2proj);
 
     allrez(iboot) = concatRezAcrossSessions(rez_2afc,rez_aw);
@@ -236,21 +237,27 @@ end
 temp = allrez;
 for i = 1:numel(temp)
     temp(i).cd_proj = nanmean(temp(i).cd_proj,4);
-    temp(i).cd_varexp = nanmean(temp(i).cd_varexp,1);
-    temp(i).cd_varexp_epoch = nanmean(temp(i).cd_varexp_epoch,1);
-    temp(i).selectivity_squared = nanmean(temp(i).selectivity_squared,3);
-    temp(i).selexp = nanmean(temp(i).selexp,3);
+%     temp(i).cd_varexp = nanmean(temp(i).cd_varexp,1);
+%     temp(i).cd_varexp_epoch = nanmean(temp(i).cd_varexp_epoch,1);
+%     temp(i).selectivity_squared = nanmean(temp(i).selectivity_squared,3);
+%     temp(i).selexp = nanmean(temp(i).selexp,3);
 end
 
 % concatenate bootstrap iterations
 rez = temp(1);
 for i = 2:numel(allrez)
     rez.cd_proj = cat(4,rez.cd_proj,temp(i).cd_proj);
-    rez.cd_varexp = cat(1,rez.cd_varexp,temp(i).cd_varexp);
-    rez.cd_varexp_epoch = cat(1,rez.cd_varexp_epoch,temp(i).cd_varexp_epoch);
-    rez.selectivity_squared = cat(3,rez.selectivity_squared,temp(i).selectivity_squared);
-    rez.selexp = cat(3,rez.selexp,temp(i).selexp);
+%     rez.cd_varexp = cat(1,rez.cd_varexp,temp(i).cd_varexp);
+%     rez.cd_varexp_epoch = cat(1,rez.cd_varexp_epoch,temp(i).cd_varexp_epoch);
+%     rez.selectivity_squared = cat(3,rez.selectivity_squared,temp(i).selectivity_squared);
+%     rez.selexp = cat(3,rez.selexp,temp(i).selexp);
 end
+
+me_all = zeros([size(me_(1).conddat),boot.iters]);
+for iboot = 1:boot.iters
+    me_all(:,:,iboot) = me_(iboot).conddat;
+end
+
 
 
 %% PLOTS
@@ -258,8 +265,8 @@ close all
 
 sav = 0; % 1=save, 0=no_save
 
-plotmiss = 0;
-plotaw = 1;
+plotmiss = 1;
+plotaw = 0;
 plotCDProj(rez,obj(1),sav,plotmiss,plotaw,params(1).alignEvent,boot.iters)
 
 % plotCDVarExp(allrez,sav)
@@ -270,7 +277,51 @@ plotCDProj(rez,obj(1),sav,plotmiss,plotaw,params(1).alignEvent,boot.iters)
 
 
 
+%% plot bootstrapped ME
+close all
 
+f = figure;
+ax = gca;
+hold on;
+
+tstart = mode(obj(1).bp.ev.bitStart) - 2.5;
+sample = mode(obj(1).bp.ev.sample) - 2.5;
+delay = mode(obj(1).bp.ev.delay) - 2.5;
+gc = 0;
+
+lw = 1;
+alph = 0.15;
+
+c = getColors;
+
+temp = squeeze(me_all(:,2,:));
+mu = mean(temp,2);
+stderr = std(temp,[],2);
+shadedErrorBar(obj(1).time,mu,stderr,{'Color',c.rhit,'LineWidth',lw},alph,ax)
+
+temp = squeeze(me_all(:,3,:));
+mu = mean(temp,2);
+stderr = std(temp,[],2);
+shadedErrorBar(obj(1).time,mu,stderr,{'Color',c.lhit,'LineWidth',lw},alph,ax)
+
+% f = figure;
+% ax = gca;
+% hold on;
+
+temp = squeeze(me_all(:,10,:));
+mu = nanmean(temp,2);
+stderr = nanstd(temp,[],2);
+shadedErrorBar(obj(1).time,mu,stderr,{'Color',c.rmiss,'LineWidth',lw,'LineStyle','--'},alph,ax)
+
+temp = squeeze(me_all(:,11,:));
+mu = mean(temp,2);
+stderr = std(temp,[],2);
+shadedErrorBar(obj(1).time,mu,stderr,{'Color',c.lmiss,'LineWidth',lw,'LineStyle','--'},alph,ax)
+xlim([-2.3 2])
+
+xlabel('Time from go cue (s)')
+ylabel('Motion energy (a.u.)')
+xline(tstart,'k--'); xline(sample,'k--'); xline(delay,'k--'); xline(gc,'k--')
 
 
 

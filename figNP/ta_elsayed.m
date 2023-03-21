@@ -6,6 +6,9 @@ addpath(genpath(fullfile(utilspth,'DataLoadingScripts')));
 addpath(genpath(fullfile(utilspth,'funcs')));
 addpath(genpath(fullfile(utilspth,'utils')));
 rmpath(genpath(fullfile(utilspth,'fig1/')));
+rmpath(genpath(fullfile(utilspth,'fig2/')));
+rmpath(genpath(fullfile(utilspth,'figx/')));
+rmpath(genpath(fullfile(utilspth,'MotionMapper/')));
 rmpath(genpath(fullfile(utilspth,'mc_stim/')));
 
 % add paths for figure specific functions
@@ -32,15 +35,15 @@ params.condition(end+1) = {'L&miss&~stim.enable&~autowater&~early'};            
 params.condition(end+1) = {'R&no&~stim.enable&~autowater&~early'};            % no right, no stim, aw off
 params.condition(end+1) = {'L&no&~stim.enable&~autowater&~early'};            % no left, no stim, aw off
 
-params.tmin = -2.5;
+params.tmin = -2.4;
 params.tmax = 2.5;
-params.dt = 1/100;
+params.dt = 1/50;
 
 % smooth with causal gaussian kernel
 params.smooth = 15;
 
 % cluster qualities to use
-params.quality = {'all'}; % accepts any cell array of strings - special character 'all' returns clusters of any quality
+params.quality = {'all'}; % accepts any cell array of strings - special character 'all' returns clusters of any quality (except 'garbage')
 % params.quality = {'Excellent','Great','Good','Fair','Multi'};
 
 params.traj_features = {{'tongue','left_tongue','right_tongue','jaw','trident','nose'},...
@@ -112,23 +115,24 @@ for sessix = 1:numel(meta)
     % x_norm = x / (lambda + max(x) - min(x))
     snpsth = rez(sessix).psth ./ (rez(sessix).softnorm_lambda + max(rez(sessix).psth) - min(rez(sessix).psth));
 
-    % mean center across conditions
-    for clu = 1:size(snpsth,2)
-        % find mean at each time point for each condition (time,1)
-        mean_across_cond = mean(snpsth(:,clu,:),3);
-        snpsth(:,clu,:) = snpsth(:,clu,:) - repmat(mean_across_cond,[1,1,size(snpsth,3)]);
-    end
+%     % mean center across conditions
+%     for clu = 1:size(snpsth,2)
+%         % find mean at each time point for each condition (time,1)
+%         mean_across_cond = mean(snpsth(:,clu,:),3);
+%         snpsth(:,clu,:) = snpsth(:,clu,:) - repmat(mean_across_cond,[1,1,size(snpsth,3)]);
+%     end
     rez(sessix).psth_processed = snpsth; % soft normed and mean centered
+    rez(sessix).psth_processed = rez(sessix).psth;
 
     % epochs
     % prep
-    edges = [-1.2 -0.2];
+    edges = [-1 -0.2];
     [~,e1] = min(abs(rez(sessix).time - edges(1)));
     [~,e2] = min(abs(rez(sessix).time - edges(2)));
     rez(sessix).prepix = e1:e2;
 
     % move
-    edges = [0.02 1.2];
+    edges = [0.1 1];
     [~,e1] = min(abs(rez(sessix).time - edges(1)));
     [~,e2] = min(abs(rez(sessix).time - edges(2)));
     rez(sessix).moveix = e1:e2;
@@ -205,29 +209,15 @@ for sessix = 1:numel(meta)
 
 
     %single trial projections
+    
+    trialdat = zscore_singleTrialNeuralData(obj(sessix)); % (time,trials,clu)
+%     trialdat = obj(sessix).trialdat; % (time,clu,trials)
+    rez(sessix).null_trialdat = tensorprod(trialdat,rez(sessix).Qnull,3,1);
+    rez(sessix).potent_trialdat = tensorprod(trialdat,rez(sessix).Qpotent,3,1);
 
-    dat{1} = obj(sessix).trialdat(:,:,params(sessix).trialid{2});
-    dat{2} = obj(sessix).trialdat(:,:,params(sessix).trialid{3});
 
-    projdat = cellfun(@(x) permute(x, [1 3 2]),dat,'UniformOutput',false);
-    projdat_reshape = cellfun(@(x) reshape(x,size(x,1)*size(x,2),size(x,3)), projdat, 'UniformOutput',false);
-
-
-    for i = 1:numel(dat)
-        projdat_null{i} = projdat_reshape{i} * rez(sessix).Qnull;
-        projdat_potent{i} = projdat_reshape{i} * rez(sessix).Qpotent;
-    end
-
-    for i = 1:2
-        projdat_null{i} = reshape(projdat_null{i}, numel(rez(sessix).time), numel(params(sessix).trialid{i+1}), rez(sessix).dPrep);
-        projdat_potent{i} = reshape(projdat_potent{i}, numel(rez(sessix).time), numel(params(sessix).trialid{i+1}), rez(sessix).dMove);
-    end
-
-    null_trialdat = cat(2,projdat_null{1}, projdat_null{2});
-    potent_trialdat = cat(2,projdat_potent{1}, projdat_potent{2});
-
-    rez(sessix).null_ssm = sum(null_trialdat.^2,3);
-    rez(sessix).potent_ssm = sum(potent_trialdat.^2,3);
+    rez(sessix).null_ssm = mean(rez(sessix).null_trialdat.^2,3);
+    rez(sessix).potent_ssm = mean(rez(sessix).potent_trialdat.^2,3);
 
 end
 
@@ -255,6 +245,7 @@ end
 
 
 defcols = getColors();
+clear cols
 cols(1,:) = defcols.null * 255;
 cols(2,:) = defcols.potent * 255;
 cols(3,:) = defcols.null * 255;
@@ -449,7 +440,7 @@ col.potent{2} = [240, 110, 138] ./ 255;
 alph = 0.2;
 lw = 2;
 
-sm = 31;
+sm = 11;
 
 xlims = [-2.3,2];
 
@@ -457,26 +448,24 @@ sample = (mode(obj(1).bp.ev.sample) - 2.5);
 delay = (mode(obj(1).bp.ev.delay) - 2.5);
 
 
-cond2use = [1 2];
+cond2use = [2 3];
 for sessix = 1:numel(meta)
     f = figure;
+    f.Position = [698   436   343   230];
     ax = gca;
     hold on;
     for c = 1:numel(cond2use)
+        null = rez(sessix).null_trialdat(:,params(sessix).trialid{cond2use(c)},:);
+        null = mean(null.^2,3);
+        mu = nanmean(null,2);
+        sig = nanstd(null,[],2) ./ sqrt(rez(sessix).dPrep);
+        shadedErrorBar(obj(1).time,mu,getCI(null),{'Color',col.null{c},'LineWidth',lw},alph,ax)
 
-        null = mySmooth(sum(rez(sessix).proj_null(:,:,c),2),sm,'reflect');
-%         mySmooth(sum(rez(sessix).N_null(:,trix,:).^2,3),sm,'reflect');
-%         mu = nanmean(null,2);
-%         sig = nanstd(null,[],2) ./ sqrt(rez(sessix).dPrep);
-%         shadedErrorBar(obj(1).time,mu,getCI(null),{'Color',col.null{c},'LineWidth',lw},alph,ax)
-        plot(obj(1).time,null,'Color',col.null{c},'LineWidth',2)
-
-        potent = mySmooth(sum(rez(sessix).proj_potent(:,:,c),2),sm,'reflect');
-%         potent = mySmooth(sum(rez(sessix).N_potent(:,trix,:).^2,3),sm,'reflect');
-%         mu = nanmean(potent,2);
-%         sig = nanstd(potent,[],2) ./ sqrt(rez(sessix).dMove);
-%         shadedErrorBar(obj(1).time,mu,getCI(potent),{'Color',col.potent{c},'LineWidth',lw},alph,ax)
-        plot(obj(1).time,potent,'Color',col.potent{c},'LineWidth',2)
+        potent = rez(sessix).potent_trialdat(:,params(sessix).trialid{cond2use(c)},:);
+        potent = mean(potent.^2,3);
+        mu = nanmean(potent,2);
+        sig = nanstd(potent,[],2) ./ sqrt(rez(sessix).dMove);
+        shadedErrorBar(obj(1).time,mu,getCI(potent),{'Color',col.potent{c},'LineWidth',lw},alph,ax)
     end
     title([meta(sessix).anm ' ' meta(sessix).date])
     ax.FontSize = 12;
@@ -500,9 +489,9 @@ for i = 1:numel(edges)
     [~,tix(i)] = min(abs(obj(1).time - edges(i)));
 end
 
-sm = 11;
+sm = 7;
 
-for sessix = 1:numel(rez)
+for sessix = 15%:numel(rez)
     temprez = rez(sessix);
     trix = cell2mat(params(sessix).trialid(2:3)');
 
@@ -515,27 +504,31 @@ for sessix = 1:numel(rez)
     trix = ix;
 
     f = figure;
-    f.Position = [510   453   831   336];
+    f.Position = [680   591   321   387];
 
-    ax1 = subplot(1,3,1);
-    plotme = tempme(:,trix);
+%     ax1 = subplot(1,3,1);
+    plotme = mySmooth(tempme(:,trix),2);
     imagesc(obj(sessix).time,1:numel(trix),plotme');
     colormap(linspecer)
     lims = clim;
 %     clim([lims(1) lims(2) / 1])
     colorbar;
-    ylabel('Trials')
+%     ylabel('Trials')
 
-    ax2 = subplot(1,3,2);
+%     ax2 = subplot(1,3,2);
+    f = figure;
+    f.Position = [680   591   321   387];
     potent = mySmooth(normalize(potent(:,trix)),sm);
     imagesc(obj(sessix).time,1:numel(trix),potent');
     colormap(linspecer);
     lims = clim;
 %     clim([lims(1) lims(2) / 1.5])
     colorbar;
-    xlabel('Time from go cue (s)')
+%     xlabel('Time from go cue (s)')
 
-    ax3 = subplot(1,3,3);
+%     ax3 = subplot(1,3,3);
+    f = figure;
+    f.Position = [680   591   321   387];
     null = mySmooth(normalize(null(:,trix)),sm);
     imagesc(obj(sessix).time,1:numel(trix), null');
     colormap(linspecer)
@@ -543,9 +536,9 @@ for sessix = 1:numel(rez)
 %     clim([lims(1) lims(2) / 1.5])
     colorbar;
 
-    sgtitle([meta(sessix).anm ' ' meta(sessix).date])
-    pause
-    close all
+%     sgtitle([meta(sessix).anm ' ' meta(sessix).date])
+%     pause
+%     close all
 
 end
 

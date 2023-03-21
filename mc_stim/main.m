@@ -7,6 +7,9 @@ addpath(genpath(fullfile(utilspth,'funcs')));
 addpath(genpath(fullfile(utilspth,'utils')));
 rmpath(genpath(fullfile(utilspth,'figNP/')))
 rmpath(genpath(fullfile(utilspth,'fig1/')))
+rmpath(genpath(fullfile(utilspth,'fig2/')))
+rmpath(genpath(fullfile(utilspth,'figx/')))
+rmpath(genpath(fullfile(utilspth,'MotionMapper/')))
 rmpath(genpath(fullfile(utilspth,'musall2019/')))
 
 
@@ -28,7 +31,7 @@ dfparams = [];
 % dfparams.alignEv = 'goCue';
 % dfparams.times = [-2.5 2.5]; % relative to goCue
 dfparams.alignEv = 'delay';
-dfparams.times = [-1.0 2.5]; % relative to delay
+dfparams.times = [-2 2.5]; % relative to delay
 
 dfparams.dt_vid = 0.0025;
 dfparams.time = dfparams.times(1):dfparams.dt_vid:dfparams.times(2);
@@ -37,16 +40,16 @@ dfparams.warp = 0; % 0 means no warping, 1 means warp delay period to
 
 
 % -- trial type params --
-dfparams.cond(1) = {'(hit|miss|no)&~stim.enable&~autowater&~autolearn&~early'}; % all trials, no stim, no autowater, no autolearn
-dfparams.cond(end+1) = {'(hit|miss|no)&stim.enable&~autowater&~autolearn&~early'};  % all trials trials, stim, no autowater, no autolearn
-dfparams.cond(end+1) = {'R&~stim.enable&~autowater&~autolearn&~early'}; % right trials, no stim, no autowater
-dfparams.cond(end+1) = {'R&stim.enable&~autowater&~autolearn&~early'};  % right trials, stim, no autowater
-dfparams.cond(end+1) = {'L&~stim.enable&~autowater&~autolearn&~early'}; % left trials, no stim, no autowater
-dfparams.cond(end+1) = {'L&stim.enable&~autowater&~autolearn&~early'};  % left trials, stim, no autowater
-dfparams.cond(end+1) = {'R&hit&~stim.enable&~autowater&~autolearn&~early'}; % right hit trials, no stim, no autowater
-dfparams.cond(end+1) = {'R&hit&stim.enable&~autowater&~autolearn&~early'};  % right hit trials, stim, no autowater
-dfparams.cond(end+1) = {'L&hit&~stim.enable&~autowater&~autolearn&~early'}; % left hit trials, no stim, no autowater
-dfparams.cond(end+1) = {'L&hit&stim.enable&~autowater&~autolearn&~early'};  % left hit trials, stim, no autowater
+dfparams.cond(1) = {'(hit|miss|no)&~stim.enable&~autowater&~early'}; % all trials, no stim, no autowater, no autolearn
+dfparams.cond(end+1) = {'(hit|miss|no)&stim.enable&~autowater&~early'};  % all trials trials, stim, no autowater, no autolearn
+dfparams.cond(end+1) = {'R&~no&~stim.enable&~autowater&~early'}; % right trials, no stim, no autowater
+dfparams.cond(end+1) = {'R&~no&stim.enable&~autowater&~early'};  % right trials, stim, no autowater
+dfparams.cond(end+1) = {'L&~no&~stim.enable&~autowater&~early'}; % left trials, no stim, no autowater
+dfparams.cond(end+1) = {'L&~no&stim.enable&~autowater&~early'};  % left trials, stim, no autowater
+dfparams.cond(end+1) = {'R&hit&~stim.enable&~autowater&~early'}; % right hit trials, no stim, no autowater
+dfparams.cond(end+1) = {'R&hit&stim.enable&~autowater&~early'};  % right hit trials, stim, no autowater
+dfparams.cond(end+1) = {'L&hit&~stim.enable&~autowater&~early'}; % left hit trials, no stim, no autowater
+dfparams.cond(end+1) = {'L&hit&stim.enable&~autowater&~early'};  % left hit trials, stim, no autowater
 % dfparams.cond(end+1) = {'R&miss&~stim.enable&~autowater&~autolearn'}; % left hit trials, no stim, no autowater
 % dfparams.cond(end+1) = {'L&miss&stim.enable&~autowater&~autolearn'};  % left hit trials, stim, no autowater
 

@@ -1,6 +1,6 @@
 function meta = loadJEB14_ALMVideo(meta,datapth)
 
-meta(end+1).datapth = datapth;
+meta(end+1).datapth = datapth; 
 meta(end).anm = 'JEB14';
 meta(end).date = '2022-08-22';
 meta(end).datafn = findDataFn(meta(end));

@@ -45,14 +45,14 @@ params.condition(end+1) = {'L&~stim.enable&~autowater&~early'}; % (13)
 params.condition(end+1) = {'hit&~stim.enable&~autowater'};               % all hits, no stim, aw off (14)
 
 % autowater
-params.condition(end+1) = {'R&hit&~stim.enable&autowater'};             % right hits, no stim, aw off (15)
-params.condition(end+1) = {'L&hit&~stim.enable&autowater'};             % left hits, no stim, aw off  (16)
-params.condition(end+1) = {'R&miss&~stim.enable&autowater'};             % right hits, no stim, aw off (17)
-params.condition(end+1) = {'L&miss&~stim.enable&autowater'};             % left hits, no stim, aw off  (18)
+params.condition(end+1) = {'R&hit&~stim.enable&autowater&~early'};             % right hits, no stim, aw off (15)
+params.condition(end+1) = {'L&hit&~stim.enable&autowater&~early'};             % left hits, no stim, aw off  (16)
+params.condition(end+1) = {'R&miss&~stim.enable&autowater&~early'};             % right hits, no stim, aw off (17)
+params.condition(end+1) = {'L&miss&~stim.enable&autowater&~early'};             % left hits, no stim, aw off  (18)
 
-params.tmin = -2.5;
+params.tmin = -2.4;
 params.tmax = 2.5;
-params.dt = 1/100;
+params.dt = 1/50;
 
 % smooth with causal gaussian kernel
 params.smooth = 15;
@@ -81,7 +81,7 @@ meta = [];
 % --- ALM ---
 meta = loadJEB6_ALMVideo(meta,datapth);
 meta = loadJEB7_ALMVideo(meta,datapth); % selectivity in ME
-meta = loadEKH1_ALMVideo(meta,datapth); % selectivity in ME
+% meta = loadEKH1_ALMVideo(meta,datapth); % selectivity in ME
 meta = loadEKH3_ALMVideo(meta,datapth); % selectivity in ME
 meta = loadJGR2_ALMVideo(meta,datapth);
 meta = loadJGR3_ALMVideo(meta,datapth);
@@ -118,7 +118,7 @@ end
 
 %% Null and Potent Space
 
-clearvars -except obj meta params me sav datapth kin rt
+clearvars -except obj meta params me sav datapth kin rt 
 
 % -----------------------------------------------------------------------
 % -- Curate Input Data --
@@ -164,7 +164,7 @@ close all
 
 sav = 0;
 
-plotmiss = 1;
+plotmiss = 0;
 plotno = 0;
 
 titlestring = 'Null';
@@ -208,12 +208,12 @@ close all
 plotVarianceExplained_DelayResponse(rez,meta);
 
 %% single trial magnitude activity in N/P
-close all
+% close all
 
 cond2use = 2:3;
-% plotME_NPMagnitude_singleTrials(meta,obj,params,me,rez,cond2use)
+plotME_NPMagnitude_singleTrials(meta,obj,params,me,rez,cond2use)
 
-corr_ME_NPMagnitude(meta,obj,params,me,rez);
+% corr_ME_NPMagnitude(meta,obj,params,me,rez);
 
 %% trial-averaged magnitude of activity in N/P
 close all
@@ -288,13 +288,18 @@ pcaNP(meta,obj,params,rez,cond2use)
 %% selectivity in N/P activity
 close all
 
-cond2use_ta = [1 2]; % right and left hits, corresponding to trial-avg projs onto n/p
-cond2use_st = [8 9]; % right and left hits, corresponding to single-trial projs onto n/p
-% plotSelectivityNP(meta,obj,params,rez,cond2use_ta,cond2use_st)
-
-% hits
+cond2use_ta = [2 3]; % right and left hits, corresponding to trial-avg projs onto n/p
+cond2use_st = [2 3]; % right and left hits, corresponding to single-trial projs onto n/p
 subTrials = 35;
-plotSelectivityNPPref(meta,obj,params,rez,cond2use_ta,cond2use_st, subTrials)
+plotSelectivityNeurons(meta,obj,params,cond2use_ta,cond2use_st) % to get number of selective cells 
+
+% cond2use_ta = [1 2]; % right and left hits, corresponding to trial-avg projs onto n/p
+% cond2use_st = [8 9]; % right and left hits, corresponding to single-trial projs onto n/p
+% % plotSelectivityNP(meta,obj,params,rez,cond2use_ta,cond2use_st)
+% 
+% % hits
+% subTrials = 35;
+% plotSelectivityNPPref(meta,obj,params,rez,cond2use_ta,cond2use_st, subTrials)
 
 % misses
 % subTrials = 10; % doesn't show anything interesting and also no error trials

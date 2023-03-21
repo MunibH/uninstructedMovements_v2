@@ -1,4 +1,4 @@
-function rez = getCodingDimensions_2afc(obj,params,cond2use,cond2proj)
+function rez = getCodingDimensions_2afc(obj,params,cond2use,cond2proj,rampcond)
 
 % cd_labels = {'early','late','go'};
 % cd_epochs = {'delay',params(1).alignEvent,params(1).alignEvent};
@@ -8,13 +8,20 @@ function rez = getCodingDimensions_2afc(obj,params,cond2use,cond2proj)
 % cd_epochs = {'delay',params(1).alignEvent,params(1).alignEvent};
 % cd_times = {[-0.42 -0.02], [-0.42 -0.02], [0.22 0.62]}; % in seconds, relative to respective epochs
 
-cd_labels = {'late'};
-cd_epochs = {params(1).alignEvent};
-cd_times = {[-0.42 -0.02]}; % in seconds, relative to respective epochs
+% cd_labels = {'late'};
+% cd_epochs = {params(1).alignEvent};
+% cd_times = {[-0.42 -0.02]}; % in seconds, relative to respective epochs
 
 % cd_labels = {'late_error','go'};
 % cd_epochs = {'goCue','goCue'};
 % cd_times = {[-0.42 -0.02], [0.02 0.42]}; % in seconds, relative to respective epochs
+
+cd_labels = {'late','go','ramping'};
+cd_epochs = {'goCue','goCue'};
+cd_times = {[-0.42 -0.02], [0.02 0.42]}; % in seconds, relative to respective epochs
+ramp_epochs = {'sample','goCue'};
+ramp_times = {[-0.3 -0.01], [-0.5 -0.01]}; % in seconds, relative to respective epochs
+
 
 for sessix = 1:numel(obj)
 
@@ -23,7 +30,7 @@ for sessix = 1:numel(obj)
     % ------------------------------------------
     rez(sessix).time = obj(sessix).time;
     rez(sessix).psth = standardizePSTH(obj(sessix));
-%     rez(sessix).psth = obj(sessix).psth;
+    %     rez(sessix).psth = obj(sessix).psth;
     rez(sessix).condition = params(sessix).condition;
     rez(sessix).trialid = params(sessix).trialid;
     rez(sessix).alignEvent = params(sessix).alignEvent;
@@ -41,6 +48,19 @@ for sessix = 1:numel(obj)
     % ------------------------------------------
     rez(sessix).cd_mode = zeros(size(rez(sessix).psth,2),numel(cd_labels)); % (neurons,numCDs)
     for ix = 1:numel(cd_labels)
+        if strcmp(cd_labels{ix},'ramping')
+            % find time points to use
+            e1_start = mode(rez.ev.(ramp_epochs{1})) + ramp_times{1}(1) - rez.align;
+            e1_stop = mode(rez.ev.(ramp_epochs{1})) + ramp_times{1}(2) - rez.align;
+            times.ramp_lateSamp = rez.time>e1_start & rez.time<e1_stop;
+
+            e2_start = mode(rez.ev.(ramp_epochs{2})) + ramp_times{2}(1) - rez.align;
+            e2_stop = mode(rez.ev.(ramp_epochs{2})) + ramp_times{2}(2) - rez.align;
+            times.ramp_lateDel = rez.time>e2_start & rez.time<e2_stop;
+            % calculate ramping mode
+            rez.cd_mode(:,ix) = calcRampingMode(rez.psth,times,rampcond);
+            continue
+        end
         % find time points to use
         e1 = mode(rez(sessix).ev.(cd_epochs{ix})) + cd_times{ix}(1) - rez(sessix).align;
         e2 = mode(rez(sessix).ev.(cd_epochs{ix})) + cd_times{ix}(2) - rez(sessix).align;
@@ -74,45 +94,45 @@ for sessix = 1:numel(obj)
     rez(sessix).cd_proj = tensorprod(temp,rez(sessix).cd_mode_orth,3,1); % (time,cond,cd), cond is in same order as con2use variable defined at the top of this function
 
 
-    % ------------------------------------------
-    % --variance explained--
-    % ------------------------------------------
-    psth = rez(sessix).psth(:,:,cond2use);
-    datacov = cov(cat(1,psth(:,:,1),psth(:,:,2)));
-    datacov(isnan(datacov)) = 0;
-    eigsum = sum(eig(datacov));
-    for i = 1:numel(cd_labels)
-        % whole trial
-        rez(sessix).cd_varexp(i) = var_proj(rez(sessix).cd_mode_orth(:,i), datacov, eigsum);
-        % respective epoch
-        epoch_psth = rez(sessix).psth(times.(cd_labels{i}),:,cond2use);
-        epoch_datacov = cov(cat(1,epoch_psth(:,:,1),epoch_psth(:,:,2)));
-        epoch_datacov(isnan(epoch_datacov)) = 0;
-        epoch_eigsum = sum(eig(epoch_datacov));
-        rez(sessix).cd_varexp_epoch(i) = var_proj(rez(sessix).cd_mode_orth(:,i), epoch_datacov, epoch_eigsum);
-    end
-
-    % ------------------------------------------
-    % --selectivity--
-    % ------------------------------------------
-    % coding directions
-    rez(sessix).selectivity_squared = squeeze(rez(sessix).cd_proj(:,1,:) - rez(sessix).cd_proj(:,2,:)).^2;
-    % sum of coding directions
-    rez(sessix).selectivity_squared(:,4) = sum(rez(sessix).selectivity_squared,2);
-    % full neural pop
-    temp = rez(sessix).psth(:,:,cond2use);
-    temp = (temp(:,:,1) - temp(:,:,2)).^2;
-    rez(sessix).selectivity_squared(:,5) = sum(temp,2); % full neural pop
-
-    % ------------------------------------------
-    % --selectivity explained--
-    % ------------------------------------------
-    full = rez(sessix).selectivity_squared(:,5);
-    rez(sessix).selexp = zeros(numel(rez(sessix).time),4); % (time,nCDs+1), +1 b/c sum of CDs
-    for i = 1:4
-        % whole trial
-        rez(sessix).selexp(:,i) = 1 - ((full - rez(sessix).selectivity_squared(:,i)) ./ full);
-    end
+%     % ------------------------------------------
+%     % --variance explained--
+%     % ------------------------------------------
+%     psth = rez(sessix).psth(:,:,cond2use);
+%     datacov = cov(cat(1,psth(:,:,1),psth(:,:,2)));
+%     datacov(isnan(datacov)) = 0;
+%     eigsum = sum(eig(datacov));
+%     for i = 1:numel(cd_labels)
+%         % whole trial
+%         rez(sessix).cd_varexp(i) = var_proj(rez(sessix).cd_mode_orth(:,i), datacov, eigsum);
+%         % respective epoch
+%         epoch_psth = rez(sessix).psth(times.(cd_labels{i}),:,cond2use);
+%         epoch_datacov = cov(cat(1,epoch_psth(:,:,1),epoch_psth(:,:,2)));
+%         epoch_datacov(isnan(epoch_datacov)) = 0;
+%         epoch_eigsum = sum(eig(epoch_datacov));
+%         rez(sessix).cd_varexp_epoch(i) = var_proj(rez(sessix).cd_mode_orth(:,i), epoch_datacov, epoch_eigsum);
+%     end
+% 
+%     % ------------------------------------------
+%     % --selectivity--
+%     % ------------------------------------------
+%     % coding directions
+%     rez(sessix).selectivity_squared = squeeze(rez(sessix).cd_proj(:,1,:) - rez(sessix).cd_proj(:,2,:)).^2;
+%     % sum of coding directions
+%     rez(sessix).selectivity_squared(:,4) = sum(rez(sessix).selectivity_squared,2);
+%     % full neural pop
+%     temp = rez(sessix).psth(:,:,cond2use);
+%     temp = (temp(:,:,1) - temp(:,:,2)).^2;
+%     rez(sessix).selectivity_squared(:,5) = sum(temp,2); % full neural pop
+% 
+%     % ------------------------------------------
+%     % --selectivity explained--
+%     % ------------------------------------------
+%     full = rez(sessix).selectivity_squared(:,5);
+%     rez(sessix).selexp = zeros(numel(rez(sessix).time),4); % (time,nCDs+1), +1 b/c sum of CDs
+%     for i = 1:4
+%         % whole trial
+%         rez(sessix).selexp(:,i) = 1 - ((full - rez(sessix).selectivity_squared(:,i)) ./ full);
+%     end
 
 
     % set some more rez variables to keep track of

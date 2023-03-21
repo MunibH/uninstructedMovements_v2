@@ -13,6 +13,12 @@ f = figure;
 ax = gca;
 hold on;
 
+% edges = [params(1).tmin, params(1).tmax];
+edges = [-0.9 0];
+for i = 1:numel(edges)
+    [~,tix(i)] = min(abs(obj(1).time - edges(i)));
+end
+
 for ianm = 1:nAnm
     % get sessions for current animal
     ix = find(objix{ianm});
@@ -23,6 +29,7 @@ for ianm = 1:nAnm
 
         % get data
         tempme = me(sessix).data;
+        tempme = tempme(tix(1):tix(2),:);
         tempme = tempme(:);
         tempme = fillmissing(tempme,'nearest');
 
@@ -30,10 +37,12 @@ for ianm = 1:nAnm
 
         potent = temprez.N_potent;
         potent = sum(potent.^2,3);
+        potent = potent(tix(1):tix(2),:);
         potent = potent(:);
 
         null = temprez.N_null;
         null = sum(null.^2,3);
+        null = null(tix(1):tix(2),:);
         null = null(:);
 
         % correlate

@@ -6,7 +6,7 @@ function plotAvgFeatValDuringStim_v2(meta,obj,dfparams,params,kin,kinfeats,feats
 featix = find(mask);
 
 % time points to use (stim time points)
-times = [0 0.8]; % relative to alignEv (should be delay)
+times = [0.5 0.7]; % relative to alignEv (should be delay)
 for i = 1:numel(times)
     [~,time_ix(i)] = min(abs(dfparams.time - times(i)));
 end

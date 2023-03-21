@@ -2,7 +2,7 @@ function rez = getCodingDimensions_aw(obj,params,cond2use,cond2proj)
 
 cd_labels = {'context'};
 cd_epochs = {'sample'};
-cd_times = {[-0.42 -0.1]}; % in seconds, relative to respective epochs
+cd_times = {[-0.42 -0.01]}; % in seconds, relative to respective epochs
 
 for sessix = 1:numel(obj)
 

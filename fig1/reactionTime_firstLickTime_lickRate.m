@@ -25,8 +25,10 @@ params.nLicks              = 20; % number of post go cue licks to calculate medi
 params.lowFR               = 1; % remove clusters with firing rates across all trials less than this val
 
 % set conditions to calculate PSTHs for
-params.condition(1)     = {'~stim.enable&~autowater&((1:Ntrials)>20)'};             % afc
-params.condition(end+1) = {'~stim.enable&autowater&((1:Ntrials)>20)'};              % aw
+params.condition(1)     = {'hit&~stim.enable&~autowater'};             % afc
+params.condition(end+1) = {'miss&~stim.enable&~autowater'};              % aw
+params.condition(end+1) = {'hit&~stim.enable&~autowater&~early'};             % afc
+params.condition(end+1) = {'miss&~stim.enable&~autowater&~early'};              % aw
 
 params.tmin = -2.5;
 params.tmax = 2.5;
@@ -56,15 +58,16 @@ datapth = '/Users/Munib/Documents/Economo-Lab/data/';
 
 meta = [];
 
-% --- ALM --- 
+% --- ALM ---
 meta = loadJEB6_ALMVideo(meta,datapth);
 meta = loadJEB7_ALMVideo(meta,datapth);
-meta = loadEKH1_ALMVideo(meta,datapth);
+% meta = loadEKH1_ALMVideo(meta,datapth);
 meta = loadEKH3_ALMVideo(meta,datapth);
 meta = loadJGR2_ALMVideo(meta,datapth);
 meta = loadJGR3_ALMVideo(meta,datapth);
-% meta = loadJEB14_ALMVideo(meta,datapth);
-% meta = loadJEB15_ALMVideo(meta,datapth);
+meta = loadJEB13_ALMVideo(meta,datapth);
+meta = loadJEB14_ALMVideo(meta,datapth);
+meta = loadJEB15_ALMVideo(meta,datapth);
 
 % --- M1TJ ---
 % meta = loadJEB14_M1TJVideo(meta,datapth);
@@ -76,7 +79,7 @@ params.probe = {meta.probe}; % put probe numbers into params, one entry for elem
 
 [obj,params] = loadSessionData(meta,params, params.behav_only);
 
-%% REACTION TIME 
+%% REACTION TIME
 
 close all
 
@@ -185,12 +188,12 @@ ax.FontSize = 10;
 ax.XTick = xs;
 xticklabels([ "RT, 2AFC" "RT, AW" "L1, 2AFC" "L1, AW "])
 
-
+temp = mean_rt_by_mouse_by_cond(:,2) - mean_rt_by_mouse_by_cond(:,1);
 
 %% distribution of rts
 
 allrt = cell2mat(rt');
-figure; 
+figure;
 histogram(allrt,200,'EdgeColor','none')
 xline(nanmedian(allrt),'k--')
 ax = gca;
@@ -277,3 +280,98 @@ xticklabels([ "2AFC" "AW" ])
 
 
 
+%% REACTION TIME - looking at difference b/w hit and miss trials in 2afc context
+
+close all
+
+% rt = firstTongueRT(obj);
+rt = firstJawRT(obj);
+
+% group  by mouse, condition, only for trials we want
+anms = unique({meta.anm});
+cond2use = 1:2;
+for isess = 1:numel(meta)
+    for icond = 1:numel(cond2use)
+        trix = params(isess).trialid{cond2use(icond)};
+        anm_rt{isess}{icond} = rt{isess}(trix);
+    end
+end
+
+all_rt = cell(2,1);
+all_rt{1} = [];
+all_rt{2} = [];
+for isess = 1:numel(meta)
+    for icond = 1:numel(cond2use)
+        mean_rt(isess,icond) = nanmean(anm_rt{isess}{icond});
+        all_rt{icond} = [all_rt{icond} anm_rt{isess}{icond}];
+%         var_rt(isess,icond) = nanstd(anm_rt{isess}{icond});
+    end
+end
+
+
+
+%%
+close all
+
+toplot = mean_rt;
+
+clrs = getColors();
+cols{1} = [0 0 0];
+cols{2} = [0.5 0.5 0.5];
+cols{3} = [0.5 0.5 0.5];
+
+f = figure; hold on;
+f.Position = [680   739   270   239];
+
+xs = [1 2];
+for i = 1:numel(xs)
+    b(i) = bar(xs(i),nanmean(toplot(:,i)));
+    b(i).FaceColor = cols{i};
+    b(i).EdgeColor = 'none';
+    b(i).FaceAlpha = 0.7;
+    if i == 3
+        b(i).FaceColor = 'none';
+        b(i).EdgeColor = cols{i};
+        b(i).LineWidth = 2;
+    end
+
+    vs(i) = scatter(randn(numel(meta),1) * 0.1 + xs(i)*ones(size(toplot(:,i))),toplot(:,i),5,'MarkerFaceColor','k',...
+        'MarkerEdgeColor','k','LineWidth',1);
+
+    e = errorbar(b(i).XEndPoints,nanmean(toplot(:,i)),nanstd(toplot(:,i)),'LineStyle','none','Color','k','LineWidth',1);
+    e.LineWidth = 0.5;
+    e.CapSize = 2;
+
+    xs_(:,i) = vs(i).XData';
+    ys_(:,i) = toplot(:,i);
+end
+
+for i = 1:size(xs_,1)
+    patchline(xs_(i,1:2),ys_(i,1:2),'EdgeAlpha',0.4,'LineWidth',0.1)
+end
+
+ylabel("Time (s)")
+% ylim([0,1])
+ax = gca;
+ax.FontSize = 10;
+ax.XTick = xs;
+xticklabels([ "RT, Hit" "RT, Miss"])
+
+clear b vs e
+f = figure;
+ax = gca;
+hold on;
+pchange = (mean_rt(:,2)-mean_rt(:,1)) ./ mean_rt(:,1);
+pchange = pchange * 100;
+b = bar(1,nanmean(pchange));
+b.FaceColor = cols{3};
+b.EdgeColor = 'none';
+b.FaceAlpha = 0.7;
+vs = scatter(randn(numel(meta),1) * 0.1 + ones(size(pchange)),pchange,5,'MarkerFaceColor','k',...
+    'MarkerEdgeColor','k','LineWidth',1);
+
+e = errorbar(b.XEndPoints,nanmean(pchange),nanstd(pchange),'LineStyle','none','Color','k','LineWidth',1);
+e.LineWidth = 0.5;
+e.CapSize = 2;
+
+ylabel(['percent change ' newline ' in reaction time from ' newline ' hit to miss trials'])

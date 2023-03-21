@@ -10,8 +10,11 @@ for i = 1:size(obj.psth,3)
     sd = obj.presampleSigma(:,i);
 %     sd = std(temp)';
     
-%     psth(:,:,i) = (temp - mu') ./ sd';
-    psth(:,:,i) = temp;
+    % standardize using presample stats
+    mu = mean(temp(1:20,:),1);
+    sd = std(temp(1:20,:),[],1);
+    psth(:,:,i) = (temp - mu) ./ sd;
+%     psth(:,:,i) = temp;
     
 end
 

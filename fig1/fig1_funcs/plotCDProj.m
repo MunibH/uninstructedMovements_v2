@@ -8,7 +8,7 @@ end
 
 clrs = getColors();
 lw = 2;
-alph = 0.1;
+alph = 0.05;
 
 sample = mode(obj(1).bp.ev.sample - obj(1).bp.ev.(alignEvent));
 delay = mode(obj(1).bp.ev.delay - obj(1).bp.ev.(alignEvent));
@@ -23,16 +23,18 @@ for i = 1:numel(allrez.cd_labels) % for each coding direction
     %     ax = nexttile; hold on;
     tempdat = squeeze(allrez.cd_proj(:,:,i,:));
     tempmean = nanmean(tempdat,3);
-%     temperror = nanstd(tempdat,[],3)./sqrt(stdErrDenom);
-    for j = 1:size(tempdat,2)
-        temp_ = squeeze(tempdat(:,j,:));
-        temperror(:,j) = getCI(temp_);
-    end
+    temperror = nanstd(tempdat,[],3)./sqrt(stdErrDenom);
+%     for j = 1:size(tempdat,2)
+%         temp_ = squeeze(tempdat(:,j,:));
+%         temperror(:,j) = getCI(temp_);
+%     end
     shadedErrorBar(obj(1).time,tempmean(:,1),temperror(:,1),{'Color',clrs.rhit,'LineWidth',lw},alph, ax)
     shadedErrorBar(obj(1).time,tempmean(:,2),temperror(:,2),{'Color',clrs.lhit,'LineWidth',lw},alph, ax)
     if plotmiss
         shadedErrorBar(obj(1).time,tempmean(:,3),temperror(:,3),{'Color',clrs.rhit*0.5,'LineWidth',lw},alph, ax)
         shadedErrorBar(obj(1).time,tempmean(:,4),temperror(:,4),{'Color',clrs.lhit*0.5,'LineWidth',lw},alph, ax)
+%         shadedErrorBar(obj(1).time,tempmean(:,9),temperror(:,9),{'Color',clrs.rhit*0.5,'LineWidth',lw},alph, ax) % ignore trials
+%         shadedErrorBar(obj(1).time,tempmean(:,10),temperror(:,10),{'Color',clrs.lhit*0.5,'LineWidth',lw},alph, ax)
     end
     if plotaw
         if strcmpi(allrez.cd_labels{i},'context')
@@ -63,14 +65,16 @@ for i = 1:numel(allrez.cd_labels) % for each coding direction
 
 
     curmodename = allrez.cd_labels{i};
-    shadetimes = obj(1).time(allrez.cd_times.(curmodename));
-    x = [shadetimes(1)  shadetimes(end) shadetimes(end) shadetimes(1)];
-    y = [ax.YLim(1) ax.YLim(1) ax.YLim(2) ax.YLim(2)];
-    %     y = [-60 -60 50 50];
-    fl = fill(x,y,'r','FaceColor',[93, 121, 148]./255);
-    fl.FaceAlpha = 0.3;
-    fl.EdgeColor = 'none';
-    ylim([y(1) y(3)]);
+    if ~strcmpi(curmodename,'ramping')
+        shadetimes = obj(1).time(allrez.cd_times.(curmodename));
+        x = [shadetimes(1)  shadetimes(end) shadetimes(end) shadetimes(1)];
+        y = [ax.YLim(1) ax.YLim(1) ax.YLim(2) ax.YLim(2)];
+        %     y = [-60 -60 50 50];
+        fl = fill(x,y,'r','FaceColor',[93, 121, 148]./255);
+        fl.FaceAlpha = 0.3;
+        fl.EdgeColor = 'none';
+        ylim([y(1) y(3)]);
+    end
 
 
     if sav

@@ -6,7 +6,7 @@ function idx = findClusters(qualityList, qualities)
 % also check if each entry in qualityList is a string/char, if not, change
 % it
 for i = 1:numel(qualityList)
-    if ~ischar(qualityList{i}) || ~isstring(qualityList{i})
+    if ~ischar(qualityList{i}) && ~isstring(qualityList{i})
         qualityList{i} = '';
     end
 end
@@ -14,7 +14,8 @@ qualityList = strtrim(qualityList);
 
 
 if any(strcmpi(qualities,'all')) || strcmpi(qualities{1},'all')
-    idx = 1:numel(qualityList);
+    idx = find(~ismember(qualityList,'garbage'));
+%     idx = 1:numel(qualityList);
     return
 end
 

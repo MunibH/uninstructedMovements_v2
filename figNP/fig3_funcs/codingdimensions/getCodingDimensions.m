@@ -15,8 +15,8 @@ function rez = getCodingDimensions(input_data,np_trialdat,trialdat_zscored,obj,p
 cd_labels = {'late','go','ramping'};
 cd_epochs = {'goCue','goCue'};
 cd_times = {[-0.42 -0.02], [0.02 0.42]}; % in seconds, relative to respective epochs
-ramp_epochs = {'delay','goCue'};
-ramp_times = {[-0.4 -0.02], [-0.5 -0.02]}; % in seconds, relative to respective epochs
+ramp_epochs = {'sample','goCue'};
+ramp_times = {[-0.3 -0.01], [-0.5 -0.01]}; % in seconds, relative to respective epochs
 
 %-------------------------------------------
 % --setup results struct--
@@ -82,56 +82,57 @@ temp = permute(rez.psth(:,:,cond2proj),[1 3 2]); % (time,cond,neurons), permutin
 rez.cd_proj = tensorprod(temp,rez.cd_mode_orth,3,1); % (time,cond,cd), cond is in same order as con2use variable defined at the top of this function
 
 % single trial n/p projs
-proj = reshape(np_trialdat,size(np_trialdat,1)*size(np_trialdat,2),size(np_trialdat,3)) * rez.cd_mode_orth;
-rez.trialdat = reshape(proj,size(np_trialdat,1),size(np_trialdat,2),size(rez.cd_mode_orth,2));
+
+% proj = reshape(np_trialdat,size(np_trialdat,1)*size(np_trialdat,2),size(np_trialdat,3)) * rez.cd_mode_orth;
+% rez.trialdat = reshape(proj,size(np_trialdat,1),size(np_trialdat,2),size(rez.cd_mode_orth,2));
 
 
-% ------------------------------------------
-% --variance explained--
-% ------------------------------------------
-psth = rez.psth(:,:,cond2use);
-datacov = cov(cat(1,psth(:,:,1),psth(:,:,2)));
-datacov(isnan(datacov)) = 0;
-eigsum = sum(eig(datacov));
+% % ------------------------------------------
+% % --variance explained--
+% % ------------------------------------------
+% psth = rez.psth(:,:,cond2use);
+% datacov = cov(cat(1,psth(:,:,1),psth(:,:,2)));
+% datacov(isnan(datacov)) = 0;
+% eigsum = sum(eig(datacov));
+% 
+% for i = 1:numel(cd_labels)
+%     if strcmpi(cd_labels{i},'ramping')
+%         continue
+%     end
+%     % whole trial
+%     rez.cd_varexp(i) = var_proj(rez.cd_mode_orth(:,i), datacov, eigsum);
+%     % respective epoch
+%     epoch_psth = rez.psth(times.(cd_labels{i}),:,cond2use);
+%     epoch_datacov = cov(cat(1,epoch_psth(:,:,1),epoch_psth(:,:,2)));
+%     epoch_datacov(isnan(epoch_datacov)) = 0;
+%     epoch_eigsum = sum(eig(epoch_datacov));
+%     rez.cd_varexp_epoch(i) = var_proj(rez.cd_mode_orth(:,i), epoch_datacov, epoch_eigsum);
+% end
 
-for i = 1:numel(cd_labels)
-    if strcmpi(cd_labels{i},'ramping')
-        continue
-    end
-    % whole trial
-    rez.cd_varexp(i) = var_proj(rez.cd_mode_orth(:,i), datacov, eigsum);
-    % respective epoch
-    epoch_psth = rez.psth(times.(cd_labels{i}),:,cond2use);
-    epoch_datacov = cov(cat(1,epoch_psth(:,:,1),epoch_psth(:,:,2)));
-    epoch_datacov(isnan(epoch_datacov)) = 0;
-    epoch_eigsum = sum(eig(epoch_datacov));
-    rez.cd_varexp_epoch(i) = var_proj(rez.cd_mode_orth(:,i), epoch_datacov, epoch_eigsum);
-end
-
-% ------------------------------------------
-% --selectivity--
-% ------------------------------------------
-% coding directions
-rez.selectivity_squared = squeeze(rez.cd_proj(:,1,:) - rez.cd_proj(:,2,:)).^2;
-% sum of coding directions
-rez.selectivity_squared(:,4) = sum(rez.selectivity_squared,2);
-% full neural pop
-% temp = rez.psth(:,:,cond2use);
-% temp = (temp(:,:,1) - temp(:,:,2)).^2;
-% temp = (obj.psth(:,:,2) - obj.psth(:,:,3)).^2;
-temp = squeeze(mean(trialdat_zscored(:,params.trialid{cond2use_trialdat(1)},:),2)) - squeeze(mean(trialdat_zscored(:,params.trialid{cond2use_trialdat(2)},:),2));
-rez.selectivity_squared(:,5) = sum(temp.^2,2); % full neural pop
+% % ------------------------------------------
+% % --selectivity--
+% % ------------------------------------------
+% % coding directions
+% rez.selectivity_squared = squeeze(rez.cd_proj(:,1,:) - rez.cd_proj(:,2,:)).^2;
+% % sum of coding directions
+% rez.selectivity_squared(:,4) = sum(rez.selectivity_squared,2);
+% % full neural pop
+% % temp = rez.psth(:,:,cond2use);
+% % temp = (temp(:,:,1) - temp(:,:,2)).^2;
+% % temp = (obj.psth(:,:,2) - obj.psth(:,:,3)).^2;
+% temp = squeeze(mean(trialdat_zscored(:,params.trialid{cond2use_trialdat(1)},:),2)) - squeeze(mean(trialdat_zscored(:,params.trialid{cond2use_trialdat(2)},:),2));
+% rez.selectivity_squared(:,5) = sum(temp.^2,2); % full neural pop
 
 
-% ------------------------------------------
-% --selectivity explained--
-% ------------------------------------------
-full = rez.selectivity_squared(:,5);
-rez.selexp = zeros(numel(rez.time),4); % (time,nCDs+1), +1 b/c sum of CDs
-for i = 1:4
-    % whole trial
-    rez.selexp(:,i) = rez.selectivity_squared(:,i) ./ full;
-end
+% % ------------------------------------------
+% % --selectivity explained--
+% % ------------------------------------------
+% full = rez.selectivity_squared(:,5);
+% rez.selexp = zeros(numel(rez.time),4); % (time,nCDs+1), +1 b/c sum of CDs
+% for i = 1:4
+%     % whole trial
+%     rez.selexp(:,i) = rez.selectivity_squared(:,i) ./ full;
+% end
 
 
 % set some more rez variables to keep track of
@@ -140,13 +141,9 @@ rez.cd_labels = cd_labels;
 rez.cd_epochs = cd_epochs;
 rez.cd_times_epoch = cd_times; % relative to respective epochs
 
-% % quick plot of cds
-% for i = 1:3
-% figure;
-% hold on;
-% plot(obj.time,rez.cd_proj(:,1,i),'b')
-% plot(obj.time,rez.cd_proj(:,2,i),'r')
-% end
+if ~isfield(rez,'trialdat')
+    rez.trialdat = cell(size(rez.psth,3),1);
+end
 
 
 end

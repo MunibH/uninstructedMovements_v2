@@ -25,8 +25,8 @@ params.nLicks              = 20; % number of post go cue licks to calculate medi
 params.lowFR               = 1; % remove clusters with firing rates across all trials less than this val
 
 % set conditions to calculate PSTHs for
-params.condition(1)     = {'~stim.enable&~autowater&((1:Ntrials)>20)'};             % afc
-params.condition(end+1) = {'~stim.enable&autowater&((1:Ntrials)>20)'};              % aw
+params.condition(1)     = {'~stim.enable&~autowater'};             % afc
+params.condition(end+1) = {'~stim.enable&autowater'};              % aw
 
 params.tmin = -2.5;
 params.tmax = 2.5;
@@ -153,17 +153,21 @@ clrs = getColors();
 cols{1} = clrs.afc;
 cols{2} = clrs.aw;
 
-win = 50;
+win = 20;
 
-for sessix = 1:numel(obj)
+for sessix = 1%:numel(obj)
     % get hit rate across entire session
     hits = obj(sessix).bp.hit;
     miss = obj(sessix).bp.miss;
     no   = obj(sessix).bp.no;
 
-    hits_ = movmean(hits,win) * 100;
-    miss_ = movmean(miss,win) * 100;
-    no_   = movmean(no,win) * 100;
+    hits_ = movmean(hits,[win,0]) * 100;
+    miss_ = movmean(miss,[win,0]) * 100;
+    no_   = movmean(no,[win,0]) * 100;
+
+%     hits_ = movmean(hits,[0,win]) * 100;
+%     miss_ = movmean(miss,[0,win]) * 100;
+%     no_   = movmean(no,[0,win]) * 100;
 
 
     f = figure; hold on;
@@ -198,8 +202,8 @@ for sessix = 1:numel(obj)
     xlabel('Trial number')
     ylabel('Rate (%)')
     title([meta(sessix).anm ' ' meta(sessix).date]);
-    ax.FontSize = 11;
-    ax.Title.FontSize = 7;
+    ax.FontSize = 10;
+    ax.Title.FontSize = 8;
     xlim([1 obj(sessix).bp.Ntrials])
 
 

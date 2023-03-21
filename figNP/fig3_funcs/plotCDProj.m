@@ -4,7 +4,7 @@ pptx.newVersions = [1 0 0]; % 1 - creates new version of pptx, 0 - add to existi
 
 
 clrs = getColors();
-lw = 1.5;
+lw = 2;
 alph = 0.3;
 
 sample = mode(rez(1).ev.sample - rez(1).align);
@@ -29,22 +29,22 @@ for i = 1:numel(rez(1).cd_labels) % for each coding direction
     tempdat = squeeze(allrez.cd_proj(:,:,i,:));
 
     tempmean = nanmean(tempdat,3);
-%     temperror = nanstd(tempdat,[],3)./sqrt(numel(rez));
+    temperror = nanstd(tempdat,[],3); %./sqrt(numel(rez));
+
     for j = 1:size(tempdat,2)
         temp_ = squeeze(tempdat(:,j,:));
-        temperror(:,j) = getCI(temp_);
+%         temperror(:,j) = prctile(temp_,2.5,2);
+%         temperror(:,j) = getCI(temp_);
     end
-    shadedErrorBar(rez(1).time,tempmean(:,1),temperror(:,1),{'Color',clrs.rhit,'LineWidth',lw},alph, ax(i))
-    shadedErrorBar(rez(1).time,tempmean(:,2),temperror(:,2),{'Color',clrs.lhit,'LineWidth',lw},alph, ax(i))
+%     if ~plotmiss
+      shadedErrorBar(rez(1).time,tempmean(:,1),temperror(:,1),{'Color',clrs.rhit,'LineWidth',lw},alph, ax(i))
+        shadedErrorBar(rez(1).time,tempmean(:,2),temperror(:,2),{'Color',clrs.lhit,'LineWidth',lw},alph, ax(i))
+%     end
     if plotmiss
         sm = 51;
-        shadedErrorBar(rez(1).time,mySmooth(tempmean(:,3),sm),mySmooth(temperror(:,3),sm),{'Color',clrs.rhit,'LineWidth',lw,'LineStyle',':'},alph, ax(i));
-        shadedErrorBar(rez(1).time,mySmooth(tempmean(:,4),sm),mySmooth(temperror(:,4),sm),{'Color',clrs.lhit,'LineWidth',lw,'LineStyle',':'},alph, ax(i))
-    end
-    if plotno
-        sm = 21;
-        shadedErrorBar(rez(1).time,mySmooth(tempmean(:,5),sm),mySmooth(temperror(:,5),sm),{'Color',clrs.rhit,'LineWidth',lw},alph, ax(i))
-        shadedErrorBar(rez(1).time,mySmooth(tempmean(:,6),sm),mySmooth(temperror(:,6),sm),{'Color',clrs.lhit,'LineWidth',lw},alph, ax(i))
+        smtype = 'zeropad';
+        shadedErrorBar(rez(1).time,mySmooth(tempmean(:,3),sm,smtype),mySmooth(temperror(:,3),sm,smtype),{'Color',clrs.rhit,'LineWidth',lw,'LineStyle',':'},alph, ax(i));
+        shadedErrorBar(rez(1).time,mySmooth(tempmean(:,4),sm,smtype),mySmooth(temperror(:,4),sm,smtype),{'Color',clrs.lhit,'LineWidth',lw,'LineStyle',':'},alph, ax(i))
     end
 
     %     xlim([rez(1).time(1);rez(1).time(end)])

@@ -1,8 +1,9 @@
 function ax = plotCD_EpochSelectivity(meta,obj,allrez_null,rez_null,allrez_potent,rez_potent)
 
 labels = {'latesample','latedelay'};
-epochs = {'delay','goCue'};
-tm = {[-0.82 -0.42], [-0.42 -0.02]}; % in seconds, relative to respective epochs
+epochs = {'goCue','goCue'};
+% tm = {[-1.47 -1.45], [-0.1 -0.01]}; % in seconds, relative to respective epochs
+tm = {[-1.5 -1.4], [-0.1 -0.01]}; % in seconds, relative to respective epochs
 
 for i = 1:numel(epochs)
     e1 = mode(obj(1).bp.ev.(epochs{i})) + tm{i}(1) - 2.5;
@@ -33,6 +34,46 @@ sel = getEpochSelectivity(sel,cdix,allrez_null,objix,nAnm,'null');
 % Potent
 sel = getEpochSelectivity(sel,cdix,allrez_potent,objix,nAnm,'potent');
 
+%%
+
+% tt = times.latesample;
+% % tt = times.latedelay;
+% % cc = [1 2]; % hits
+% cc = [3 4]; % miss
+% dat = squeeze(allrez_potent.cd_proj(:,cc,1,:));
+% rpotent = mean(squeeze(dat(tt,1,:)),1);
+% lpotent = mean(squeeze(dat(tt,2,:)),1);
+% sel.prctile.potent = prctile(rpotent - lpotent, [5 95]);
+% 
+% 
+% dat = squeeze(allrez_null.cd_proj(:,cc,1,:));
+% rnull = mean(squeeze(dat(tt,1,:)),1);
+% lnull = mean(squeeze(dat(tt,2,:)),1);
+% sel.prctile.null = prctile(rnull - lnull, [5 95]);
+% 
+% % figure; hold on;
+% % histogram(r,100,'facecolor','b')
+% % histogram(l,100,'facecolor','r')
+% 
+% cols = getColors;
+% 
+% figure;
+% hold on;
+% nbins = 30;
+% histogram(rpotent-lpotent,nbins,'facecolor',cols.potent,'facealpha',0.6,'edgecolor','none')
+% xline(sel.prctile.potent(1),'--','color',cols.potent,'linewidth',2)
+% xline(sel.prctile.potent(2),'--','color',cols.potent,'linewidth',2)
+% histogram(rnull-lnull,nbins,'facecolor',cols.null,'facealpha',0.6,'edgecolor','none')
+% xline(sel.prctile.null(1),'--','color',cols.null,'linewidth',2)
+% xline(sel.prctile.null(2),'--','color',cols.null,'linewidth',2)
+% title('late sample | miss')
+% xline(0,'--','linewidth',2)
+% 
+% % pd = fitdist((r-l)','Normal');
+% % xs = -2.5:0.01:1.5;
+% % y = pdf(pd,xs);
+% % figure;
+% % plot(xs,y)
 
 %%
 
@@ -45,7 +86,7 @@ ct = 1;
 for i = 1:numel(fns) % hits/misses
     f = figure;
     title(fns{i})
-    f.Position = [680   691   294   287];
+    f.Position = [972   451   214   261];
     ax = gca;
     hold on;
     for j = 1:numel(np) % null/potent
@@ -76,13 +117,13 @@ for i = 1:numel(fns) % hits/misses
 
             b(i).FaceAlpha = 0.85;
             
-            xx = nAnm;
-%             xx = numel(obj);
-            vs(i) = scatter(randn(xx,1) * 0.05 + xs(j,k)*ones(size(temp,2),1),temp,5,'MarkerFaceColor','k',...
-                'MarkerEdgeColor','k','LineWidth',1);
+%             xx = nAnm;
+            xx = size(sel.hit.null,2);
+%             vs(i) = scatter(randn(xx,1) * 0.05 + xs(j,k)*ones(size(temp,2),1),temp,5,'MarkerFaceColor','k',...
+%                 'MarkerEdgeColor','k','LineWidth',1);
 
-            b(i).XEndPoints;
-            e = errorbar(b(i).XEndPoints,mu,nanstd(temp)./sqrt(numel(obj)),'LineStyle','none','Color','k','LineWidth',1);
+%             e = errorbar(b(i).XEndPoints,mu,nanstd(temp)./sqrt(numel(obj)),'LineStyle','none','Color','k','LineWidth',1);
+            e = errorbar(b(i).XEndPoints,mu,nanstd(temp),'LineStyle','none','Color','k','LineWidth',1);
             e.LineWidth = 0.5;
             e.CapSize = 2;
 
@@ -90,13 +131,19 @@ for i = 1:numel(fns) % hits/misses
             %             ys_(:,ct) = temp;
             %             ct = ct + 1;
 
+%             ci = bootci(1000,@mean,temp); % 95 % confidence intervals
+%             ci = paramci(fitdist(temp','Normal'));
+%             ci = confidence_intervals( aa, 95 );
 
-            %         [h(ct),p(ct)] = ttest(temp);
-%             [p(ct),h(ct)] = ranksum(temp,zeros(size(temp)));
-            [p(ct),h(ct)] = signrank(temp,zeros(size(temp)));
-            if h(ct)
-                text(xs(j,k),0,'*','FontSize',30);
-            end
+
+%             [h(ct),p(ct)] = ttest(temp,zeros(size(temp)));
+%             [h(ct),p(ct)] = my_ttest(temp);
+% %             [p(ct),h(ct)] = ranksum(temp,zeros(size(temp)));
+% %             [p(ct),h(ct)] = signrank(temp,zeros(size(temp)));
+%             if h(ct)
+%                 text(xs(j,k),0,'*','FontSize',30);
+%                 text(xs(j,k),0.1,num2str(p(ct)),'FontSize',10);
+%             end
             ct = ct + 1;
 
         end
@@ -194,18 +241,18 @@ sel.hit.(spacename) = squeeze(cddat(:,1,:) - cddat(:,2,:));
 sel.miss.(spacename) = squeeze(cddat(:,3,:) - cddat(:,4,:));
 
 
-selfns = fieldnames(sel);
-for i = 1:numel(selfns)
-    for ianm = 1:nAnm
-        sessix = find(objix{ianm});
-        temp = nanmean(sel.(selfns{i}).(spacename)(:,sessix),2);
-        newsel.(selfns{i}).(spacename)(:,ianm) = temp;
-    end
-end
-
-
-sel.hit.(spacename) = newsel.hit.(spacename);
-sel.miss.(spacename) = newsel.miss.(spacename);
+% selfns = fieldnames(sel);
+% for i = 1:numel(selfns)
+%     for ianm = 1:nAnm
+%         sessix = find(objix{ianm});
+%         temp = nanmean(sel.(selfns{i}).(spacename)(:,sessix),2);
+%         newsel.(selfns{i}).(spacename)(:,ianm) = temp;
+%     end
+% end
+% 
+% 
+% sel.hit.(spacename) = newsel.hit.(spacename);
+% sel.miss.(spacename) = newsel.miss.(spacename);
 
 
 end

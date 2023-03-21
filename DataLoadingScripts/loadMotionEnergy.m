@@ -76,10 +76,13 @@ me.data = fillmissing(me.data,'nearest');
 % -------------------------------------------------------------------
 me.move = me.data > (me.moveThresh);
 
-
+% % baseline subtract 
+% ps = [mode(obj.bp.ev.bitStart) mode(obj.bp.ev.sample-obj.bp.ev.bitStart)] - mode(obj.bp.ev.(params.alignEvent));
+% for i = 1:numel(ps)
+%     [~,psix(i)] = min(abs(obj.time - ps(i)));
 % end
-
-
+% psme = mean(me.data(psix(1):psix(2),:),1);
+% me.data = me.data - psme;
 
 end % loadMotionEnergy
 

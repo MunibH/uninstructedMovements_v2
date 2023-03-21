@@ -1,4 +1,4 @@
-function rt = firstJawRT(obj)
+ function rt = firstJawRT(obj)
 % get reaction time from jaw (and tongue) trajectories as first time jaw
 % significantly moved after go cue
 

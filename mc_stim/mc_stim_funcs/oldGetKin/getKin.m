@@ -29,7 +29,16 @@ for i = 1:numel(meta)
         else
             tempme(:,j) = interp1(obj(i).traj{1}(j).frameTimes_warped-alignTimes(j),temp{j},taxis);
         end
+        
     end
+
+    % baseline subtract 
+    ps = [mode(obj(1).bp.ev.bitStart) mode(obj(1).bp.ev.sample-obj(1).bp.ev.bitStart)] - mode(obj(1).bp.ev.(dfparams.alignEv));
+    for j = 1:numel(ps)
+        [~,psix(j)] = min(abs(dfparams.time - ps(j)));
+    end
+    psme = mean(tempme(psix(1):psix(2),:),1);
+    tempme = tempme - psme;    
 
     kinfeats{i} = cat(3, kinfeats{i}, tempme);
     kin(i).featLeg{end+1} = 'motion_energy';
