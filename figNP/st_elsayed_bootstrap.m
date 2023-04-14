@@ -42,6 +42,12 @@ params.condition(end+1) = {'L&~stim.enable&~autowater&~early'}; % (11)
 % for ramping
 params.condition(end+1) = {'hit&~stim.enable&~autowater'};               % all hits, no stim, aw off (12)
 
+% autowater
+params.condition(end+1) = {'R&hit&~stim.enable&autowater&~early'};             % right hits, no stim, aw off (13)
+params.condition(end+1) = {'L&hit&~stim.enable&autowater&~early'};             % left hits, no stim, aw off  (14)
+params.condition(end+1) = {'R&miss&~stim.enable&autowater&~early'};             % right hits, no stim, aw off (15)
+params.condition(end+1) = {'L&miss&~stim.enable&autowater&~early'};             % left hits, no stim, aw off  (16)
+
 params.tmin = -2.35;
 params.tmax = 2.5;
 params.dt = 1/50;
@@ -77,9 +83,9 @@ meta = loadJEB7_ALMVideo(meta,datapth);
 meta = loadEKH3_ALMVideo(meta,datapth);
 meta = loadJGR2_ALMVideo(meta,datapth);
 meta = loadJGR3_ALMVideo(meta,datapth);
-meta = loadJEB13_ALMVideo(meta,datapth);
-meta = loadJEB14_ALMVideo(meta,datapth);
-meta = loadJEB15_ALMVideo(meta,datapth);
+% meta = loadJEB13_ALMVideo(meta,datapth);
+% meta = loadJEB14_ALMVideo(meta,datapth);
+% meta = loadJEB15_ALMVideo(meta,datapth);
 
 
 % --- M1TJ ---
@@ -103,7 +109,7 @@ params.probe = {meta.probe}; % put probe numbers into params, one entry for elem
 % ------------------------------------------
 for sessix = 1:numel(meta)
     me(sessix) = loadMotionEnergy(obj(sessix), meta(sessix), params(sessix), datapth);
-    kin(sessix) = getKinematics(obj(sessix), me(sessix), params(sessix));
+%     kin(sessix) = getKinematics(obj(sessix), me(sessix), params(sessix));
 end
 
 
@@ -126,8 +132,8 @@ for sessix = 1:numel(meta)
     trialdat_zscored = zscore_singleTrialNeuralData(obj(sessix));
 
     % -- null and potent spaces
-    cond2use = [2:5]; % right hit, left hit, right miss, left miss, 2afc and aw
-    cond2proj = [2:5 12];
+    cond2use = [2:5 13:16]; % right hit, left hit, right miss, left miss, 2afc and aw
+    cond2proj = [2:5 13:16];
     nullalltime = 0; % use all time points to estimate null space if 1
     onlyAW = 0; % only use AW trials
     delayOnly = 0; % only use delay period
@@ -140,7 +146,7 @@ disp('DONE')
 
 clear boot bootobj bootparams
 
-boot.iters = 100; % number of bootstrap iterations (most papers do 1000)
+boot.iters = 1000; % number of bootstrap iterations (most papers do 1000)
 
 boot.N.anm = 5; % number of animals to sample w/ replacement
 boot.N.sess = 2; % number of sessions to sample w/ replacement (if Nsessions for an animal is less than this number, sample Nsessions)
@@ -231,10 +237,17 @@ for iboot = 1:boot.iters
             trialdat.potent = rez(sessix).recon.potent(:,:,samp.cluid{ianm}{isess});
             trialdat.me = me(sessix).data;
             trialid = bootparams.trialid;
-            for icond = 1:numel(trialid)
+            for icond = 1:numel(trialid)-4 % -4 for aw only
                 % control
-                samp.trialdat.null{icond} = cat(3,samp.trialdat.null{icond},trialdat.null(:,trialid{icond},:));
-                samp.trialdat.potent{icond} = cat(3,samp.trialdat.potent{icond},trialdat.potent(:,trialid{icond},:));
+                try
+                    samp.trialdat.null{icond} = cat(3,samp.trialdat.null{icond},trialdat.null(:,trialid{icond},:));
+                catch
+                end
+                try
+                    samp.trialdat.potent{icond} = cat(3,samp.trialdat.potent{icond},trialdat.potent(:,trialid{icond},:));
+                catch
+                end
+
                 samp.me{icond} = cat(2,samp.me{icond},trialdat.me(:,trialid{icond}));
 
 
@@ -259,7 +272,7 @@ for iboot = 1:boot.iters
         end
     end
 
-    for icond = 1:numel(samp.trialdat.null)
+    for icond = 1:numel(samp.trialdat.null)-4 % -4 for aw only
         samp.psth.null(:,:,icond) = squeeze(mean(samp.trialdat.null{icond},2));
         samp.psth.potent(:,:,icond) = squeeze(mean(samp.trialdat.potent{icond},2));
 
@@ -281,7 +294,7 @@ for iboot = 1:boot.iters
     cd_null(iboot) = getCodingDimensions(samp.psth.null,nan,nan,obj(1),params(1),cond2use,cond2use_trialdat, cond2proj, rampcond);
     cd_potent(iboot) = getCodingDimensions(samp.psth.potent,nan,nan,obj(1),params(1),cond2use,cond2use_trialdat, cond2proj, rampcond);
     % project single trials
-    for icond = 1:numel(samp.trialdat.null)
+    for icond = 1:numel(samp.trialdat.null)-4 % -4 for aw only
         cd_null(iboot).trialdat{icond} = tensorprod(samp.trialdat.null{icond},cd_null(iboot).cd_mode_orth,3,1);
         cd_potent(iboot).trialdat{icond} = tensorprod(samp.trialdat.potent{icond},cd_null(iboot).cd_mode_orth,3,1);
     end
@@ -313,7 +326,7 @@ close all
 
 sav = 0;
 
-plotmiss = 1;
+plotmiss = 0;
 plotno = 0;
 
 titlestring = 'Null';

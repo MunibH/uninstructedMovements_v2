@@ -12,6 +12,8 @@ rmpath(genpath(fullfile(utilspth,'MotionMapper/')))
 % add paths for figure specific functions
 addpath(genpath(pwd))
 
+clc
+
 % performance by mouse on AFC and AW trials
 
 %% PARAMETERS
@@ -25,8 +27,8 @@ params.nLicks              = 20; % number of post go cue licks to calculate medi
 params.lowFR               = 1; % remove clusters with firing rates across all trials less than this val
 
 % set conditions to calculate PSTHs for
-params.condition(1)     = {'~stim.enable&~autowater&((1:Ntrials)>20)'};             % afc
-params.condition(end+1) = {'~stim.enable&autowater&((1:Ntrials)>20)'};              % aw
+params.condition(1)     = {'(hit|miss)&~stim.enable&~autowater&((1:Ntrials)<(Ntrials-20))'};             % afc
+params.condition(end+1) = {'(hit|miss)&~stim.enable&autowater&((1:Ntrials)<(Ntrials-20))'};              % aw
 
 params.tmin = -2.5;
 params.tmax = 2.5;
@@ -47,7 +49,7 @@ params.feat_varToExplain = 80; % num factors for dim reduction of video features
 
 params.advance_movement = 0.0;
 
-params.behav_only = 1;
+params.behav_only = 0;
 
 
 %% SPECIFY DATA TO LOAD
@@ -58,11 +60,12 @@ meta = [];
 
 % --- ALM --- 
 meta = loadJEB6_ALMVideo(meta,datapth);
-meta = loadJEB7_ALMVideo(meta,datapth);
-meta = loadEKH1_ALMVideo(meta,datapth);
-meta = loadEKH3_ALMVideo(meta,datapth);
-meta = loadJGR2_ALMVideo(meta,datapth);
-meta = loadJGR3_ALMVideo(meta,datapth);
+% meta = loadJEB7_ALMVideo(meta,datapth);
+% meta = loadEKH1_ALMVideo(meta,datapth);
+% meta = loadEKH3_ALMVideo(meta,datapth);
+% meta = loadJGR2_ALMVideo(meta,datapth);
+% meta = loadJGR3_ALMVideo(meta,datapth);
+% meta = loadJEB13_ALMVideo(meta,datapth);
 % meta = loadJEB14_ALMVideo(meta,datapth);
 % meta = loadJEB15_ALMVideo(meta,datapth);
 
@@ -85,6 +88,9 @@ perf = cell(numel(unique(anms)),1);
 for i = 1:numel(meta)
     anmix = find(ismember(anms,meta(i).anm));
     perf{anmix} = [perf{anmix} ; rez(i).perf];
+    if ~ismember(anms{anmix},{'JEB13','JEB14','JEB15'})
+        perf_sess(i,:) = rez(i).perf;
+    end
 end
 % average across sessions for each mouse
 perf = cellfun(@(x) mean(x,1)*100, perf, 'UniformOutput',false);
@@ -96,7 +102,8 @@ perf = cell2mat(perf); % (animals, cond)
 
 close all
 
-figure;
+f=figure;
+f.Position = [680   715   318   263];
 ax = gca;
 hold on;
 
@@ -106,28 +113,41 @@ cols{2} = clrs.aw;
 
 xs = [0 1];
 for i = 1:size(perf,2)
-    b(i) = bar(xs(i),mean(perf(:,i)));
+    b(i) = bar(xs(i),nanmean(perf(:,i)));
     b(i).FaceColor = cols{i};
     b(i).EdgeColor = 'none';
     b(i).FaceAlpha = 0.5;
-    vs(i) = scatter(randn(numel(anms),1) * 0.1 + xs(i)*ones(size(perf(:,i))),perf(:,i),30,'MarkerFaceColor',cols{i},...
+    b(i).BarWidth = 0.7;
+    vs(i) = scatter(randn(numel(anms),1) * 0.1 + xs(i)*ones(size(perf(:,i))),perf(:,i),20,'MarkerFaceColor',cols{i},...
         'MarkerEdgeColor','k','LineWidth',1);%,'XJitter','randn','XJitterWidth',0.25);
-    errorbar(b(i).XEndPoints,mean(perf(:,i)),std(perf(:,i)),'LineStyle','none','Color','k','LineWidth',1)
+    errorbar(b(i).XEndPoints,nanmean(perf(:,i)),nanstd(perf(:,i))./sqrt(numel(anms)),'LineStyle','none','Color','k','LineWidth',1)
 
     xs_(:,i) = vs(i).XData';
     ys_(:,i) = perf(:,i);
 end
 
 for i = 1:size(xs_,1)
-    patchline(xs_(i,:),ys_(i,:),'EdgeAlpha',0.4)
+    if ~ismember(anms{i},{'JEB13','JEB14','JEB15'})
+        patchline(xs_(i,:),ys_(i,:),'EdgeAlpha',0.4)
+    end
+end
+
+% t-test
+[h,p] = ttest(perf_sess(:,1),perf_sess(:,2));
+if h
+    text(0.5,98,'*','FontSize',20)
+    text(0,97,num2str(p),'FontSize',10)
 end
 
 
 ax.XTick = xs;
 xticklabels(["2AFC" "AW"])
 ylabel("Performance (%)")
-ylim([0,100])
+ylim([65,100])
 ax = gca;
 ax.FontSize = 12;
+
+
+
 
 

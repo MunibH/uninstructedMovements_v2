@@ -6,7 +6,7 @@ function plotME_NPMagnitude_singleTrials(meta,obj,params,me,rez,cond2use)
 
 cols = linspecer(numel(rez));
 % xlims = [-2 2];
-% xlims = [-0.9 0];
+xlims = [-0.9 0];
 % xlims = [-0.9 0];
 
 % edges = [params(1).tmin, params(1).tmax];
@@ -57,9 +57,9 @@ for sessix = 1:numel(rez)
     c = colorbar;
     lims = clim;
     %     clim([lims(1) lims(2) / 1])
-%     xlim(xlims)
-    xlabel('Time (s) from go cue')
-    ylabel('Trials')
+    xlim(xlims)
+%     xlabel('Time (s) from go cue')
+%     ylabel('Trials')
 %     c.Label.String = 'Motion Energy (a.u.)';
 
     % PLOT POTENT
@@ -70,8 +70,9 @@ for sessix = 1:numel(rez)
     colormap(linspecer);
     c = colorbar;
     lims = clim;
+    clim([0 8])
     %     clim([lims(1) lims(2) / 1.5])
-%     xlim(xlims)
+    xlim(xlims)
 %     c.Label.String = 'Potent - Magnitude (a.u.)';
 
     % PLOT NULL
@@ -81,14 +82,14 @@ for sessix = 1:numel(rez)
     imagesc(time,1:numel(trix), null(:,sortix)');
     colormap(linspecer)
     c = colorbar;
-    clim([0 10])
+    clim([0 8])
     clim_null = clim;
 %     clim([clim_null(1) clim_null(2)/1.5])
-%     xlim(xlims)
+    xlim(xlims)
 %     c.Label.String = 'Null - Magnitude (a.u.)';
 
     axes(potentax);
-    clim(clim_null)
+%     clim(clim_null)
 
 %     sgtitle([meta(sessix).anm ' ' meta(sessix).date])
 

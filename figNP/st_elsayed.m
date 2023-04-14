@@ -208,7 +208,7 @@ close all
 plotVarianceExplained_DelayResponse(rez,meta);
 
 %% single trial magnitude activity in N/P
-% close all
+close all
 
 cond2use = 2:3;
 plotME_NPMagnitude_singleTrials(meta,obj,params,me,rez,cond2use)
@@ -505,13 +505,55 @@ xlim(xlims);
 % histogram(cc.potent,nb,'EdgeColor','none','FaceColor',col.potent,'FaceAlpha',0.5);
 
 
+%% plot selectivity in AW trials (right - left selectivity) (for supp4s)
+close all
 
+sel = [];
 
+sm = 5;
+smtype = 'zeropad';
 
+edges = [-0.5 0];
+for i = 1:numel(edges)
+    [~,ix(i)] = min(abs(obj(1).time - edges(i)));
+end
 
+cond2use = [13 14];
+for sessix = 1:numel(meta)
+    trix = params(sessix).trialid(cond2use);
+    for c = 1:numel(trix)
+        psth{c} = mySmooth(mean(obj(sessix).trialdat(:,:,trix{c}),3),sm,smtype);
+    end
 
+    % find pref
+    temp = cell2mat(cellfun(@(x) nanmean(x(ix(1):ix(2),:),2), psth, 'UniformOutput',false));
+    
+    
+    sel = cat(2,sel,psth{1}-psth{2});
+    
+%     break
+    
+end
+    
+lw = 2;
+alph = 0.2;
 
+f = figure;
+ax = gca;
+mu = nanmean(sel,2);
+% sd = nanstd(sel,[],2) ./ sqrt(size(sel,2)) * ;
+sd = getCI(sel)*1.96;
+shadedErrorBar(obj(1).time,mu,sd,{'Color','k','LineWidth',lw},alph,ax)
+xlim([-2.3 2])
 
+tstart = mode(obj(1).bp.ev.bitStart) - 2.5;
+sample = mode(obj(1).bp.ev.sample) - 2.5;
+delay = mode(obj(1).bp.ev.delay) - 2.5;
+gc = 0;
+
+xline(tstart,'k--'); xline(sample,'k--'); xline(delay,'k--'); xline(gc,'k--'); 
+xlabel('Time from go cue (s)')
+ylabel('Selectivity (spikes / s)')
 
 
 
