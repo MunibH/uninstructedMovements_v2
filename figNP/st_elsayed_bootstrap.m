@@ -83,9 +83,9 @@ meta = loadJEB7_ALMVideo(meta,datapth);
 meta = loadEKH3_ALMVideo(meta,datapth);
 meta = loadJGR2_ALMVideo(meta,datapth);
 meta = loadJGR3_ALMVideo(meta,datapth);
-% meta = loadJEB13_ALMVideo(meta,datapth);
-% meta = loadJEB14_ALMVideo(meta,datapth);
-% meta = loadJEB15_ALMVideo(meta,datapth);
+meta = loadJEB13_ALMVideo(meta,datapth);
+meta = loadJEB14_ALMVideo(meta,datapth);
+meta = loadJEB15_ALMVideo(meta,datapth);
 
 
 % --- M1TJ ---
@@ -427,7 +427,7 @@ for iboot = 1:boot.iters
     end
 end
 
-%%
+%
 f = figure;
 
 xlims = [-2.3 0];
