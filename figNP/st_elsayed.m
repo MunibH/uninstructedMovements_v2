@@ -1,7 +1,7 @@
 clear,clc,close all
 
 % add paths for data loading scripts, all fig funcs, and utils
-utilspth = 'C:\Users\munib\Documents\Economo-Lab\code\uninstructedMovements_v3';
+utilspth = '/Users/munib/Economo-Lab/code/uninstructedMovements_v3';
 addpath(genpath(fullfile(utilspth,'DataLoadingScripts')));
 addpath(genpath(fullfile(utilspth,'funcs')));
 addpath(genpath(fullfile(utilspth,'utils')));
@@ -74,7 +74,7 @@ params.advance_movement = 0;
 
 %% SPECIFY DATA TO LOAD
 
-datapth = '/Users/Munib/Documents/Economo-Lab/data/';
+datapth = '/Users/munib/Economo-Lab/data';
 
 meta = [];
 
@@ -197,7 +197,7 @@ close all
 plotCDSelectivity(meta,obj,cd_null_all,cd_null,cd_potent_all,cd_potent);
 
 
-plotCD_EpochSelectivity(meta,obj,cd_null_all,cd_null,cd_potent_all,cd_potent);
+% plotCD_EpochSelectivity(meta,obj,cd_null_all,cd_null,cd_potent_all,cd_potent);
 
 
 %% variance explained
