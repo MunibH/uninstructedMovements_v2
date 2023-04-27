@@ -65,7 +65,7 @@ meta = [];
 % --- ALM ---
 meta = loadJEB6_ALMVideo(meta,datapth);
 meta = loadJEB7_ALMVideo(meta,datapth);
-meta = loadEKH1_ALMVideo(meta,datapth);
+% meta = loadEKH1_ALMVideo(meta,datapth);
 meta = loadEKH3_ALMVideo(meta,datapth);
 meta = loadJGR2_ALMVideo(meta,datapth);
 meta = loadJGR3_ALMVideo(meta,datapth);
@@ -384,16 +384,24 @@ clear r
 
 dt = params(1).dt;
 
-maxlag = int64(3 ./ dt);
+% maxlag = int64( ./ dt);
+maxlag = 2 / dt;
+
+tt = [-2 0]; % only use time points before go cue
+for i = 1:numel(tt)
+    [~,tix(i)] = min(abs(obj(1).time - tt(i)));
+end
+tix = tix(1):tix(2);
 
 cond2use = [2 3];
 for sessix = 1:numel(meta)
 
     trix = cell2mat(params(sessix).trialid(cond2use)');
 
-    thisme = zscore(me(sessix).data(:,trix));
-    null = rez(sessix).null_ssm;
-    potent = rez(sessix).potent_ssm;
+%     thisme = zscore(me(sessix).data(:,trix));
+    thisme = normalize(me(sessix).data(tix,trix));
+    null = normalize(rez(sessix).null_ssm(tix,:));
+    potent = normalize(rez(sessix).potent_ssm(tix,:));
 
     for t = 1:numel(trix)
 
@@ -414,13 +422,14 @@ col = getColors();
 lw = 2;
 alph = 0.2;
 f = figure;
+f.Position = [680   694   383   284];
 ax = gca;
 hold on;
 shadedErrorBar(lagtm*dt,mean(nullcc,2),getCI(nullcc),{'Color',col.null,'LineWidth',lw},alph,ax);
 shadedErrorBar(lagtm*dt,mean(potentcc,2),getCI(potentcc),{'Color',col.potent,'LineWidth',lw},alph,ax);
 
-xlabel('lags (s)')
-ylabel('cross corr')
+xlabel('Time lag, movement and subspace activity (s)')
+ylabel('Correlation')
 title('ta-elsayed')
 
 

@@ -146,7 +146,7 @@ disp('DONE')
 
 clear boot bootobj bootparams
 
-boot.iters = 1000; % number of bootstrap iterations (most papers do 1000)
+boot.iters = 100; % number of bootstrap iterations (most papers do 1000)
 
 boot.N.anm = 5; % number of animals to sample w/ replacement
 boot.N.sess = 2; % number of sessions to sample w/ replacement (if Nsessions for an animal is less than this number, sample Nsessions)

@@ -1,7 +1,7 @@
 clear,clc,close all
 
 % add paths for data loading scripts, all fig funcs, and utils
-utilspth = '/Users/munib/Economo-Lab/code/uninstructedMovements_v3';
+utilspth = 'C:\Users\munib\Documents\Economo-Lab\code\uninstructedMovements_v3';
 addpath(genpath(fullfile(utilspth,'DataLoadingScripts')));
 addpath(genpath(fullfile(utilspth,'funcs')));
 addpath(genpath(fullfile(utilspth,'utils')));
@@ -74,7 +74,7 @@ params.advance_movement = 0;
 
 %% SPECIFY DATA TO LOAD
 
-datapth = '/Users/munib/Economo-Lab/data';
+datapth = 'C:\Users\munib\Documents\Economo-Lab\data';
 
 meta = [];
 
@@ -383,14 +383,22 @@ clear r
 
 dt = params(1).dt;
 
-maxlag = int64(3 ./ dt);
+% maxlag = int64( ./ dt);
+maxlag = 2 / dt;
+
+tt = [-2 0]; % only use time points before go cue
+for i = 1:numel(tt)
+    [~,tix(i)] = min(abs(obj(1).time - tt(i)));
+end
+tix = tix(1):tix(2);
 
 cond2use = [2 3];
 for sessix = 1:numel(meta)
 
     trix = cell2mat(params(sessix).trialid(cond2use)');
 
-    thisme = zscore(me(sessix).data(:,trix));
+%     thisme = zscore(me(sessix).data(tix,trix));
+    thisme = normalize(me(sessix).data(tix,trix));
     %     null = sum(rez(sessix).N_null(:,trix,:).^2,3);
     %     potent = sum(rez(sessix).N_potent(:,trix,:).^2,3);
 
@@ -399,14 +407,14 @@ for sessix = 1:numel(meta)
         % null
         ndims = rez(sessix).dPrep;
         for d = 1:ndims
-            null = rez(sessix).N_null(:,trix(t),d).^2;
+            null = normalize(rez(sessix).N_null(tix,trix(t),d).^2);
             [r.null{sessix}(:,t,d),lagtm] = xcorr(thisme(:,t),null,maxlag,'normalized'); % {session}(time,trial,dim)
         end
 
         % potent
         ndims = rez(sessix).dMove;
         for d = 1:ndims
-            potent = rez(sessix).N_potent(:,trix(t),d).^2;
+            potent = normalize(rez(sessix).N_potent(tix,trix(t),d).^2);
             [r.potent{sessix}(:,t,d),lagtm] = xcorr(thisme(:,t),potent,maxlag,'normalized');
         end
     end
@@ -424,17 +432,18 @@ col = getColors();
 lw = 2;
 alph = 0.2;
 f = figure;
+f.Position = [680   694   383   284];
 ax = gca;
 hold on;
 % shadedErrorBar(lagtm*dt,mean(nullcc,2),std(nullcc,[],2)./sqrt(numel(meta)),{'Color',col.null,'LineWidth',lw},alph,ax);
 % shadedErrorBar(lagtm*dt,mean(potentcc,2),std(potentcc,[],2)./sqrt(numel(meta)),{'Color',col.potent,'LineWidth',lw},alph,ax);
 shadedErrorBar(lagtm*dt,mean(nullcc,2),getCI(nullcc),{'Color',col.null,'LineWidth',lw},alph,ax);
 shadedErrorBar(lagtm*dt,mean(potentcc,2),getCI(potentcc),{'Color',col.potent,'LineWidth',lw},alph,ax);
+% xlim([-0.5 0.5])
 
-
-xlabel('lags (s)')
-ylabel('cross corr')
-title('ta-elsayed')
+xlabel('Time lag, movement and subspace activity (s)')
+ylabel('Correlation')
+title('st-elsayed')
 
 %% onset of selectivity in potent space and motion energy (just exploring)
 
