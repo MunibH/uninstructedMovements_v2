@@ -6,6 +6,7 @@ function cd = calcCD(psth,times,psthdims)
 % psthdims - which of size(psth,3)=conditions to use when calculating CD
 
     tempdat = psth(:,:,psthdims);
+    
     mu = squeeze(mean(tempdat(times,:,:),1));
 
     sd = squeeze(std(tempdat(times,:,:),[],1));

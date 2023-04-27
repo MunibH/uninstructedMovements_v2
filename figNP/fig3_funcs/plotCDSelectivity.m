@@ -36,6 +36,12 @@ sel.miss.null = squeeze(allrez_null.cd_proj(:,3,cdix,:) - allrez_null.cd_proj(:,
 sel.hit.potent = squeeze(allrez_potent.cd_proj(:,1,cdix,:) - allrez_potent.cd_proj(:,2,cdix,:));
 sel.miss.potent = squeeze(allrez_potent.cd_proj(:,3,cdix,:) - allrez_potent.cd_proj(:,4,cdix,:));
 
+
+% sel.hit.null = sel.hit.null ./ max(sel.hit.null);
+% sel.miss.null = sel.miss.null ./ max(sel.miss.null);
+% sel.hit.potent = sel.hit.potent ./ max(sel.hit.potent);
+% sel.miss.potent = sel.miss.potent ./ max(sel.miss.potent);
+
 %% plot
 
 lw = 1.5;
