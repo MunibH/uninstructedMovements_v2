@@ -6,7 +6,7 @@ function [obj,cluid] = removeLowFRClusters(obj,cluid,lowFR,prbnum)
 %   low-firing rate unit will be small, so the neural trajectory may
 %   show a deflection each time the neuron spikes.
 
-meanFRs = nanmean(nanmean(obj.psth{prbnum},3));
+meanFRs = mean(mean(obj.psth{prbnum},3,'omitnan'),'omitnan');
 use = meanFRs > lowFR;
 
 % remove low fr clusters
