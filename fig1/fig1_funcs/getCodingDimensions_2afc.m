@@ -8,19 +8,19 @@ function rez = getCodingDimensions_2afc(obj,params,cond2use,cond2proj,rampcond)
 % cd_epochs = {'delay',params(1).alignEvent,params(1).alignEvent};
 % cd_times = {[-0.42 -0.02], [-0.42 -0.02], [0.22 0.62]}; % in seconds, relative to respective epochs
 
-% cd_labels = {'late'};
-% cd_epochs = {params(1).alignEvent};
-% cd_times = {[-0.42 -0.02]}; % in seconds, relative to respective epochs
+cd_labels = {'late'};
+cd_epochs = {params(1).alignEvent};
+cd_times = {[-0.42 -0.02]}; % in seconds, relative to respective epochs
 
 % cd_labels = {'late_error','go'};
 % cd_epochs = {'goCue','goCue'};
 % cd_times = {[-0.42 -0.02], [0.02 0.42]}; % in seconds, relative to respective epochs
 
-cd_labels = {'late','go','ramping'};
-cd_epochs = {'goCue','goCue'};
-cd_times = {[-0.42 -0.02], [0.02 0.42]}; % in seconds, relative to respective epochs
-ramp_epochs = {'sample','goCue'};
-ramp_times = {[-0.3 -0.01], [-0.5 -0.01]}; % in seconds, relative to respective epochs
+% cd_labels = {'late','go','ramping'};
+% cd_epochs = {'goCue','goCue'};
+% cd_times = {[-0.42 -0.02], [0.02 0.42]}; % in seconds, relative to respective epochs
+% ramp_epochs = {'sample','goCue'};
+% ramp_times = {[-0.3 -0.01], [-0.5 -0.01]}; % in seconds, relative to respective epochs
 
 
 for sessix = 1:numel(obj)
@@ -50,15 +50,15 @@ for sessix = 1:numel(obj)
     for ix = 1:numel(cd_labels)
         if strcmp(cd_labels{ix},'ramping')
             % find time points to use
-            e1_start = mode(rez.ev.(ramp_epochs{1})) + ramp_times{1}(1) - rez.align;
-            e1_stop = mode(rez.ev.(ramp_epochs{1})) + ramp_times{1}(2) - rez.align;
-            times.ramp_lateSamp = rez.time>e1_start & rez.time<e1_stop;
+            e1_start = mode(rez(sessix).ev.(ramp_epochs{1})) + ramp_times{1}(1) - rez(sessix).align;
+            e1_stop = mode(rez(sessix).ev.(ramp_epochs{1})) + ramp_times{1}(2) - rez(sessix).align;
+            times.ramp_lateSamp = rez(sessix).time>e1_start & rez(sessix).time<e1_stop;
 
-            e2_start = mode(rez.ev.(ramp_epochs{2})) + ramp_times{2}(1) - rez.align;
-            e2_stop = mode(rez.ev.(ramp_epochs{2})) + ramp_times{2}(2) - rez.align;
-            times.ramp_lateDel = rez.time>e2_start & rez.time<e2_stop;
+            e2_start = mode(rez(sessix).ev.(ramp_epochs{2})) + ramp_times{2}(1) - rez(sessix).align;
+            e2_stop = mode(rez(sessix).ev.(ramp_epochs{2})) + ramp_times{2}(2) - rez(sessix).align;
+            times.ramp_lateDel = rez(sessix).time>e2_start & rez(sessix).time<e2_stop;
             % calculate ramping mode
-            rez.cd_mode(:,ix) = calcRampingMode(rez.psth,times,rampcond);
+            rez.cd_mode(:,ix) = calcRampingMode(rez(sessix).psth,times,rampcond);
             continue
         end
         % find time points to use

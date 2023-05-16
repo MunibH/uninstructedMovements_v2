@@ -8,6 +8,7 @@ addpath(genpath(fullfile(utilspth,'utils')));
 rmpath(genpath(fullfile(utilspth,'fig3/')))
 rmpath(genpath(fullfile(utilspth,'fig2/')))
 rmpath(genpath(fullfile(utilspth,'figx/')))
+rmpath(genpath(fullfile(utilspth,'figNP/')))
 rmpath(genpath(fullfile(utilspth,'mc_stim/')))
 rmpath(genpath(fullfile(utilspth,'MotionMapper/')))
 rmpath(genpath(fullfile(utilspth,'musall2919/')))
@@ -112,41 +113,45 @@ dat.meta = meta;
 % % cols = cols(1,:);
 % cols = [110 250 251] ./ 255;
 % trix = [8 21 68]; % jaw trials
-% plotTraj = 0;
+% plotTraj = 1;
 % trajoff = 40;
-% div = 1.02;
-% cdiv = 1.02;
+% % div = 1.02;
+% % cdiv = 1.02;
+% div = 1.008;
+% cdiv = 1.008;
 % ms = 27;
 % xoff = 10;
 % yoff = -4;
 
-% feats = 6; % nose
-% view = 1; % side cam
-% % cols = cols(2,:);
-% cols = [255 87 187] ./ 255;
-% trix = [65 117 130];
-% % trix = 130;
-% plotTraj = 0;
-% trajoff = 120;
-% div = 1.02;
-% cdiv = 1.02;
-% ms = 27;
-% xoff = 0;
-% yoff = 0;
-
-feats = [5 6]; % paws
-view = 2; % bottom camcam
-% cols = cols(3:4,:);
-cols(1,:) = [84 201 100] ./ 255;
-cols(2,:) = [250, 176, 0] ./ 255;
-trix = [8 63 120]; % paw
+feats = 6; % nose
+view = 1; % side cam
+% cols = cols(2,:);
+cols = [255 87 187] ./ 255;
+trix = [65 117 130];
+% trix = 130;
 plotTraj = 1;
 trajoff = 120;
-div = 1.007;
-cdiv = 1.005;
-ms = 20;
+% div = 1.02;
+% cdiv = 1.02;
+div = 1.008;
+cdiv = 1.008;
+ms = 27;
 xoff = 0;
 yoff = 0;
+
+% feats = [5 6]; % paws
+% view = 2; % bottom camcam
+% % cols = cols(3:4,:);
+% cols(1,:) = [84 201 100] ./ 255;
+% cols(2,:) = [250, 176, 0] ./ 255;
+% trix = [8 63 120]; % paw
+% plotTraj = 0;
+% trajoff = 120;
+% div = 1.002;
+% cdiv = 1.001;
+% ms = 20;
+% xoff = 0;
+% yoff = 0;
 
 vidpth = ['C:\Users\munib\Documents\Economo-Lab\data\Video\JEB15\2022-07-27\Cam' num2str(view-1)];
 vids = dir(vidpth);
@@ -154,7 +159,7 @@ vids = vids(~[vids(:).isdir]);
 vids = {vids(:).name};
 vidfns = natsortfiles(vids)';
 
-nprev = 200;
+nprev = 1000;
 
 for itrix = 1:numel(trix)
     

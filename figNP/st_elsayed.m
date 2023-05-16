@@ -118,7 +118,7 @@ end
 
 %% Null and Potent Space
 
-clearvars -except obj meta params me sav datapth kin rt 
+clearvars -except obj meta params me sav datapth kin rt
 
 % -----------------------------------------------------------------------
 % -- Curate Input Data --
@@ -147,8 +147,8 @@ for sessix = 1:numel(meta)
     cond2proj = [1:4]; % right hits, left hits, right miss, left miss (corresponding to null/potent psths in rez)
     cond2use_trialdat = [2 3]; % for calculating selectivity explained in full neural pop
     rampcond = 5; % corresponding to cond2proj in null/potent analysis
-%     cd_null(sessix) = getCodingDimensions(rez(sessix).N_null_psth,rez(sessix).N_null,trialdat_zscored,obj(sessix),params(sessix),cond2use,cond2use_trialdat, cond2proj,rampcond);
-%     cd_potent(sessix) = getCodingDimensions(rez(sessix).N_potent_psth,rez(sessix).N_potent,trialdat_zscored,obj(sessix),params(sessix),cond2use,cond2use_trialdat, cond2proj,rampcond);
+    %     cd_null(sessix) = getCodingDimensions(rez(sessix).N_null_psth,rez(sessix).N_null,trialdat_zscored,obj(sessix),params(sessix),cond2use,cond2use_trialdat, cond2proj,rampcond);
+    %     cd_potent(sessix) = getCodingDimensions(rez(sessix).N_potent_psth,rez(sessix).N_potent,trialdat_zscored,obj(sessix),params(sessix),cond2use,cond2use_trialdat, cond2proj,rampcond);
 
     cd_null(sessix) = getCodingDimensions(rez(sessix).recon_psth.null,trialdat_zscored,trialdat_zscored,obj(sessix),params(sessix),cond2use,cond2use_trialdat, cond2proj, rampcond);
     cd_potent(sessix) = getCodingDimensions(rez(sessix).recon_psth.potent,trialdat_zscored,trialdat_zscored,obj(sessix),params(sessix),cond2use,cond2use_trialdat, cond2proj, rampcond);
@@ -291,12 +291,12 @@ close all
 cond2use_ta = [2 3]; % right and left hits, corresponding to trial-avg projs onto n/p
 cond2use_st = [2 3]; % right and left hits, corresponding to single-trial projs onto n/p
 subTrials = 35;
-plotSelectivityNeurons(meta,obj,params,cond2use_ta,cond2use_st) % to get number of selective cells 
+plotSelectivityNeurons(meta,obj,params,cond2use_ta,cond2use_st) % to get number of selective cells
 
 % cond2use_ta = [1 2]; % right and left hits, corresponding to trial-avg projs onto n/p
 % cond2use_st = [8 9]; % right and left hits, corresponding to single-trial projs onto n/p
 % % plotSelectivityNP(meta,obj,params,rez,cond2use_ta,cond2use_st)
-% 
+%
 % % hits
 % subTrials = 35;
 % plotSelectivityNPPref(meta,obj,params,rez,cond2use_ta,cond2use_st, subTrials)
@@ -397,7 +397,7 @@ for sessix = 1:numel(meta)
 
     trix = cell2mat(params(sessix).trialid(cond2use)');
 
-%     thisme = zscore(me(sessix).data(tix,trix));
+    %     thisme = zscore(me(sessix).data(tix,trix));
     thisme = normalize(me(sessix).data(tix,trix));
     %     null = sum(rez(sessix).N_null(:,trix,:).^2,3);
     %     potent = sum(rez(sessix).N_potent(:,trix,:).^2,3);
@@ -498,13 +498,13 @@ ax = nexttile;
 imagesc(obj(1).time,1:numel(obj),me_.left'); %colormap(linspecer);
 xlim(xlims);
 
-% 
+%
 % temp = me_.right - me_.left;
 % for i = 1:numel(obj)
 %     cc.null(i) = corr(temp(:,i),null(:,i));
 %     cc.potent(i) = corr(temp(:,i),potent(:,i));
 % end
-% 
+%
 % col = getColors;
 % f = figure;
 % ax = gca;
@@ -536,14 +536,14 @@ for sessix = 1:numel(meta)
 
     % find pref
     temp = cell2mat(cellfun(@(x) nanmean(x(ix(1):ix(2),:),2), psth, 'UniformOutput',false));
-    
-    
+
+
     sel = cat(2,sel,psth{1}-psth{2});
-    
-%     break
-    
+
+    %     break
+
 end
-    
+
 lw = 2;
 alph = 0.2;
 
@@ -560,9 +560,83 @@ sample = mode(obj(1).bp.ev.sample) - 2.5;
 delay = mode(obj(1).bp.ev.delay) - 2.5;
 gc = 0;
 
-xline(tstart,'k--'); xline(sample,'k--'); xline(delay,'k--'); xline(gc,'k--'); 
+xline(tstart,'k--'); xline(sample,'k--'); xline(delay,'k--'); xline(gc,'k--');
 xlabel('Time from go cue (s)')
 ylabel('Selectivity (spikes / s)')
+
+
+%% magnitude squared n/p
+
+sav = 1;
+
+mag = getMagnitudeAcrossDimsNP(rez,21);
+
+cols = getColors;
+
+tstart = mode(obj(1).bp.ev.bitStart) - 2.5;
+sample = mode(obj(1).bp.ev.sample) - 2.5;
+delay = mode(obj(1).bp.ev.delay) - 2.5;
+gc = 0;
+
+
+close all
+for sessix = 1:numel(mag)
+
+    f = figure;
+    f.Position = [301         532        1138         308];
+    t = tiledlayout('flow');
+
+    ax = nexttile;
+    imagesc(obj(sessix).time,1:obj(sessix).bp.Ntrials,mag(sessix).null')
+    colormap(linspecer)
+    title('Null')
+    xline(tstart,'k--'); xline(sample,'k--'); xline(delay,'k--'); xline(gc,'k--');
+
+    ax = nexttile;
+    imagesc(obj(sessix).time,1:obj(sessix).bp.Ntrials,mag(sessix).potent')
+    colormap(linspecer)
+    title('Potent')
+
+    xline(tstart,'k--'); xline(sample,'k--'); xline(delay,'k--'); xline(gc,'k--');
+
+
+
+    ax = nexttile;
+    hold on;
+    nr = mean(mag(sessix).null(:,params(sessix).trialid{2}),2);
+    pr = mean(mag(sessix).potent(:,params(sessix).trialid{2}),2);
+    nl = mean(mag(sessix).null(:,params(sessix).trialid{3}),2);
+    pl = mean(mag(sessix).potent(:,params(sessix).trialid{3}),2);
+    plot(obj(sessix).time,nr,'Color',cols.rmiss,'LineWidth',2)
+    plot(obj(sessix).time,nl,'Color',cols.lmiss,'LineWidth',2)
+    plot(obj(sessix).time,pr,'Color',cols.rhit_aw,'LineWidth',2)
+    plot(obj(sessix).time,pl,'Color',cols.lhit_aw,'LineWidth',2)
+    xline(tstart,'k--'); xline(sample,'k--'); xline(delay,'k--'); xline(gc,'k--');
+
+
+    xlabel(t,'Time from go cue (s)')
+    ylabel(t,'Sum sq. activity (a.u.)')
+    sgtitle([meta(sessix).anm ' ' meta(sessix).date])
+
+
+    if sav
+        pth = 'C:\Users\munib\Documents\Economo-Lab\code\uninstructedMovements_v3\figNP\figs\fig4\magnitudeNP';
+        fn = [meta(sessix).anm '_' meta(sessix).date];
+        mysavefig(f,pth,fn)
+    end
+
+end
+
+
+
+
+
+
+
+
+
+
+
 
 
 

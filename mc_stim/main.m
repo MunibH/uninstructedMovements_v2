@@ -41,7 +41,9 @@ dfparams.warp = 0; % 0 means no warping, 1 means warp delay period to
 
 % -- trial type params --
 dfparams.cond(1) = {'(hit|miss|no)&~stim.enable&~autowater&~early'}; % all trials, no stim, no autowater, no autolearn
+% dfparams.cond(1) = {'(hit|miss|no)&~stim.enable'}; % all trials, no stim, no autowater, no autolearn
 dfparams.cond(end+1) = {'(hit|miss|no)&stim.enable&~autowater&~early'};  % all trials trials, stim, no autowater, no autolearn
+% dfparams.cond(end+1) = {'(hit|miss|no)&stim.enable'};  % all trials trials, stim, no autowater, no autolearn
 dfparams.cond(end+1) = {'R&~no&~stim.enable&~autowater&~early'}; % right trials, no stim, no autowater
 dfparams.cond(end+1) = {'R&~no&stim.enable&~autowater&~early'};  % right trials, stim, no autowater
 dfparams.cond(end+1) = {'L&~no&~stim.enable&~autowater&~early'}; % left trials, no stim, no autowater
@@ -58,8 +60,8 @@ dfparams.stim.types = {'Bi_MC','Right_MC','Left_MC','Bi_ALM','Bi_M1TJ','Right_AL
 % dfparams.stim.num   = logical([1 1 1 1 1 1 1 1 1]);   % ALL
 % dfparams.stim.num   = logical([0 0 0 0 0 1 1 1 1]);   % Right_ALM / Left_ALM / Right_M1TJ / Left_M1TJ
 % dfparams.stim.num   = logical([0 0 0 1 0 0 0 0 0]);   % Bi_ALM
-% dfparams.stim.num   = logical([0 0 0 0 1 0 0 0 0]);   % Bi_M1TJ
-dfparams.stim.num   = logical([1 0 0 0 0 0 0 0 0]);   % Bi_MC
+dfparams.stim.num   = logical([0 0 0 0 1 0 0 0 0]);   % Bi_M1TJ
+% dfparams.stim.num   = logical([1 0 0 0 0 0 0 0 0]);   % Bi_MC
 % dfparams.stim.num   = logical([0 0 0 1 1 0 0 0 0]);   % Bi_M1TJ Bi_ALM
 % dfparams.stim.num   = logical([0 1 1 0 0 0 0 0 0]);   % Right_MC
 % dfparams.stim.num   = logical([0 0 1 0 0 0 0 0 0]);   % Left_MC
@@ -69,7 +71,7 @@ dfparams.stim.num   = logical([1 0 0 0 0 0 0 0 0]);   % Bi_MC
 % dfparams.stim.num   = logical([0 0 0 0 0 0 0 0 1]);   % Left_M1TJ
 
 dfparams.stim.pow.types = [1.08, 3.14, 8]; % mW, 3.14 for all unilateral sessions and most bilateral sessions
-dfparams.stim.pow.num = logical([1 1 1]);
+dfparams.stim.pow.num = logical([0 1 1]);
 
 
 % -- plotting params --
@@ -132,10 +134,25 @@ end
 %     obj = warpData(obj,params);
 % end
 
+%% kinematics
+
+for sessix = 1:numel(obj)
+    if ~isstruct(obj(sessix).me)
+        temp = obj(sessix).me;
+        obj(sessix).me = [];
+        obj(sessix).me.data = temp;
+        clear temp
+    end
+end
+% kin.dat (don't use)
+% kin.featLeg corresponds to 3rd dimension of kinfeats/kinfeats_norm
+[kin,kinfeats,kinfeats_norm] = getKin(meta,obj,dfparams,params);
+
 %% behavioral performance
 close all
 
 rez = getPerformance(meta,obj,params); % rez is struct array, each entyr is an animal. perf is (sessions,conditions)
+% only include sessions with good behavior
 
 % plots
 cond2use = 1:6;
@@ -172,19 +189,7 @@ plotPerformanceAllMice(meta,obj,rez,dfparams,params,cond2use,connectConds)
 % title('early licks all sessions, all mice')
 % ax.FontSize = 20;
 
-%% kinematics
 
-for sessix = 1:numel(obj)
-    if ~isstruct(obj(sessix).me)
-        temp = obj(sessix).me;
-        obj(sessix).me = [];
-        obj(sessix).me.data = temp;
-        clear temp
-    end
-end
-% kin.dat (don't use)
-% kin.featLeg corresponds to 3rd dimension of kinfeats/kinfeats_norm
-[kin,kinfeats,kinfeats_norm] = getKin(meta,obj,dfparams,params);
 
 %% plot kinematics
 close all

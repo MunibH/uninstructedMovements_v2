@@ -31,7 +31,7 @@ for i = 1:size(perf,2)
 %     vs(i) = scatter(xs(i)*ones(size(perf(:,i))),perf(:,i),10,'MarkerFaceColor','k',...
 %         'MarkerEdgeColor','k','LineWidth',1,'XJitter','randn','XJitterWidth',0.25);
     
-    xx = randn(size(perf(:,i))) * 0.1 + xs(i)*ones(size(perf(:,i)));
+    xx = randn(size(perf(:,i))) * 0.01 + xs(i)*ones(size(perf(:,i)));
     vs(i) = scatter(xx,perf(:,i),10,'MarkerFaceColor','k',...
         'MarkerEdgeColor','k','LineWidth',1);
 

@@ -112,14 +112,14 @@ clearvars -except datapth kin me meta obj params
 % params
 rez.nFolds = 4; % number of iterations (bootstrap)
 
-rez.binSize = 75; % ms
+rez.binSize = 40; % ms
 rez.dt = floor(rez.binSize / (params(1).dt*1000)); % samples
 rez.tm = obj(1).time(1:rez.dt:numel(obj(1).time));
 rez.numT = numel(rez.tm);
 
 rez.train = 1; % fraction of trials to use for training (1-train for testing)
 
-rez.nShuffles = 4;
+rez.nShuffles = 2;
 
 % match number of right and left hits, and right and left misses
 cond2use = 2:5;
@@ -207,9 +207,10 @@ for ifeat = 1:numel(featGroups)
         % input
         % use all features
         X = kin(sessix).dat(:,trials.all,rez.featix);
+
         % fill missing values
         for featix = 1:size(X,3)
-%             X(:,:,featix) = fillmissing(X(:,:,featix),"constant",0);
+            %             X(:,:,featix) = fillmissing(X(:,:,featix),"constant",0);
         end
 
         % train/test split
@@ -264,11 +265,11 @@ f = figure;
 ax = gca;
 hold on;
 
-ctrl = mySmooth(acc, 3,'reflect');
-shuffed = mySmooth(acc_shuf_, 15,'reflect');
+ctrl = mySmooth(acc, 11,'reflect');
+shuffed = mySmooth(acc_shuf_, 101,'reflect');
 
 shadedErrorBar(rez.tm(1:end-1),mean(ctrl,2),getCI(ctrl),{'Color',cols{1},'LineWidth',2},alph,ax)
-shadedErrorBar(rez.tm(1:end-1),mean(shuffed,2),getCI(shuffed),{'Color',cols{2},'LineWidth',2},alph,ax)
+shadedErrorBar(rez.tm(1:end-1),mean(shuffed,2),getCI(shuffed,0),{'Color',cols{2},'LineWidth',2},alph,ax)
 
 % shadedErrorBar(rez.tm(1:end-1),mean(acc,2),std(acc,[],2)./sqrt(numel(obj)),{'Color',cols{1},'LineWidth',2},alph,ax)
 % shadedErrorBar(rez.tm(1:end-1),mean(acc_shuf_,2),std(acc_shuf_,[],2)./sqrt(numel(obj)),{'Color',cols{2},'LineWidth',2},alph,ax)

@@ -118,7 +118,7 @@ end
 
 
 %%
-close all
+% close all
 
 % f = figure;
 % f.Position = [437   139   498   659];
@@ -136,7 +136,9 @@ nclu = 5;
 
 cols = getColors;
 lw = 2;
-alph = 0.4;
+alph = 0.23;
+alph2 = 0.13;
+cscale = 0.8;
 
 % while true
 for trix = 58
@@ -175,14 +177,16 @@ for trix = 58
     ax = gca;
     hold on;
 
-%     plot(obj.time,m,'Color',cols.potent,'LineWidth',lw)
-%     plot(obj.time,mpotent,'Color',cols.null,'LineWidth',lw)
+    cc = cols.potent * cscale;
+    plot(obj.time,m,'Color',cc,'LineWidth',lw)
+    cc = cols.null * cscale;
+    plot(obj.time,mpotent,'Color',cc,'LineWidth',lw)
 %     for i = 1:nclu
 %         plot(obj.time,n{i}-(1.5*i),'Color',cols.potent,'LineWidth',lw)
 %         plot(obj.time,npotent{i}-(1.5*i),'Color',cols.null,'LineWidth',lw)
 %     end
-    plot(obj.time,m,'Color','k','LineWidth',lw)
-    plot(obj.time,mpotent,'Color','k','LineWidth',lw)
+%     plot(obj.time,m,'Color','k','LineWidth',lw)
+%     plot(obj.time,mpotent,'Color','k','LineWidth',lw)
     for i = 1:nclu
         plot(obj.time,n{i}-(1.5*i),'Color','k','LineWidth',lw)
         plot(obj.time,npotent{i}-(1.5*i),'Color','k','LineWidth',lw)
@@ -206,6 +210,9 @@ for trix = 58
         ff(ii).FaceAlpha = alph;
         ff(ii).EdgeColor = 'none';
         uistack(ff(ii),'bottom');
+        ff2(ii) = fill([ns(ii) ne(ii) ne(ii) ns(ii)], [-0.3 -0.3 ax.YLim(2) ax.YLim(2)], cols.null);
+        ff2(ii).FaceAlpha = alph2;
+        ff2(ii).EdgeColor = 'none'; 
     end
     [mstart, mend, mlen] = ZeroOnesCount(move);
     mend = mend + 1;
@@ -219,6 +226,10 @@ for trix = 58
         ff(ii).FaceAlpha = alph;
         ff(ii).EdgeColor = 'none';
         uistack(ff(ii),'bottom');
+        ff2(ii) = fill([ms(ii) me_(ii) me_(ii) ms(ii)], [-0.3 -0.3 ax.YLim(2) ax.YLim(2)], cols.potent);
+        ff2(ii).FaceAlpha = alph2;
+        ff2(ii).EdgeColor = 'none'; 
+%         uistack(ff2(ii),'bottom');
     end
 %     uistack(ff,'bottom')
     ax.Visible = 'off';

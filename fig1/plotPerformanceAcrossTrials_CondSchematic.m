@@ -155,7 +155,7 @@ cols{2} = clrs.aw;
 
 win = 20;
 
-for sessix = 1%:numel(obj)
+for sessix = 1:numel(obj)
     % get hit rate across entire session
     hits = obj(sessix).bp.hit;
     miss = obj(sessix).bp.miss;
