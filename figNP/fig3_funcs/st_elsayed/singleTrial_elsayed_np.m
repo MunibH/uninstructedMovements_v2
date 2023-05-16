@@ -48,12 +48,12 @@ if delayOnly
     potent = [];
     for trix = 1:numel(trials)
         t = trials(trix);
-        delay_t(1) = obj.bp.ev.delay(t) - 2.5;
-        delay_t(2) = obj.bp.ev.goCue(t) - 0.02 - 2.5;
+                delay_t(1) = obj.bp.ev.delay(t) - 2.5;
+                delay_t(2) = obj.bp.ev.goCue(t) - 0.02 - 2.5;
         for i = 1:numel(delay_t)
             [~,ix(i)] = min(abs(obj.time - delay_t(i)));
         end
-        
+
         mask{trix} = me.move(ix(1):ix(2),t);
 
         full{trix} = squeeze(input_data(ix(1):ix(2),t,:));

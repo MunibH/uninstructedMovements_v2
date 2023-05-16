@@ -277,7 +277,7 @@ ctrl(15:end,:) = mySmooth(acc(15:end,:), 15,'reflect');
 shuffed = mySmooth(acc_shuf_, 21,'reflect');
 
 shadedErrorBar(rez.tm(1:end-1),mean(ctrl,2),getCI(ctrl),{'Color',cols{1},'LineWidth',2},alph,ax)
-shadedErrorBar(rez.tm(1:end-1),mean(shuffed,2),getCI(shuffed),{'Color',cols{2},'LineWidth',2},alph,ax)
+shadedErrorBar(rez.tm(1:end-1),mean(shuffed,2),getCI(shuffed,0),{'Color',cols{2},'LineWidth',2},alph,ax)
 xline(0,'k--','LineWidth',1)
 xline(sample,'k--','LineWidth',1)
 xline(delay,'k--','LineWidth',1)
