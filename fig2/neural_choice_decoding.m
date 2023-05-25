@@ -2,6 +2,7 @@ clear,close all
 
 % add paths for data loading scripts, all fig funcs, and utils
 utilspth = 'C:\Users\munib\Documents\Economo-Lab\code\uninstructedMovements_v3';
+utilspth = '/Users/munib/Economo-Lab/code/uninstructedMovements_v3';
 addpath(genpath(fullfile(utilspth,'DataLoadingScripts')));
 addpath(genpath(fullfile(utilspth,'funcs')));
 addpath(genpath(fullfile(utilspth,'utils')));
@@ -56,7 +57,10 @@ params.advance_movement = 0.0;
 
 %% SPECIFY DATA TO LOAD
 
+
 datapth = '/Users/Munib/Documents/Economo-Lab/data/';
+datapth = '/users/munib/Economo-Lab/data/';
+
 
 meta = [];
 
@@ -206,6 +210,7 @@ ctrl = mySmooth(tempacc, 11,'reflect');
 ctrl = ctrl(size(tempacc)/2+1:end,:);
 acc_shuff_ = cat(2,acc_shuf_,acc_shuf_);
 shuffed = mySmooth(acc_shuff_, 15,'reflect');
+
 
 shadedErrorBar(rez.tm(1:end-1),mean(ctrl,2),getCI(ctrl),{'Color',cols{1},'LineWidth',2},alph,ax)
 shadedErrorBar(rez.tm(1:end-1),mean(shuffed,2),getCI(shuffed,0)/2,{'Color',cols{2},'LineWidth',2},alph,ax)
