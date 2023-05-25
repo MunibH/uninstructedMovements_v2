@@ -32,9 +32,9 @@ params.condition(end+1) = {'L&miss&~stim.enable&~autowater&~early'};            
 params.condition(end+1) = {'L&hit&~stim.enable&~autowater&~early'};             % left hits, no stim, aw off
 params.condition(end+1) = {'R&miss&~stim.enable&~autowater&~early'};            % error left, no stim, aw off
 
-params.tmin = -3;
+params.tmin = -2.4;
 params.tmax = 2.5;
-params.dt = 1/100;
+params.dt = 1/50;
 
 % smooth with causal gaussian kernel
 params.smooth = 15;
@@ -95,7 +95,7 @@ clearvars -except datapth kin me meta obj params
 % params
 rez.nFolds = 4; % number of iterations (bootstrap)
 
-rez.binSize = 40; % ms
+rez.binSize = 75; % ms
 rez.dt = floor(rez.binSize / (params(1).dt*1000)); % samples
 rez.tm = obj(1).time(1:rez.dt:numel(obj(1).time));
 rez.numT = numel(rez.tm);
@@ -185,50 +185,55 @@ acc_shuf_ = reshape(acc_shuf,size(acc_shuf,1),size(acc_shuf,2)*size(acc_shuf,3))
 
 
 %% plot
+
 close all
 
 cols = {'k',[0.6,0.6,0.6]};
 
-alph = 0.15;
+alph = 0.2;
 
 sample = mode(obj(1).bp.ev.sample) - mode(obj(1).bp.ev.goCue);
 delay = mode(obj(1).bp.ev.delay) - mode(obj(1).bp.ev.goCue);
 trialStart = mode(obj(1).bp.ev.bitStart) - mode(obj(1).bp.ev.goCue);
 
 f = figure;
+f.Position = [644   517   335   258];
 ax = gca;
 hold on;
 
-ctrl = mySmooth(acc, 11,'reflect');
-shuffed = mySmooth(acc_shuf_, 101,'reflect');
+tempacc = cat(1,mean(acc(1,:),2)*ones(size(acc)),acc);
+ctrl = mySmooth(tempacc, 11,'reflect');
+ctrl = ctrl(size(tempacc)/2+1:end,:);
+acc_shuff_ = cat(2,acc_shuf_,acc_shuf_);
+shuffed = mySmooth(acc_shuff_, 15,'reflect');
 
 shadedErrorBar(rez.tm(1:end-1),mean(ctrl,2),getCI(ctrl),{'Color',cols{1},'LineWidth',2},alph,ax)
-shadedErrorBar(rez.tm(1:end-1),mean(shuffed,2),getCI(shuffed,0),{'Color',cols{2},'LineWidth',2},alph,ax)
+shadedErrorBar(rez.tm(1:end-1),mean(shuffed,2),getCI(shuffed,0)/2,{'Color',cols{2},'LineWidth',2},alph,ax)
 
 % shadedErrorBar(rez.tm(1:end-1),mean(acc,2),std(acc,[],2)./sqrt(numel(obj)),{'Color',cols{1},'LineWidth',2},alph,ax)
 % shadedErrorBar(rez.tm(1:end-1),mean(acc_shuf_,2),std(acc_shuf_,[],2)./sqrt(numel(obj)),{'Color',cols{2},'LineWidth',2},alph,ax)
-xline(0,'k--','LineWidth',1)
-xline(sample,'k--','LineWidth',1)
-xline(delay,'k--','LineWidth',1)
-xline(trialStart,'k--','LineWidth',1)
-xlim([trialStart, params(1).tmax-0.2])
+xx=xline(0,'k--'); uistack(xx,'bottom');
+xx=xline(sample,'k--'); uistack(xx,'bottom');
+xx=xline(delay,'k--'); uistack(xx,'bottom');
+xx=xline(trialStart,'k--'); uistack(xx,'bottom');
+xlim([trialStart+0.1, params(1).tmax-0.2])
 ylim([ax.YLim(1) 1])
 
 xlabel('Time from go cue (s)')
 ylabel([num2str(rez.nFolds) '-Fold CV Accuracy'])
 title('Neural choice decoding','FontSize',8)
 
-h = zeros(2, 1);
-for i = 1:numel(h)
-    h(i) = plot(NaN,NaN,'-','Color',cols{i},'LineWidth',2);
-end
-legString = {'Neural data','Shuffled labels'};
-
-leg = legend(h, legString);
-leg.EdgeColor = 'none';
-leg.Location = 'best';
-leg.Color = 'none';
-ax.FontSize = 10;
+% h = zeros(2, 1);
+% for i = 1:numel(h)
+%     h(i) = plot(NaN,NaN,'-','Color',cols{i},'LineWidth',2);
+% end
+% legString = {'Kinematics','Shuffled labels'};
+% 
+% leg = legend(h, legString);
+% leg.EdgeColor = 'none';
+% leg.Location = 'best';
+% leg.Color = 'none';
+% ax.FontSize = 10;
 
 
 

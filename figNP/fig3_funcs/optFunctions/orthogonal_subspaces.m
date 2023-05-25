@@ -29,13 +29,32 @@ function [Q, Qcost, P, info, options] = orthogonal_subspaces(C1, d1, C2, d2, alp
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-assert(isequal(C1, C1'));
-assert(isequal(C2, C2'));
+if ~isequal(C1, C1')
+    C1 = (C1 + C1.')/2; % forcing symmetry due to round-off errors
+end
+if ~isequal(C2, C2')
+    C2 = (C2 + C2.')/2;
+end
+% assert(isequal(C1, C1'));
+% assert(isequal(C2, C2'));
+
+if any(any(isnan(C1)))
+    C1 = fillmissing(C1,'constant',0);
+end
+if any(any(isnan(C2)))
+    C2 = fillmissing(C2,'constant',0);
+end
+
+
 assert(size(C1,1) == size(C2,1));
 n = size(C1,1);
 dmax = max(d1,d2);
 %largest magnitude eigenvalues
+try
 eigvals1 = eigs(C1, dmax, 'la'); %hoping that these all eigs are positive, still only divinding by largest algebraic +ve values
+catch
+    'a'
+end
 eigvals2 = eigs(C2, dmax, 'la');
 assert(~any(eigvals1<0), 'eigvals1 <0');
 assert(~any(eigvals2<0), 'eigvals2 <0');

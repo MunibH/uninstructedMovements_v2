@@ -14,7 +14,6 @@ rmpath(genpath(fullfile(utilspth,'mc_stim/')))
 addpath(genpath(pwd))
 
 clc
-
 %% PARAMETERS
 params.alignEvent          = 'goCue'; % 'jawOnset' 'goCue'  'moveOnset'  'firstLick'  'lastLick'
 
@@ -26,15 +25,14 @@ params.nLicks              = 20; % number of post go cue licks to calculate medi
 params.lowFR               = 1; % remove clusters with firing rates across all trials less than this val
 
 % set conditions to calculate PSTHs for
-params.condition(1)     = {'(hit|miss|no)'};                             % all trials
-params.condition(end+1) = {'R&hit&~stim.enable&~autowater&~early'};             % right hits, no stim, aw off
-params.condition(end+1) = {'L&miss&~stim.enable&~autowater&~early'};            % error right, no stim, aw off
-params.condition(end+1) = {'L&hit&~stim.enable&~autowater&~early'};             % left hits, no stim, aw off
-params.condition(end+1) = {'R&miss&~stim.enable&~autowater&~early'};            % error left, no stim, aw off
+params.condition(1)     = {'R&hit&~stim.enable&~autowater&((1:Ntrials)>20)&((1:Ntrials)<(Ntrials-20))'};             % right hits, no stim, aw off
+params.condition(end+1) = {'L&hit&~stim.enable&~autowater&((1:Ntrials)>20)&((1:Ntrials)<(Ntrials-20))'};             % left hits, no stim, aw off
+params.condition(end+1) = {'R&hit&~stim.enable&autowater&((1:Ntrials)>20)&((1:Ntrials)<(Ntrials-20))'};             % right hits, no stim, aw off
+params.condition(end+1) = {'L&hit&~stim.enable&autowater&((1:Ntrials)>20)&((1:Ntrials)<(Ntrials-20))'};             % left hits, no stim, aw off
 
-params.tmin = -2.4;
+params.tmin = -3;
 params.tmax = 2.5;
-params.dt = 1/50;
+params.dt = 1/100;
 
 % smooth with causal gaussian kernel
 params.smooth = 15;
@@ -67,9 +65,6 @@ meta = loadEKH1_ALMVideo(meta,datapth);
 meta = loadEKH3_ALMVideo(meta,datapth);
 meta = loadJGR2_ALMVideo(meta,datapth);
 meta = loadJGR3_ALMVideo(meta,datapth);
-meta = loadJEB13_ALMVideo(meta,datapth);
-meta = loadJEB14_ALMVideo(meta,datapth);
-meta = loadJEB15_ALMVideo(meta,datapth);
 meta = loadJEB19_ALMVideo(meta,datapth);
 
 % --- M1TJ ---
@@ -105,9 +100,9 @@ for sessix = 1:numel(meta)
     kin(sessix) = getKinematics(obj(sessix), me(sessix), params(sessix));
 end
 
-%% choice decoding from dlc features
+%% context decoding from dlc features
 
-clearvars -except datapth kin me meta obj params
+clearvars -except datapth kin me meta obj params acc acc_shuf
 
 % params
 rez.nFolds = 4; % number of iterations (bootstrap)
@@ -119,12 +114,12 @@ rez.numT = numel(rez.tm);
 
 rez.train = 1; % fraction of trials to use for training (1-train for testing)
 
-rez.nShuffles = 2;
+rez.nShuffles = 4;
 
 % match number of right and left hits, and right and left misses
-cond2use = 2:5;
-hitcond = [1 3];
-misscond = [2 4];
+cond2use = 1:4;
+afccond = [1 2];
+awcond = [3 4];
 
 % featGroups = {{'tongue'},...
 %     {'jaw','trident'},...
@@ -183,38 +178,38 @@ for ifeat = 1:numel(featGroups)
 
         trials_cond = params(sessix).trialid(cond2use);
 
-        minHitTrials = cellfun(@(x) numel(x),trials_cond(hitcond), 'UniformOutput',false);
-        nhits = min(cell2mat(minHitTrials));
+        minAFCTrials = cellfun(@(x) numel(x),trials_cond(afccond), 'UniformOutput',false);
+        nafc = min(cell2mat(minAFCTrials));
 
-        minMissTrials = cellfun(@(x) numel(x),trials_cond(misscond), 'UniformOutput',false);
-        nmiss = min(cell2mat(minMissTrials));
+        minAWTrials = cellfun(@(x) numel(x),trials_cond(awcond), 'UniformOutput',false);
+        naw = min(cell2mat(minAWTrials));
 
+        nTrials = min(nafc,naw);
 
-        trials_hit = cellfun(@(x) randsample(x,nhits), trials_cond(hitcond), 'UniformOutput', false);
-        trialsHit = cell2mat(trials_hit);
-        trialsHit = trialsHit(:);
+        trials_afc = cellfun(@(x) randsample(x,nTrials), trials_cond(afccond), 'UniformOutput', false);
+        trialsAFC = cell2mat(trials_afc);
+        trialsAFC = trialsAFC(:);
 
-        trials_miss = cellfun(@(x) randsample(x,nmiss), trials_cond(misscond), 'UniformOutput', false);
-        trialsMiss = cell2mat(trials_miss);
-        trialsMiss = trialsMiss(:);
+        trials_aw = cellfun(@(x) randsample(x,nTrials), trials_cond(awcond), 'UniformOutput', false);
+        trialsAW = cell2mat(trials_aw);
+        trialsAW = trialsAW(:);
 
-%         trials.all = [trialsHit ; trialsMiss];
-        trials.all = trialsHit;
+        trials.all = [trialsAFC ; trialsAW];
 
         % labels (1 for right choice, 0 for left choice)
-        Y = [ones(nhits,1) ; -ones(nhits,1) ; ones(nmiss,1) ; -ones(nmiss,1)]; % right hits, left hits, left miss, right miss
+        Y = [ones(nTrials,1) ; ones(nTrials,1) ; -ones(nTrials,1) ; -ones(nTrials,1)]; % right hits, left hits, left miss, right miss
+        % Y = [ones(nhits,1) ; -ones(nhits,1) ; ones(nmiss,1) ; -ones(nmiss,1)]; % right hits, left hits, left miss, right miss
 
         % input
-        % use all features
-        X = kin(sessix).dat(:,trials.all,rez.featix);
-
-        % fill missing values
-        for featix = 1:size(X,3)
-            %             X(:,:,featix) = fillmissing(X(:,:,featix),"constant",0);
-        end
+        X = obj(sessix).trialdat(:,:,trials.all);
+        X = permute(X,[1 3 2]); % (time,trials, clu)
+        Xmax = max(X(:));
+        Xmin = min(X(:));
+        Range = Xmax - Xmin;
+        Xnrm = ((X - Xmin)/Range - 0.5) * 2;
+        X = Xnrm; clear Xnrm;
 
         % train/test split
-
         [trials.train,trials.trainidx] = datasample(trials.all,round(numel(trials.all)*rez.train),'Replace',false);
         trials.testidx = find(~ismember(trials.all,trials.train));
         trials.test = trials.all(trials.testidx);
@@ -238,7 +233,7 @@ for ifeat = 1:numel(featGroups)
 
         in.train.y = Y(trials.trainidx);
         in.test.y  = Y(trials.testidx);
-        
+
         for ishuf = 1:rez.nShuffles
             acc_shuf(:,sessix,ishuf,ifeat) = DLC_ChoiceDecoder(in,rez,trials);
         end
@@ -249,6 +244,16 @@ for ifeat = 1:numel(featGroups)
 end
 
 acc_shuf_ = reshape(acc_shuf,size(acc_shuf,1),size(acc_shuf,2)*size(acc_shuf,3));
+
+
+%% t-test
+
+for itime = 1:size(acc,1)
+    [h(itime),p(itime)] = ttest2(acc(itime,:),acc_shuf_(itime,:));
+end
+figure;
+hold on
+plot(rez.tm(1:end-1),p,'LineWidth',2)
 
 
 %% plot
@@ -265,6 +270,7 @@ trialStart = mode(obj(1).bp.ev.bitStart) - mode(obj(1).bp.ev.goCue);
 
 f = figure;
 f.Position = [644   517   335   258];
+f.Renderer = 'painters';
 ax = gca;
 hold on;
 
@@ -288,62 +294,18 @@ ylim([ax.YLim(1) 1])
 
 xlabel('Time from go cue (s)')
 ylabel([num2str(rez.nFolds) '-Fold CV Accuracy'])
-title('Kinematic choice decoding','FontSize',8)
+title('Neural context decoding','FontSize',8)
 
 % h = zeros(2, 1);
 % for i = 1:numel(h)
 %     h(i) = plot(NaN,NaN,'-','Color',cols{i},'LineWidth',2);
 % end
 % legString = {'Kinematics','Shuffled labels'};
-% 
+%
 % leg = legend(h, legString);
 % leg.EdgeColor = 'none';
 % leg.Location = 'best';
 % leg.Color = 'none';
 % ax.FontSize = 10;
-
-
-%% same plot but for each session
-
-cols = linspecer(size(acc,3));
-
-alph = 0.5;
-
-sample = mode(obj(1).bp.ev.sample) - mode(obj(1).bp.ev.goCue);
-delay = mode(obj(1).bp.ev.delay) - mode(obj(1).bp.ev.goCue);
-
-figure;
-t = tiledlayout('flow');
-for sessix = 1:size(acc,2)
-    ax = nexttile;
-    hold on
-    temp = mySmooth(squeeze(acc(:,sessix,:)),21);
-    for ifeat = 1:size(acc,3)
-        temp2 = temp(:,ifeat);
-        shadedErrorBar(rez.tm(1:end-1),mean(temp2,2),std(temp2,[],2)./sqrt(numel(obj)),{'Color',cols(ifeat,:),'LineWidth',2},alph,ax)
-    end
-    title([meta(sessix).anm ' ' meta(sessix).date])
-    xline(0,'k:','LineWidth',2)
-    xline(sample,'k:','LineWidth',2)
-    xline(delay,'k:','LineWidth',2)
-
-    ylim([0.4 1])
-
-%     if sessix == 1
-%         h = zeros(numel(featGroups), 1);
-%         for i = 1:numel(h)
-%             h(i) = plot(NaN,NaN,'-','Color',cols(i,:),'LineWidth',2);
-%         end
-%         legString = cellfun(@(x) strrep(x{1},'_',' '), featGroups,'UniformOutput',false);
-% 
-%         leg = legend(h, legString);
-%         leg.EdgeColor = 'none';
-%         leg.Location = 'best';
-%     end
-end
-
-
-xlabel(t,'Time (s) from go cue')
-ylabel(t,[num2str(rez.nFolds) '-Fold CV Accuracy'])
 
 

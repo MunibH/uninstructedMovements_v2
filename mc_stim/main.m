@@ -60,8 +60,8 @@ dfparams.stim.types = {'Bi_MC','Right_MC','Left_MC','Bi_ALM','Bi_M1TJ','Right_AL
 % dfparams.stim.num   = logical([1 1 1 1 1 1 1 1 1]);   % ALL
 % dfparams.stim.num   = logical([0 0 0 0 0 1 1 1 1]);   % Right_ALM / Left_ALM / Right_M1TJ / Left_M1TJ
 % dfparams.stim.num   = logical([0 0 0 1 0 0 0 0 0]);   % Bi_ALM
-dfparams.stim.num   = logical([0 0 0 0 1 0 0 0 0]);   % Bi_M1TJ
-% dfparams.stim.num   = logical([1 0 0 0 0 0 0 0 0]);   % Bi_MC
+% dfparams.stim.num   = logical([0 0 0 0 1 0 0 0 0]);   % Bi_M1TJ
+dfparams.stim.num   = logical([1 0 0 0 0 0 0 0 0]);   % Bi_MC
 % dfparams.stim.num   = logical([0 0 0 1 1 0 0 0 0]);   % Bi_M1TJ Bi_ALM
 % dfparams.stim.num   = logical([0 1 1 0 0 0 0 0 0]);   % Right_MC
 % dfparams.stim.num   = logical([0 0 1 0 0 0 0 0 0]);   % Left_MC
@@ -119,6 +119,7 @@ disp(['Stim Loc: ' stim2use])
 disp(['    Stim Power: ' num2str(pow2use)])
 disp('')
 
+meta = meta(11);
 
 obj = loadObjs(meta);
 
@@ -209,7 +210,7 @@ cond2plot = 1:2;
 sav = 0;
 
 plotKinfeats(meta,obj,dfparams,params,kin,kinfeats,feats2plot,cond2plot,sav)
-
+clim([0 100])
 
 
 %% avg jaw velocity during stim

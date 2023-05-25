@@ -67,12 +67,12 @@ datapth = '/Users/Munib/Documents/Economo-Lab/data/';
 meta = [];
 
 % --- ALM ---
-meta = loadJEB6_ALMVideo(meta,datapth);
-meta = loadJEB7_ALMVideo(meta,datapth); % selectivity in ME
-meta = loadEKH1_ALMVideo(meta,datapth); % selectivity in ME
-meta = loadEKH3_ALMVideo(meta,datapth); % selectivity in ME
-meta = loadJGR2_ALMVideo(meta,datapth);
-meta = loadJGR3_ALMVideo(meta,datapth);
+% meta = loadJEB6_ALMVideo(meta,datapth);
+% meta = loadJEB7_ALMVideo(meta,datapth); % selectivity in ME
+% meta = loadEKH1_ALMVideo(meta,datapth); % selectivity in ME
+% meta = loadEKH3_ALMVideo(meta,datapth); % selectivity in ME
+% meta = loadJGR2_ALMVideo(meta,datapth);
+% meta = loadJGR3_ALMVideo(meta,datapth);
 % meta = loadJEB13_ALMVideo(meta,datapth);
 % meta = loadJEB14_ALMVideo(meta,datapth); % selectivity in ME % go cue is at 2.3 instead of 2.5 like all other sessions??
 % meta = loadJEB15_ALMVideo(meta,datapth);
@@ -132,11 +132,6 @@ par.dt = params(1).dt; % moving time bin
 par.pre_s = par.pre .* params(1).dt; % dt, pre_s, and post_s just here to know how much time you're using. Set params.dt and pre/post appropriately for you analysis
 par.post_s = par.post .* params(1).dt;
 
-% these parameters above are important for decoding accuracy. for actual
-% analyses (like a final analysis to be included in a publication),
-% you should vary these parameters only if you have a validation
-% set that you won't test on until these parameters are set. Otherwise,
-% there's a high risk of overfitting
 
 % cross val folds
 par.nFolds = 4;
@@ -155,15 +150,11 @@ par.feats = cat(1, temp{:});
 % trials
 par.cond2use = [6 7];
 
-par.regularize = 1; % if 0, linear regression. if 1, ridge regression
+par.regularize = 0; % if 0, linear regression. if 1, ridge regression
 
 %% DECODING
 
 close all
-
-cmapfn = 'ContextColormap.mat';
-temp = load(fullfile('C:\Users\munib\Documents\Economo-Lab\code\uninstructedMovements_v3\utils',cmapfn));
-contextcmap = flipud(temp.ContextColormap);
 
 for sessix = 1:numel(meta)
     disp([num2str(sessix) ' / ' num2str(numel(meta))])
@@ -220,9 +211,9 @@ for sessix = 1:numel(meta)
 
     Y.mu = mean(Y.train,1,'omitnan');
     Y.sigma = std(Y.train,[],1,'omitnan');
-    Y.train = (Y.train - Y.mu);% ./ Y.sigma;
+    Y.train = (Y.train - Y.mu) ./ Y.sigma;
     if ~par.test==0
-        Y.test = (Y.test - Y.mu);% ./ Y.sigma;
+        Y.test = (Y.test - Y.mu) ./ Y.sigma;
     end
 
     % fill missing values in kinematics
@@ -232,202 +223,19 @@ for sessix = 1:numel(meta)
     Y.test = fillmissing(Y.test,'nearest');
 
     if par.regularize
-        mdl = fitrlinear(X.train,Y.train,'Learner','svm','KFold',par.nFolds,'Regularization','ridge');
+        mdl = fitrlinear(X.train,Y.train,'Learner','leastsquares','KFold',par.nFolds,'Regularization','ridge');
     else
-        mdl = fitrlinear(X.train,Y.train,'Learner','svm','KFold',par.nFolds);
+        mdl = fitrlinear(X.train,Y.train,'Learner','leastsquares','KFold',par.nFolds);
     end
     pred = kfoldPredict(mdl);
 
-    % SStot = nansum((Y.train-mean(Y.train,1,'omitmissing')).^2);     % Total Sum-Of-Squares
-    % SSres = nansum((Y.train-pred).^2);                             % Residual Sum-Of-Squares
-    % r2_ss(sessix) = 1-SSres/SStot;
-    % corrs = corrcoef(Y.train,pred);
-    % r2c(sessix) = corrs(1,2);
-
-    y = reshape(Y.train,Y.size(1),Y.size(2)); % original input data (centered)
+    y = reshape(Y.train,Y.size(1),Y.size(2)); % original input data (standardized)
     yhat = reshape(pred,Y.size(1),Y.size(2)); % prediction
 
-    % y = y * -1; % for consistency with Figure 1
-    % yhat = yhat * -1;
-
-    cols = getColors;
-    sm = 31;
-    alph = 0.2;
-    xlims = [-2.5 2.5];
-    lw = 2;
-
-
-    sample = mode(obj(1).bp.ev.sample) - mode(obj(1).bp.ev.(params(1).alignEvent));
-    delay = mode(obj(1).bp.ev.delay) - mode(obj(1).bp.ev.(params(1).alignEvent));
-    gc = mode(obj(1).bp.ev.goCue) - mode(obj(1).bp.ev.(params(1).alignEvent));
-
-
-    nCond1 = numel(params(sessix).trialid{6});
-    nCond2 = numel(params(sessix).trialid{7});
-
-    ydr = y(:,1:nCond1) + Y.mu;
-    ywc = y(:,nCond1+1:end); % + Y.mu; % add back mean
-
-    yhatdr = yhat(:,1:nCond1) + Y.mu;
-    yhatwc = yhat(:,nCond1+1:end);% + Y.mu;
-
-    % center at 0 by subtracting scalar, only doing this for example
-    % session
-    if sessix == 7
-        % tempdat = cat(2,ydr,ywc);
-        % mumu = mean(tempdat,2);
-        mumu = 0;
-        ydr = ydr - mumu;
-        ywc = ywc - mumu;
-        yhatdr = yhatdr - mumu;
-        yhatwc = yhatwc - mumu;
-    end
-
-
-    %%
-
-
-    clims = [-105 105];
-    heatmapsm = 11;
-
-    f = figure;
-    ax = subplot(1,2,1);
-    hold on;
-    temp = mySmooth(cat(2,ydr,ywc),heatmapsm);
-
-    % temp(temp<-100) = -100;
-    imagesc(obj(sessix).time,1:size(y,2),temp');
-    ax.YDir = "reverse";
-    yline(size(ydr,2),'k-');
-    xline(sample,'k--')
-    xline(delay,'k--')
-    xline(gc,'k--')
-    colormap(contextcmap)
-    title('data')
-    c1 = colorbar;
-    clim(clims)
-    ylim(ax,[1 size(y,2)])
-
-    ax = subplot(1,2,2);
-
-    temp = mySmooth(cat(2,yhatdr,yhatwc),heatmapsm);
-    % temp(temp<-100) = -100;
-    % temp(temp>70) = 70;
-    imagesc(obj(sessix).time,1:size(yhat,2),temp');
-    ax.YDir = "reverse";
-    yline(size(ydr,2),'k-','linewidth',0.1);
-    xline(sample,'k--','linewidth',0.1)
-    xline(delay,'k--','linewidth',0.1)
-    xline(gc,'k--','linewidth',0.1)
-    colormap(contextcmap)
-    title('prediction')
-    c2 = colorbar;
-    clim(clims)
-    ylim(ax,[1 size(y,2)])
-
-    %%
-
-
-    mu.ydr = mean(ydr,2,'omitmissing');
-    mu.ywc = mean(ywc,2,'omitmissing');
-    mu.yhatdr = mean(yhatdr,2,'omitmissing');
-    mu.yhatwc = mean(yhatwc,2,'omitmissing');
-
-    sd.ydr = getCI(ydr);
-    sd.ywc = getCI(ywc);
-    sd.yhatdr = getCI(yhatdr);
-    sd.yhatwc = getCI(yhatwc);
-
-
-    fns = fieldnames(mu);
-    for i = 1:numel(fns)
-        mu.(fns{i}) = mySmooth(mu.(fns{i}),sm,'reflect');
-        sd.(fns{i}) = mySmooth(sd.(fns{i}),sm,'reflect');
-    end
-
-
-    f = figure;
-    f.Position = [644   483   338   231];
-    ax = gca;
-    hold on;
-    shadedErrorBar(obj(1).time,mu.ydr,sd.ydr,{'Color',cols.afc,'LineWidth',lw,'LineStyle','-'},alph,ax)
-    shadedErrorBar(obj(1).time,mu.ywc,sd.ywc,{'Color',cols.aw,'LineWidth',lw,'LineStyle','-'},alph,ax)
-    shadedErrorBar(obj(1).time,mu.yhatdr,sd.yhatdr,{'Color',cols.afc,'LineWidth',lw,'LineStyle','--'},alph,ax)
-    shadedErrorBar(obj(1).time,mu.yhatwc,sd.yhatwc,{'Color',cols.aw,'LineWidth',lw,'LineStyle','--'},alph,ax)
-    ax.FontSize = 10;
-    xlim(xlims)
-    xline(sample,'k--')
-    xline(delay,'k--')
-    xline(gc,'k--')
-
-    ylabel('CD Context projection')
-    xlabel('Time from go cue (s)')
-    % title(t,['R^2 = ' num2str(round(r2,2))])  
-    
-    %%
-
-    % tix = [-2.4,-2.2]; % presample
-    tix = [-2.4,2.4];
-    ix = findTimeIX(obj(1).time,tix);
-    ix = ix(1):ix(2);
-
-    sdr = mean(ydr(ix,:),1,'omitmissing');
-    shatdr = mean(yhatdr(ix,:),1,'omitmissing');
-    swc = mean(ywc(ix,:),1,'omitmissing');
-    shatwc = mean(yhatwc(ix,:),1,'omitmissing');
-
-    xxx = cat(2,sdr,swc);
-    yyy = cat(2,shatdr,shatwc);
-    mdl_ = fitlm(xxx,yyy);
-    r2(sessix) = mdl_.Rsquared.Ordinary;
-
-    W = mdl_.Coefficients.Estimate; % intercept, x1
-
-
-    f = figure;
-    f.Position = [644   483   338   231];
-    ax = gca;
-    hold on;
-    scatter(shatdr,sdr,30,'filled','MarkerEdgeColor','w','MarkerFaceColor',cols.afc);
-    scatter(shatwc,swc,30,'filled','MarkerEdgeColor','w','MarkerFaceColor',cols.aw);
-    xlabel('CD Context, prediction')
-    ylabel('CD Context, data')
-    thisr2 = round(r2(sessix),2);
-    title(['R^2 = ' num2str(thisr2) ])
-    xs = ax.XLim;
-    xs = linspace(xs(1),xs(2),100);
-    rr =  xs.* W(2) + W(1);
-    plot(xs,rr,'k--')
-    axis square
+    cc = corrcoef(y(:),yhat(:));
+    r2(sessix) = cc(1,2);
 
 end
-
-%% r2 bar plot
-
-f = figure;
-f.Position = [748   394   193   272];
-ax = gca;
-hold on;
-
-dat = r2;
-
-
-xs = 0;
-for i = 1:numel(xs)
-    b(i) = bar(xs(i),mean(dat,'omitmissing'));
-    b(i).FaceColor = [0.5 0.5 0.5]; %[143, 49, 139] ./ 255; % 143, 49, 139
-    b(i).EdgeColor = 'none';
-    % b(i).FaceAlpha = 0.5;
-    b(i).BarWidth = 0.7;
-    vs(i) = scatter(xs(i)*ones(numel(dat),1),dat,80,'MarkerFaceColor','k',...
-        'MarkerEdgeColor','w','XJitter','randn','XJitterWidth',0.25);
-    errorbar(b(i).XEndPoints,nanmean(dat),nanstd(dat),'LineStyle','none','Color','k','LineWidth',1)
-end
-ax.XTick = [];
-ylabel("R^2")
-ax = gca;
-ax.FontSize = 12;
-
 
 
 

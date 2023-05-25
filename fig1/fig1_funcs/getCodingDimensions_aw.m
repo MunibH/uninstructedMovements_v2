@@ -17,7 +17,8 @@ for sessix = 1:numel(obj)
     rez(sessix).ev.sample = obj(sessix).bp.ev.sample;
     rez(sessix).ev.delay = obj(sessix).bp.ev.delay;
     rez(sessix).ev.goCue = obj(sessix).bp.ev.goCue;
-    aligntimes = obj(sessix).bp.ev.(params(sessix).alignEvent)(cell2mat(params(sessix).trialid(cond2use)'));
+    aligntimes = mode(obj(sessix).bp.ev.goCue) - 2.5;
+    % aligntimes = obj(sessix).bp.ev.(params(sessix).alignEvent)(cell2mat(params(sessix).trialid(cond2use)'));
     rez(sessix).ev.(params(sessix).alignEvent) = aligntimes;
     rez(sessix).align = mode(aligntimes);
 

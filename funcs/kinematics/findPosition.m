@@ -7,6 +7,9 @@ featix = findDLCFeatIndex(obj.traj,view,{feat});
 xpos = nan(numel(taxis),nTrials);
 ypos = nan(numel(taxis),nTrials);
 
+vidshift = findVideoOffset(obj);
+% vidshift = 1;
+
 for i = 1:nTrials % for each trial
 
     trix = i;
@@ -31,7 +34,7 @@ for i = 1:nTrials % for each trial
             ts = mySmooth(ts, 1, 'reflect');
         end
         % linear interpolation of frameTimes to taxis
-        tsinterp = interp1(traj(trix).frameTimes-0.5-obj.bp.ev.(alignEv)(trix), ts, taxis);
+        tsinterp = interp1(traj(trix).frameTimes-vidshift-obj.bp.ev.(alignEv)(trix), ts, taxis);
     end
 
     xpos(:,i) = tsinterp(:,1);

@@ -30,26 +30,26 @@ for i = 1:numel(obj) % for each session
             temp = kinfeats{i}(:,trials,featix(k));
             toplot = cat(2,toplot,temp);
         end
-        toplot = mySmooth(toplot,21,'reflect');
+        toplot = mySmooth(toplot,31,'reflect');
         imagesc(dfparams.time, 1:size(toplot,2), toplot');
-        xline(delay,'w--');
-        xline(sample,'w--');
-        xline(gc,'w--')
+        xline(delay,'k--');
+        xline(sample,'k--');
+        xline(gc,'k--')
         if delay~=0
-            xline(0,'w--');
+            xline(0,'k--');
         end
         title(dfparams.cond{cond2plot(j)});
-        xlim([dfparams.time(10) 1]);
+        xlim([-0.9 0.9]);
         ylim([0 size(toplot,2)]);
         xlabel(['Time from stim/' dfparams.alignEv ' onset (s)'])
         title([meta(i).anm ' ' meta(i).date ' | ' feats2plot{k}], 'Interpreter','none')
         ax.YDir = 'reverse';
         for i = 1:numel(nTrials)-1
-            yline(nTrials(i),'w--')
+            yline(nTrials(i),'k--')
         end
-        colormap(linspecer)
+        colormap(parula)
         c = colorbar;
-
+        c.Limits = [0 c.Limits(2)];
         if sav
            pth = [ 'C:\Users\munib\Documents\Economo-Lab\code\uninstructedMovements\mc_stim\figs\' meta(i).anm '\kin'];
            fn = [ meta(i).anm '_' meta(i).date '_' feats2plot{k} ];

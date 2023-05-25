@@ -65,14 +65,14 @@ meta = [];
 % --- ALM ---
 meta = loadJEB6_ALMVideo(meta,datapth);
 meta = loadJEB7_ALMVideo(meta,datapth);
-% meta = loadEKH1_ALMVideo(meta,datapth);
+meta = loadEKH1_ALMVideo(meta,datapth);
 meta = loadEKH3_ALMVideo(meta,datapth);
 meta = loadJGR2_ALMVideo(meta,datapth);
 meta = loadJGR3_ALMVideo(meta,datapth);
 meta = loadJEB13_ALMVideo(meta,datapth);
 meta = loadJEB14_ALMVideo(meta,datapth);
 meta = loadJEB15_ALMVideo(meta,datapth);
-
+meta = loadJEB19_ALMVideo(meta,datapth);
 
 % --- M1TJ ---
 % meta = loadJEB13_M1TJVideo(meta,datapth);
@@ -115,12 +115,12 @@ for sessix = 1:numel(meta)
     % x_norm = x / (lambda + max(x) - min(x))
     snpsth = rez(sessix).psth ./ (rez(sessix).softnorm_lambda + max(rez(sessix).psth) - min(rez(sessix).psth));
 
-%     % mean center across conditions
-%     for clu = 1:size(snpsth,2)
-%         % find mean at each time point for each condition (time,1)
-%         mean_across_cond = mean(snpsth(:,clu,:),3);
-%         snpsth(:,clu,:) = snpsth(:,clu,:) - repmat(mean_across_cond,[1,1,size(snpsth,3)]);
-%     end
+    %     % mean center across conditions
+    %     for clu = 1:size(snpsth,2)
+    %         % find mean at each time point for each condition (time,1)
+    %         mean_across_cond = mean(snpsth(:,clu,:),3);
+    %         snpsth(:,clu,:) = snpsth(:,clu,:) - repmat(mean_across_cond,[1,1,size(snpsth,3)]);
+    %     end
     rez(sessix).psth_processed = snpsth; % soft normed and mean centered
     rez(sessix).psth_processed = rez(sessix).psth;
 
@@ -209,9 +209,9 @@ for sessix = 1:numel(meta)
 
 
     %single trial projections
-    
+
     trialdat = zscore_singleTrialNeuralData(obj(sessix)); % (time,trials,clu)
-%     trialdat = obj(sessix).trialdat; % (time,clu,trials)
+    %     trialdat = obj(sessix).trialdat; % (time,clu,trials)
     rez(sessix).null_trialdat = tensorprod(trialdat,rez(sessix).Qnull,3,1);
     rez(sessix).potent_trialdat = tensorprod(trialdat,rez(sessix).Qpotent,3,1);
 
@@ -299,6 +299,48 @@ title('Covariances')
 
 %% single trial r2 b/w (me,potent) and (me,null)
 close all
+
+f = figure;
+f.Position = [680   692   299   186];
+ax = gca;
+hold on;
+
+sz = 50;
+cond2use = [2 3];
+% for each session, calculate avg feat value over trials
+for isess = 1:numel(meta)
+    sessix = isess;
+
+    trix = cell2mat(params(sessix).trialid(cond2use)');
+
+    thisme = me(sessix).data(:,trix);
+    null = rez(sessix).null_ssm(:,trix);
+    potent = rez(sessix).potent_ssm(:,trix);
+
+    r2.null(isess) = corr(thisme(:),null(:)).^2;
+    r2.potent(isess) = corr(thisme(:),potent(:)).^2;
+
+end
+
+
+s = scatter(r2.null,r2.potent,sz, ...
+    'MarkerEdgeColor','w','MarkerFaceColor','k');
+
+xlabel('R2(ME,Null)', 'Interpreter','none')
+ylabel('R2(ME,Potent)', 'Interpreter','none')
+ax.FontSize = 9;
+axis(ax,'equal')
+
+mins = min([ax.XLim(1) ax.YLim(1)]);
+maxs = max([ax.XLim(2) ax.YLim(2)]);
+
+xlim([0 maxs])
+ylim([0 maxs])
+ax = gca;
+plot(ax.XLim,ax.YLim,'k--','LineWidth',2)
+
+
+%%
 
 
 
@@ -398,7 +440,7 @@ for sessix = 1:numel(meta)
 
     trix = cell2mat(params(sessix).trialid(cond2use)');
 
-%     thisme = zscore(me(sessix).data(:,trix));
+    %     thisme = zscore(me(sessix).data(:,trix));
     thisme = normalize(me(sessix).data(tix,trix));
     null = normalize(rez(sessix).null_ssm(tix,:));
     potent = normalize(rez(sessix).potent_ssm(tix,:));
@@ -505,49 +547,49 @@ for sessix = 15%:numel(rez)
     trix = cell2mat(params(sessix).trialid(2:3)');
 
     tempme = me(sessix).data(:,trix);
-    
+
     null = rez(sessix).null_ssm;
     potent = rez(sessix).potent_ssm;
-   
+
     [~,ix] = sort(mean(tempme(tix(1):tix(2),:),1),'descend');
     trix = ix;
 
     f = figure;
     f.Position = [680   591   321   387];
 
-%     ax1 = subplot(1,3,1);
+    %     ax1 = subplot(1,3,1);
     plotme = mySmooth(tempme(:,trix),2);
     imagesc(obj(sessix).time,1:numel(trix),plotme');
     colormap(linspecer)
     lims = clim;
-%     clim([lims(1) lims(2) / 1])
+    %     clim([lims(1) lims(2) / 1])
     colorbar;
-%     ylabel('Trials')
+    %     ylabel('Trials')
 
-%     ax2 = subplot(1,3,2);
+    %     ax2 = subplot(1,3,2);
     f = figure;
     f.Position = [680   591   321   387];
     potent = mySmooth(normalize(potent(:,trix)),sm);
     imagesc(obj(sessix).time,1:numel(trix),potent');
     colormap(linspecer);
     lims = clim;
-%     clim([lims(1) lims(2) / 1.5])
+    %     clim([lims(1) lims(2) / 1.5])
     colorbar;
-%     xlabel('Time from go cue (s)')
+    %     xlabel('Time from go cue (s)')
 
-%     ax3 = subplot(1,3,3);
+    %     ax3 = subplot(1,3,3);
     f = figure;
     f.Position = [680   591   321   387];
     null = mySmooth(normalize(null(:,trix)),sm);
     imagesc(obj(sessix).time,1:numel(trix), null');
     colormap(linspecer)
     lims = clim;
-%     clim([lims(1) lims(2) / 1.5])
+    %     clim([lims(1) lims(2) / 1.5])
     colorbar;
 
-%     sgtitle([meta(sessix).anm ' ' meta(sessix).date])
-%     pause
-%     close all
+    %     sgtitle([meta(sessix).anm ' ' meta(sessix).date])
+    %     pause
+    %     close all
 
 end
 

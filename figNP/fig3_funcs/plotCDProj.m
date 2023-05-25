@@ -29,7 +29,7 @@ for i = 1:numel(rez(1).cd_labels) % for each coding direction
     tempdat = squeeze(allrez.cd_proj(:,:,i,:));
 
     tempmean = nanmean(tempdat,3);
-    temperror = nanstd(tempdat,[],3); %./sqrt(numel(rez));
+    temperror = nanstd(tempdat,[],3)./sqrt(numel(rez));
 
     for j = 1:size(tempdat,2)
         temp_ = squeeze(tempdat(:,j,:));

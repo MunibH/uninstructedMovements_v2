@@ -65,9 +65,7 @@ meta = loadEKH1_ALMVideo(meta,datapth);
 meta = loadEKH3_ALMVideo(meta,datapth);
 meta = loadJGR2_ALMVideo(meta,datapth);
 meta = loadJGR3_ALMVideo(meta,datapth);
-% meta = loadJEB14_ALMVideo(meta,datapth);
-% meta = loadJEB15_ALMVideo(meta,datapth);
-
+meta = loadJEB19_ALMVideo(meta,datapth);
 
 % --- M1TJ ---
 % meta = loadJEB14_M1TJVideo(meta,datapth);
@@ -116,18 +114,18 @@ rez.numT = numel(rez.tm);
 
 rez.train = 1; % fraction of trials to use for training (1-train for testing)
 
-rez.nShuffles = 2;
+rez.nShuffles = 4;
 
 % match number of right and left hits, and right and left misses
 cond2use = 1:4;
 afccond = [1 2];
 awcond = [3 4];
 
-featGroups = {{'tongue'},...
-    {'jaw','trident'},...
-    {'nose','nostril'},...
-    {'paw'},...
-    {'motion_energy'}};
+% featGroups = {{'tongue'},...
+%     {'jaw','trident'},...
+%     {'nose','nostril'},...
+%     {'paw'},...
+%     {'motion_energy'}};
 
 featGroups = {'all'};
 
@@ -223,7 +221,7 @@ for ifeat = 1:numel(featGroups)
 
         % decoding
 
-%         acc(:,sessix,ifeat) = DLC_ChoiceDecoder(in,rez,trials);
+        acc(:,sessix,ifeat) = DLC_ChoiceDecoder(in,rez,trials);
 
 
         % shuffle labels for a 'null' distribution
@@ -260,154 +258,53 @@ plot(rez.tm(1:end-1),p,'LineWidth',2)
 
 %% plot
 
+close all
+
 cols = {'k',[0.6,0.6,0.6]};
 
-alph = 0.15;
+alph = 0.2;
 
 sample = mode(obj(1).bp.ev.sample) - mode(obj(1).bp.ev.goCue);
 delay = mode(obj(1).bp.ev.delay) - mode(obj(1).bp.ev.goCue);
 trialStart = mode(obj(1).bp.ev.bitStart) - mode(obj(1).bp.ev.goCue);
 
 f = figure;
+f.Position = [644   517   335   258];
 ax = gca;
 hold on;
 
-ctrl = acc;
-ctrl(15:end,:) = mySmooth(acc(15:end,:), 15,'reflect');
-shuffed = mySmooth(acc_shuf_, 21,'reflect');
+tempacc = cat(1,mean(acc(1,:),2)*ones(size(acc)),acc);
+ctrl = mySmooth(tempacc, 11,'reflect');
+ctrl = ctrl(size(tempacc)/2+1:end,:);
+acc_shuff_ = cat(2,acc_shuf_,acc_shuf_);
+shuffed = mySmooth(acc_shuff_, 15,'reflect');
 
 shadedErrorBar(rez.tm(1:end-1),mean(ctrl,2),getCI(ctrl),{'Color',cols{1},'LineWidth',2},alph,ax)
-shadedErrorBar(rez.tm(1:end-1),mean(shuffed,2),getCI(shuffed,0),{'Color',cols{2},'LineWidth',2},alph,ax)
-xline(0,'k--','LineWidth',1)
-xline(sample,'k--','LineWidth',1)
-xline(delay,'k--','LineWidth',1)
-xline(trialStart,'k--','LineWidth',1)
-xlim([trialStart, params(1).tmax-0.2])
+shadedErrorBar(rez.tm(1:end-1),mean(shuffed,2),getCI(shuffed,0)/2,{'Color',cols{2},'LineWidth',2},alph,ax)
+
+% shadedErrorBar(rez.tm(1:end-1),mean(acc,2),std(acc,[],2)./sqrt(numel(obj)),{'Color',cols{1},'LineWidth',2},alph,ax)
+% shadedErrorBar(rez.tm(1:end-1),mean(acc_shuf_,2),std(acc_shuf_,[],2)./sqrt(numel(obj)),{'Color',cols{2},'LineWidth',2},alph,ax)
+xx=xline(0,'k--'); uistack(xx,'bottom');
+xx=xline(sample,'k--'); uistack(xx,'bottom');
+xx=xline(delay,'k--'); uistack(xx,'bottom');
+xx=xline(trialStart,'k--'); uistack(xx,'bottom');
+xlim([trialStart+0.1, params(1).tmax-0.2])
 ylim([ax.YLim(1) 1])
 
 xlabel('Time from go cue (s)')
 ylabel([num2str(rez.nFolds) '-Fold CV Accuracy'])
 title('Kinematic context decoding','FontSize',8)
 
-h = zeros(2, 1);
-for i = 1:numel(h)
-    h(i) = plot(NaN,NaN,'-','Color',cols{i},'LineWidth',2);
-end
-legString = {'Kinematics','Shuffled labels'};
+% h = zeros(2, 1);
+% for i = 1:numel(h)
+%     h(i) = plot(NaN,NaN,'-','Color',cols{i},'LineWidth',2);
+% end
+% legString = {'Kinematics','Shuffled labels'};
+% 
+% leg = legend(h, legString);
+% leg.EdgeColor = 'none';
+% leg.Location = 'best';
+% leg.Color = 'none';
+% ax.FontSize = 10;
 
-leg = legend(h, legString);
-leg.EdgeColor = 'none';
-leg.Location = 'best';
-leg.Color = 'none';
-ax.FontSize = 10;
-
-
-%% plot
-
-cols = linspecer(size(acc,3));
-
-alph = 0.5;
-
-sample = mode(obj(1).bp.ev.sample) - mode(obj(1).bp.ev.goCue);
-delay = mode(obj(1).bp.ev.delay) - mode(obj(1).bp.ev.goCue);
-
-figure;
-ax = gca;
-hold on;
-for ifeat = 1:size(acc,3)
-    temp = acc(:,:,ifeat);
-    shadedErrorBar(rez.tm(1:end-1),mean(temp,2),std(temp,[],2)./sqrt(numel(obj)),{'Color',cols(ifeat,:),'LineWidth',2},alph,ax)
-end
-xline(0,'k:','LineWidth',2)
-xline(sample,'k:','LineWidth',2)
-xline(delay,'k:','LineWidth',2)
-
-ylim([ax.YLim(1) 1])
-
-xlabel('Time (s) from go cue')
-ylabel([num2str(rez.nFolds) '-Fold CV Accuracy'])
-title('Context Decoding from DLC Features')
-
-h = zeros(numel(featGroups), 1);
-for i = 1:numel(h)
-    h(i) = plot(NaN,NaN,'-','Color',cols(i,:),'LineWidth',2);
-end
-legString = cellfun(@(x) strrep(x{1},'_',' '), featGroups,'UniformOutput',false);
-
-leg = legend(h, legString);
-leg.EdgeColor = 'none';
-leg.Location = 'best';
-
-xlim([-2.5 2.5])
-
-%% same plot but for each session
-
-cols = linspecer(size(acc,3));
-
-alph = 0.5;
-
-sample = mode(obj(1).bp.ev.sample) - mode(obj(1).bp.ev.goCue);
-delay = mode(obj(1).bp.ev.delay) - mode(obj(1).bp.ev.goCue);
-
-figure;
-t = tiledlayout('flow');
-for sessix = 1:size(acc,2)
-    ax = nexttile;
-    hold on
-    temp = mySmooth(squeeze(acc(:,sessix,:)),21);
-    for ifeat = 1:size(acc,3)
-        temp2 = temp(:,ifeat);
-        shadedErrorBar(rez.tm(1:end-1),mean(temp2,2),std(temp2,[],2)./sqrt(numel(obj)),{'Color',cols(ifeat,:),'LineWidth',2},alph,ax)
-    end
-    title([meta(sessix).anm ' ' meta(sessix).date])
-    xline(0,'k:','LineWidth',2)
-    xline(sample,'k:','LineWidth',2)
-    xline(delay,'k:','LineWidth',2)
-
-    ylim([0.4 1])
-
-    %     if sessix == 1
-    %         h = zeros(numel(featGroups), 1);
-    %         for i = 1:numel(h)
-    %             h(i) = plot(NaN,NaN,'-','Color',cols(i,:),'LineWidth',2);
-    %         end
-    %         legString = cellfun(@(x) strrep(x{1},'_',' '), featGroups,'UniformOutput',false);
-    %
-    %         leg = legend(h, legString);
-    %         leg.EdgeColor = 'none';
-    %         leg.Location = 'best';
-    %     end
-end
-
-
-xlabel(t,'Time (s) from go cue')
-ylabel(t,[num2str(rez.nFolds) '-Fold CV Accuracy'])
-
-
-%% average over all sessions, features
-
-cols = linspecer(size(acc,3));
-
-alph = 0.5;
-
-sample = mode(obj(1).bp.ev.sample) - mode(obj(1).bp.ev.goCue);
-delay = mode(obj(1).bp.ev.delay) - mode(obj(1).bp.ev.goCue);
-
-temp = mean(temp,3); % each feature
-
-
-figure;
-ax = gca;
-hold on;
-shadedErrorBar(rez.tm(1:end-1),mean(temp,2),std(temp,[],2)./sqrt(numel(obj)),{'Color',cols(1,:),'LineWidth',2},alph,ax)
-
-xline(0,'k:','LineWidth',2)
-xline(sample,'k:','LineWidth',2)
-xline(delay,'k:','LineWidth',2)
-
-ylim([ax.YLim(1) 1])
-
-xlabel('Time (s) from go cue')
-ylabel([num2str(rez.nFolds) '-Fold CV Accuracy'])
-title('Choice Decoding from DLC Features')
 

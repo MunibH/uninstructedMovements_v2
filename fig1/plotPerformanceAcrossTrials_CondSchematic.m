@@ -59,10 +59,10 @@ meta = [];
 % --- ALM --- 
 meta = loadJEB6_ALMVideo(meta,datapth);
 meta = loadJEB7_ALMVideo(meta,datapth);
-meta = loadEKH1_ALMVideo(meta,datapth);
-meta = loadEKH3_ALMVideo(meta,datapth);
-meta = loadJGR2_ALMVideo(meta,datapth);
-meta = loadJGR3_ALMVideo(meta,datapth);
+% meta = loadEKH1_ALMVideo(meta,datapth);
+% meta = loadEKH3_ALMVideo(meta,datapth);
+% meta = loadJGR2_ALMVideo(meta,datapth);
+% meta = loadJGR3_ALMVideo(meta,datapth);
 % meta = loadJEB14_ALMVideo(meta,datapth);
 % meta = loadJEB15_ALMVideo(meta,datapth);
 
@@ -155,7 +155,7 @@ cols{2} = clrs.aw;
 
 win = 20;
 
-for sessix = 1:numel(obj)
+for sessix = 2%:numel(obj)
     % get hit rate across entire session
     hits = obj(sessix).bp.hit;
     miss = obj(sessix).bp.miss;
@@ -173,9 +173,9 @@ for sessix = 1:numel(obj)
     f = figure; hold on;
     f.Position = [339   493   549   202];
     ax = gca;
-    plot((1:obj(sessix).bp.Ntrials), hits_,'k', 'LineWidth',1)
-    plot((1:obj(sessix).bp.Ntrials), miss_,'Color',[0.5 0.5 0.5], 'LineWidth',1)
-    plot((1:obj(sessix).bp.Ntrials), no_,'Color',[50, 168, 82]./255, 'LineWidth',1)
+    plot((1:obj(sessix).bp.Ntrials), hits_,'k', 'LineWidth',1.5)
+    plot((1:obj(sessix).bp.Ntrials), miss_,'Color',[0.5 0.5 0.5], 'LineWidth',1.5)
+    plot((1:obj(sessix).bp.Ntrials), no_,'Color',[50, 168, 82]./255, 'LineWidth',1.5)
 
     yy = ax.YLim;
 
@@ -188,6 +188,7 @@ for sessix = 1:numel(obj)
         ff = fill(xs,ys,clrs.aw);
         ff.FaceAlpha = 0.3;
         ff.EdgeColor = 'none';
+        uistack(ff,'bottom')
     end
     % afc blocks
     [istart, iend] = ZeroOnesCount(~tt);
@@ -197,6 +198,7 @@ for sessix = 1:numel(obj)
         ff = fill(xs,ys,clrs.afc);
         ff.FaceAlpha = 0.3;
         ff.EdgeColor = 'none';
+        uistack(ff,'bottom')
     end
 
     xlabel('Trial number')
@@ -217,3 +219,6 @@ for sessix = 1:numel(obj)
     leg.EdgeColor = 'none';
     leg.Color = 'none';
 end
+
+
+xlim([1 250])

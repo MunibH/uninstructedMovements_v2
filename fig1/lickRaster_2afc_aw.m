@@ -59,10 +59,10 @@ meta = [];
 
 meta = loadJEB6_ALMVideo(meta,datapth);
 meta = loadJEB7_ALMVideo(meta,datapth);
-meta = loadEKH1_ALMVideo(meta,datapth);
-meta = loadEKH3_ALMVideo(meta,datapth);
-meta = loadJGR2_ALMVideo(meta,datapth);
-meta = loadJGR3_ALMVideo(meta,datapth);
+% meta = loadEKH1_ALMVideo(meta,datapth);
+% meta = loadEKH3_ALMVideo(meta,datapth);
+% meta = loadJGR2_ALMVideo(meta,datapth);
+% meta = loadJGR3_ALMVideo(meta,datapth);
 % meta = loadJEB15_ALMVideo(meta,datapth);
 
 
@@ -86,7 +86,8 @@ fns = fieldnames(clrs);
 for i = 1:numel(fns)
     cols{i} = clrs.(fns{i});
 end
-
+cols{3} = cols{1};
+cols{4} = cols{2};
 
 cond2use = 1:4;
 
@@ -98,24 +99,28 @@ goCue = 0;
 sample = mode(obj(sessix).bp.ev.sample) - mode(obj(sessix).bp.ev.goCue);
 delay = mode(obj(sessix).bp.ev.delay) - mode(obj(sessix).bp.ev.goCue);
 
-
+ylims = [0 95];
 
 nTrials{1} = numel(params(sessix).trialid{3});
 nTrials{2} = numel(params(sessix).trialid{1});
 
-
+toff = 4;
 
 f = figure; hold on;
 f.Position = [520   561   234   418];
 trialOffset = 1;
 
+trixcut = [25, 100];
 
 % right trials (2afc + aw)
 cond2use = [3 1];
 for cix = 1:numel(cond2use)
-    if cix > 1; trialOffset = trialOffset + 10; end
+    if cix > 1; trialOffset = trialOffset + toff; end
 
     for trix = 1:nTrials{cix}
+        if trix > trixcut(cix)
+            break
+        end
         check1 = 0;
         check2 = 0;
 
@@ -152,7 +157,7 @@ for cix = 1:numel(cond2use)
 
 end
 xlim([-2.5 2.7]);
-ylim([0 160])
+ylim(ylims)
 xlabel('Time from go cue (s)')
 ylabel('Trials')
 ax = gca;
@@ -172,12 +177,17 @@ f = figure; hold on;
 f.Position = [520   561   234   418];
 trialOffset = 1;
 
+trixcut = [25, 100];
+
 % left trials (2afc + aw)
 cond2use = [4 2];
 for cix = 1:numel(cond2use)
-    if cix > 1; trialOffset = trialOffset + 10; end
+    if cix > 1; trialOffset = trialOffset + toff; end
 
     for trix = 1:nTrials{cix}
+        if trix > trixcut(cix)
+            break
+        end
         check1 = 0;
         check2 = 0;
 
@@ -214,7 +224,7 @@ for cix = 1:numel(cond2use)
 
 end
 xlim([-2.5 2.7]);
-ylim([0 110])
+ylim(ylims)
 xlabel('Time from go cue (s)')
 ylabel('Trials')
 ax = gca;

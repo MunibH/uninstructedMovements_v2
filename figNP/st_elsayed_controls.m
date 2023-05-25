@@ -25,10 +25,10 @@ params.lowFR               = 0; % remove clusters with firing rates across all t
 
 % set conditions to calculate PSTHs for
 params.condition(1)     = {'(hit|miss|no)'};                             % all trials (1)
-params.condition(end+1) = {'R&hit&~stim.enable&~autowater&~early'};             % right hits, no stim, aw off (2)
-params.condition(end+1) = {'L&hit&~stim.enable&~autowater&~early'};             % left hits, no stim, aw off (3)
-params.condition(end+1) = {'R&miss&~stim.enable&~autowater&~early'};            % error right, no stim, aw off (4)
-params.condition(end+1) = {'L&miss&~stim.enable&~autowater&~early'};            % error left, no stim, aw off (5)
+params.condition(end+1) = {'R&hit&~stim.enable&~autowater'};             % right hits, no stim, aw off (2)
+params.condition(end+1) = {'L&hit&~stim.enable&~autowater'};             % left hits, no stim, aw off (3)
+params.condition(end+1) = {'R&miss&~stim.enable&~autowater'};            % error right, no stim, aw off (4)
+params.condition(end+1) = {'L&miss&~stim.enable&~autowater'};            % error left, no stim, aw off (5)
 params.condition(end+1) = {'R&no&~stim.enable&~autowater&~early'};            % no right, no stim, aw off (6)
 params.condition(end+1) = {'L&no&~stim.enable&~autowater&~early'};            % no left, no stim, aw off (7)
 
@@ -81,13 +81,13 @@ meta = [];
 % --- ALM ---
 meta = loadJEB6_ALMVideo(meta,datapth);
 meta = loadJEB7_ALMVideo(meta,datapth); % selectivity in ME
-% meta = loadEKH1_ALMVideo(meta,datapth); % selectivity in ME
+meta = loadEKH1_ALMVideo(meta,datapth); % selectivity in ME
 meta = loadEKH3_ALMVideo(meta,datapth); % selectivity in ME
 meta = loadJGR2_ALMVideo(meta,datapth);
 meta = loadJGR3_ALMVideo(meta,datapth);
-meta = loadJEB13_ALMVideo(meta,datapth);
-meta = loadJEB14_ALMVideo(meta,datapth); % selectivity in ME % go cue is at 2.3 instead of 2.5 like all other sessions??
-meta = loadJEB15_ALMVideo(meta,datapth);
+% meta = loadJEB13_ALMVideo(meta,datapth);
+% meta = loadJEB14_ALMVideo(meta,datapth); % selectivity in ME % go cue is at 2.3 instead of 2.5 like all other sessions??
+% meta = loadJEB15_ALMVideo(meta,datapth);
 meta = loadJEB19_ALMVideo(meta,datapth);
 
 % --- M1TJ ---
@@ -110,8 +110,9 @@ params.probe = {meta.probe}; % put probe numbers into params, one entry for elem
 % me (struct array) - one entry per session
 % ------------------------------------------
 for sessix = 1:numel(meta)
+    disp(['Loading kinematics - Session ' num2str(sessix) '/' num2str(numel(meta))])
     me(sessix) = loadMotionEnergy(obj(sessix), meta(sessix), params(sessix), datapth);
-    %     kin(sessix) = getKinematics(obj(sessix), me(sessix), params(sessix));
+    % kin(sessix) = getKinematics(obj(sessix), me(sessix), params(sessix));
 end
 
 
@@ -138,9 +139,10 @@ for sessix = 1:numel(meta)
     cond2use = [2:5 15:18]; % right hit, left hit, right miss, left miss, 2afc and aw
     cond2proj = [8:11 14];
     nullalltime = 0; % use all time points to estimate null space if 1
-    onlyAW = 0; % only use AW trials
+    onlyAW = 1; % only use AW trials
     delayOnly = 0; % only use delay period
-    rez(sessix) = singleTrial_elsayed_np(trialdat_zscored, obj(sessix), me(sessix), params(sessix), cond2use, cond2proj, nullalltime, onlyAW, delayOnly);
+    responseOnly = 0; % only use response period
+    rez(sessix) = singleTrial_elsayed_np(trialdat_zscored, obj(sessix), me(sessix), params(sessix), cond2use, cond2proj, nullalltime, onlyAW, delayOnly, responseOnly);
 
     % -- coding dimensions
     cond2use = [1 2]; % right hits, left hits (corresponding to null/potent psths in rez)
@@ -164,7 +166,7 @@ close all
 
 sav = 0;
 
-plotmiss = 0;
+plotmiss = 1;
 plotno = 0;
 
 titlestring = 'Null';
@@ -180,11 +182,11 @@ axpotent = plotCDProj(cd_potent_all,cd_potent,sav,titlestring,plotmiss,plotno);
 % plotSelectivityExplained(cd_potent_all,cd_potent,sav,titlestring)
 
 % match y axis limits across null and potent space CDs
-for i = 1:numel(axnull)
-    ys = [ min(axnull(i).YLim(1),axpotent(i).YLim(1)) max(axnull(i).YLim(2),axpotent(i).YLim(2)) ];
-    axnull(i).YLim = ys;
-    axpotent(i).YLim = ys;
-end
+% for i = 1:numel(axnull)
+%     ys = [ min(axnull(i).YLim(1),axpotent(i).YLim(1)) max(axnull(i).YLim(2),axpotent(i).YLim(2)) ];
+%     axnull(i).YLim = ys;
+%     axpotent(i).YLim = ys;
+% end
 
 titlestring = 'Null | Potent CDs';
 % plotCDProj_NP(cd_potent_all,cd_null_all,cd_potent,cd_null,sav,titlestring,plotmiss)
@@ -209,9 +211,12 @@ plotVarianceExplained_DelayResponse(rez,meta);
 
 %% single trial magnitude activity in N/P
 close all
-
+% jeb15 session1 is example session
+% session 3 is a good example session (JEB7 2021-04-30) for aw only
 cond2use = 2:3;
-plotME_NPMagnitude_singleTrials(meta,obj,params,me,rez,cond2use)
+% [nmag,pmag] = 
+plotME_NPMagnitude_singleTrials(meta,obj,params,me,rez,cond2use);
+
 
 % corr_ME_NPMagnitude(meta,obj,params,me,rez);
 
@@ -519,7 +524,7 @@ close all
 
 sel = [];
 
-sm = 5;
+sm = 31;
 smtype = 'zeropad';
 
 edges = [-0.5 0];
@@ -527,7 +532,7 @@ for i = 1:numel(edges)
     [~,ix(i)] = min(abs(obj(1).time - edges(i)));
 end
 
-cond2use = [13 14];
+cond2use = [15 16];
 for sessix = 1:numel(meta)
     trix = params(sessix).trialid(cond2use);
     for c = 1:numel(trix)
@@ -560,7 +565,10 @@ sample = mode(obj(1).bp.ev.sample) - 2.5;
 delay = mode(obj(1).bp.ev.delay) - 2.5;
 gc = 0;
 
-xline(tstart,'k--'); xline(sample,'k--'); xline(delay,'k--'); xline(gc,'k--');
+xx = xline(tstart,'k--'); uistack(xx,'bottom')
+xx = xline(sample,'k--');  uistack(xx,'bottom')
+xx = xline(delay,'k--');  uistack(xx,'bottom')
+xx = xline(gc,'k--'); uistack(xx,'bottom')
 xlabel('Time from go cue (s)')
 ylabel('Selectivity (spikes / s)')
 
@@ -629,11 +637,57 @@ end
 
 
 
+%% cds_dr_wc.mat vs cds_wc
 
+temp = load('cds_dr_wc.mat');
+cds_dr_wc = temp.cds;
+temp = load('cds_wc.mat');
+cds_wc = temp.cds;
 
+clear temp
 
+labels = {'TrialType','Go','Ramping'};
+cond2use = [1 2];
+for i = 1:size(cds_dr_wc.null,3)
+    temp.dr = squeeze(cds_dr_wc.potent(:,cond2use,i,:)); % (time,cond,session)
+    temp.dr = reshape(temp.dr,size(temp.dr,1)*size(temp.dr,2),size(temp.dr,3));
+    temp.dr = temp.dr(:,[1:7,end-3:end]); % only AW sessions
+    temp.wc = squeeze(cds_wc.potent(:,cond2use,i,:)); % (time,cond,session)
+    temp.wc = reshape(temp.wc,size(temp.wc,1)*size(temp.wc,2),size(temp.wc,3));
 
+    cc_ = corr(temp.dr,temp.wc);
+    cc{i} = diag(cc_);
 
+end
+
+%%
+
+close all
+
+f=figure;
+f.Position = [661   463   266   273];
+ax = gca;
+hold on;
+div = 1;
+xs = 1:numel(labels);
+for i = 1:numel(xs)
+    ci = cc{i};
+    h(i) = bar(xs(i),mean(ci));
+    h(i).FaceColor = [0.5 0.5 0.5];
+    h(i).EdgeColor = 'none';
+    h(i).FaceAlpha = 1;
+    h(i).BarWidth = 0.7;
+    scatter(xs(i)*ones(size(ci)),ci,25,'MarkerFaceColor','k', ...
+            'MarkerEdgeColor','w','LineWidth',1,'XJitter','randn','XJitterWidth',.15, ...
+            'MarkerFaceAlpha',1)
+    errorbar(h(i).XEndPoints,mean(ci),std(ci)./sqrt(numel(ci)),'LineStyle','none','Color','k','LineWidth',1);
+end
+
+% ylim([-0.001 ax.YLim(2)])
+ax.XTick = xs;
+xticklabels({'TrialType','Go','Ramping'})
+ylabel('Corr(DR-WC , WC)')
+ax.FontSize = 10;
 
 
 

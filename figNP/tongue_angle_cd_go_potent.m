@@ -70,17 +70,56 @@ f = figure;
 end
 
 %%
+close all
 
-f = figure;
+xlims = [0 1];
+sm = 21;
+% f = figure;
 % ax = gca;
 % hold on;
+% cond2use = [2:5];
+cond2use = [4 5];
+c_ = [3 4];
+cc{1} = c.rhit;
+cc{2} = c.lhit;
+cc{3} = c.rmiss;
+cc{4} = c.lmiss;
 for isess = 1:numel(meta)
-    ax = nexttile; hold on;
+    f = figure;
+    ax = nexttile;
+    hold on;
     temp = tdat{isess};
-    plot(obj(1).time,temp{1},'color',c.rhit)
-    plot(obj(1).time,temp{2},'color',c.lhit)
-    plot(obj(1).time,temp{3},'color',c.rmiss)
-    plot(obj(1).time,temp{4},'color',c.lmiss)
+    for i = 1:numel(cond2use)
+        plot(obj(1).time,temp{c_(i)},'color',cc{c_(i)})
+    % plot(obj(1).time,temp{2},'color',c.lhit)
+    % plot(obj(1).time,temp{3},'color',c.rmiss)
+    % plot(obj(1).time,temp{4},'color',c.lmiss)
+    end
+    xlim(xlims)
+
+    trialdat_zscored = zscore_singleTrialNeuralData(obj(isess));
+
+    W = cd_null(isess).cd_mode_orth(:,2);
+    temp = tensorprod(trialdat_zscored,W,3,1);
+    ax = nexttile;
+    hold on;
+    for i = 1:numel(cond2use)
+        trix = params(isess).trialid{cond2use(i)};
+        plot(obj(1).time,mySmooth(temp(:,trix),sm),'color',cc{i})
+    end
+    xlim(xlims)
+
+    W = cd_potent(isess).cd_mode_orth(:,2);
+    temp = tensorprod(trialdat_zscored,W,3,1);
+    ax = nexttile;
+    hold on;
+    for i = 1:numel(cond2use)
+        trix = params(isess).trialid{cond2use(i)};
+        plot(obj(1).time,mySmooth(temp(:,trix),sm),'color',cc{i})
+    end
+    xlim(xlims)
+    % break
+
 end
 
 

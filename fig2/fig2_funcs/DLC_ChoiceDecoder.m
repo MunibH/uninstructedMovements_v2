@@ -21,11 +21,11 @@ for i = 1:rez.dt:(size(X_train,1)-rez.dt) % each timepoint
     end
 
 %     mdl = fitcecoc(x_train,y_train);
-%     mdl = fitclinear(x_train,y_train);
-    mdl = fitcsvm(x_train,y_train,'Standardize',false);
-    cv_mdl = crossval(mdl,'KFold',rez.nFolds);
+    mdl = fitclinear(x_train',y_train','Learner','logistic','KFold',rez.nFolds,'ObservationsIn','columns');
+    % mdl = fitcsvm(x_train,y_train,'Standardize',false);
+    % cv_mdl = crossval(mdl,'KFold',rez.nFolds);
     
-    pred = kfoldPredict(cv_mdl);
+    pred = kfoldPredict(mdl);
 
     acc(ix) = sum(pred == y_train) / numel(y_train);
     ix = ix + 1;

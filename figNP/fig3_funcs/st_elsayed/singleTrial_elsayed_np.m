@@ -1,4 +1,4 @@
-function rez = singleTrial_elsayed_np(input_data,obj,me,params,cond2use, cond2proj, nullalltime, onlyAW, delayOnly)
+function rez = singleTrial_elsayed_np(input_data,obj,me,params,cond2use, cond2proj, nullalltime, onlyAW, delayOnly, responseOnly)
 warning('off', 'manopt:getHessian:approx')
 
 %% trials to use (afc)
@@ -44,83 +44,176 @@ end
 %% split data into quiet and moving time points
 
 if delayOnly
-    null = [];
-    potent = [];
-    for trix = 1:numel(trials)
-        t = trials(trix);
-                delay_t(1) = obj.bp.ev.delay(t) - 2.5;
-                delay_t(2) = obj.bp.ev.goCue(t) - 0.02 - 2.5;
-        for i = 1:numel(delay_t)
-            [~,ix(i)] = min(abs(obj.time - delay_t(i)));
-        end
-
-        mask{trix} = me.move(ix(1):ix(2),t);
-
-        full{trix} = squeeze(input_data(ix(1):ix(2),t,:));
-        try % if no non-move time points
-            null = cat(1,null,full{trix}(~mask{trix},:));
-        catch
-        end
-        try % if no move time points
-         potent = cat(1,potent,full{trix}(mask{trix},:));
-        catch
-        end
-
-    end
-    N.delay = null;
-    N.resp  = potent;
-    N.null = null;
-    N.potent = null;
-
-    rez.N = N;
-
-else
-    % motion energy
-    mask = me.move(:,trials);
-    mask = mask(:); % (time*trials) , 1 where animal is moving, 0 where animal is quiet
-
-    % single trial neural data
-    N.full = input_data(:,trials,:);
-    N.dims = size(N.full);
-    N.full_reshape = reshape(N.full,N.dims(1)*N.dims(2),N.dims(3));
-
-    if nullalltime
-        N.null = N.full_reshape(:,:);
-    else
-        N.null = N.full_reshape(~mask,:);
-    end
-
-    % sample same number of null time points and potent time points
-    if nullalltime
-        nNull = size(N.null,1); % how many null time points
-        maskix = find(mask);
-        mask_ = mask(randsample(maskix,nNull,false));
-    else
-        mask_ = mask;
-        N.potent = N.full_reshape(mask_,:);
-    end
-
-
-    % get delay and response epoch neural activity (only used for variance
-    % explained calcs)
-    delay_edges = [-0.42 -0.02];
-    resp_edges  = [0.02 0.42];
-    for i = 1:2
-        [~,delayix(i)] = min(abs(obj(1).time - delay_edges(i)));
-        [~,respix(i)] = min(abs(obj(1).time - resp_edges(i)));
-    end
-
-    N.delay = N.full(delayix(1):delayix(2),:,:);
-    N.resp = N.full(respix(1):respix(2),:,:);
-    N.delay = reshape(N.delay,size(N.delay,1)*size(N.delay,2),size(N.delay,3));
-    N.resp = reshape(N.resp,size(N.resp,1)*size(N.resp,2),size(N.resp,3));
-
-
-
-    rez.N = N;
-
+    delay_t(1) = mode(obj.bp.ev.delay) - 2.5;
+    delay_t(2) = mode(obj.bp.ev.goCue) - 0.02 - 2.5;
+    ix = findTimeIX(obj.time,delay_t);
+elseif responseOnly
+    rt(1) = mode(obj.bp.ev.goCue) + 1 - 2.5;
+    rt(2) = mode(obj.bp.ev.goCue) - 2.5;
+    ix = findTimeIX(obj.time,rt);
+else 
+    ix = 1:numel(obj.time);
 end
 
+% motion energy
+mask = me.move(ix,trials);
+mask = mask(:); % (time*trials) , 1 where animal is moving, 0 where animal is quiet
+
+% single trial neural data
+N.full = input_data(ix,trials,:);
+N.dims = size(N.full);
+N.full_reshape = reshape(N.full,N.dims(1)*N.dims(2),N.dims(3));
+
+if nullalltime
+    N.null = N.full_reshape(:,:);
+else
+    N.null = N.full_reshape(~mask,:);
+end
+
+% sample same number of null time points and potent time points
+if nullalltime
+    nNull = size(N.null,1); % how many null time points
+    maskix = find(mask);
+    mask_ = mask(randsample(maskix,nNull,false));
+else
+    mask_ = mask;
+    N.potent = N.full_reshape(mask_,:);
+end
+
+
+% get delay and response epoch neural activity (only used for variance
+% explained calcs)
+delay_edges = [-0.42 -0.02];
+resp_edges  = [0.02 0.42];
+for i = 1:2
+    [~,delayix(i)] = min(abs(obj(1).time - delay_edges(i)));
+    [~,respix(i)] = min(abs(obj(1).time - resp_edges(i)));
+end
+
+N.delay = input_data(delayix(1):delayix(2),:,:);
+N.resp = input_data(respix(1):respix(2),:,:);
+N.delay = reshape(N.delay,size(N.delay,1)*size(N.delay,2),size(N.delay,3));
+N.resp = reshape(N.resp,size(N.resp,1)*size(N.resp,2),size(N.resp,3));
+
+
+
+rez.N = N;
+
+
+
+
+% if delayOnly
+%     null = [];
+%     potent = [];
+%     for trix = 1:numel(trials)
+%         t = trials(trix);
+%         delay_t(1) = obj.bp.ev.delay(t) - 2.5;
+%         delay_t(2) = obj.bp.ev.goCue(t) - 0.02 - 2.5;
+%         ix = findTimeIX(obj.time,delay_t);
+%         % for i = 1:numel(delay_t)
+%         %     [~,ix(i)] = min(abs(obj.time - delay_t(i)));
+%         % end
+% 
+%         mask{trix} = me.move(ix(1):ix(2),t);
+% 
+%         full{trix} = squeeze(input_data(ix(1):ix(2),t,:));
+%         try % if no non-move time points
+%             null = cat(1,null,full{trix}(~mask{trix},:));
+%         catch
+%         end
+%         try % if no move time points
+%          potent = cat(1,potent,full{trix}(mask{trix},:));
+%         catch
+%         end
+% 
+%     end
+%     N.delay = null;
+%     N.resp  = potent;
+%     N.null = null;
+%     N.potent = null;
+% 
+%     rez.N = N;
+% 
+% elseif responseOnly
+% 
+%     null = [];
+%     potent = [];
+%     for trix = 1:numel(trials)
+%         t = trials(trix);
+%         delay_t(1) = -2;
+%         delay_t(2) = 2;
+%         ix = findTimeIX(obj.time,delay_t);
+%         % for i = 1:numel(delay_t)
+%         %     [~,ix(i)] = min(abs(obj.time - delay_t(i)));
+%         % end
+% 
+%         mask{trix} = me.move(ix(1):ix(2),t);
+% 
+%         full{trix} = squeeze(input_data(ix(1):ix(2),t,:));
+%         try % if no non-move time points
+%             null = cat(1,null,full{trix}(~mask{trix},:));
+%         catch
+%         end
+%         try % if no move time points
+%          potent = cat(1,potent,full{trix}(mask{trix},:));
+%         catch
+%         end
+% 
+%     end
+%     N.delay = null;
+%     N.resp  = potent;
+%     N.null = null;
+%     N.potent = null;
+% 
+%     rez.N = N;
+% 
+% else
+%     % motion energy
+%     mask = me.move(:,trials);
+%     mask = mask(:); % (time*trials) , 1 where animal is moving, 0 where animal is quiet
+% 
+%     % single trial neural data
+%     N.full = input_data(:,trials,:);
+%     N.dims = size(N.full);
+%     N.full_reshape = reshape(N.full,N.dims(1)*N.dims(2),N.dims(3));
+% 
+%     if nullalltime
+%         N.null = N.full_reshape(:,:);
+%     else
+%         N.null = N.full_reshape(~mask,:);
+%     end
+% 
+%     % sample same number of null time points and potent time points
+%     if nullalltime
+%         nNull = size(N.null,1); % how many null time points
+%         maskix = find(mask);
+%         mask_ = mask(randsample(maskix,nNull,false));
+%     else
+%         mask_ = mask;
+%         N.potent = N.full_reshape(mask_,:);
+%     end
+% 
+% 
+%     % get delay and response epoch neural activity (only used for variance
+%     % explained calcs)
+%     delay_edges = [-0.42 -0.02];
+%     resp_edges  = [0.02 0.42];
+%     for i = 1:2
+%         [~,delayix(i)] = min(abs(obj(1).time - delay_edges(i)));
+%         [~,respix(i)] = min(abs(obj(1).time - resp_edges(i)));
+%     end
+% 
+%     N.delay = N.full(delayix(1):delayix(2),:,:);
+%     N.resp = N.full(respix(1):respix(2),:,:);
+%     N.delay = reshape(N.delay,size(N.delay,1)*size(N.delay,2),size(N.delay,3));
+%     N.resp = reshape(N.resp,size(N.resp,1)*size(N.resp,2),size(N.resp,3));
+% 
+% 
+% 
+%     rez.N = N;
+% 
+% end
+% 
 
 
 

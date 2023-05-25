@@ -57,9 +57,9 @@ meta = [];
 
 % --- ALM --- 
 % meta = loadJEB6_ALMVideo(meta,datapth);
-meta = loadJEB7_ALMVideo(meta,datapth);
+% meta = loadJEB7_ALMVideo(meta,datapth);
 % meta = loadEKH1_ALMVideo(meta,datapth);
-% meta = loadEKH3_ALMVideo(meta,datapth);
+meta = loadEKH3_ALMVideo(meta,datapth);
 % meta = loadJGR2_ALMVideo(meta,datapth);
 % meta = loadJGR3_ALMVideo(meta,datapth);
 % meta = loadJEB14_ALMVideo(meta,datapth);
@@ -89,17 +89,25 @@ params.probe = params.probe(sesh);
 % EKH3 2021-08-11 | Cell 17
 % JEB7 2021-04-30 | Cell 5
 
-close all
-cond2plot = 1:2;
 clrs = getColors;
 
-cols{1} = clrs.rhit;
-cols{2} = clrs.lhit;
-% cols{1} = clrs.afc;
-% cols{2} = clrs.aw;
+close all
+% % % 2afc
+% cond2plot = 1:2;
+% cols{1} = clrs.rhit;
+% cols{2} = clrs.lhit;
+
+% % % aw
+cond2plot = 3:4;
+cols{1} = clrs.afc;
+cols{2} = clrs.aw;
 
 
 plotSpikeRaster_PSTH(meta,obj,params,cond2plot,cols)
+
+%%
+
+writeGCFtoPDF(gcf,'raster_psth.pdf')
 
 %%
 close all

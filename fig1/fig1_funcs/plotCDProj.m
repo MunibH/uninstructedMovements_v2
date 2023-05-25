@@ -8,7 +8,7 @@ end
 
 clrs = getColors();
 lw = 2;
-alph = 0.05;
+alph = 0.2;
 
 sample = mode(obj(1).bp.ev.sample - obj(1).bp.ev.(alignEvent));
 delay = mode(obj(1).bp.ev.delay - obj(1).bp.ev.(alignEvent));
@@ -42,8 +42,8 @@ for i = 1:numel(allrez.cd_labels) % for each coding direction
             shadedErrorBar(obj(1).time,tempmean(:,5),temperror(:,5),{'Color',clrs.afc,'LineWidth',lw},alph, ax)
             shadedErrorBar(obj(1).time,tempmean(:,6),temperror(:,6),{'Color',clrs.aw,'LineWidth',lw},alph, ax)
         else
-            shadedErrorBar(obj(1).time,tempmean(:,7),temperror(:,7),{'Color',clrs.rhit_aw,'LineWidth',lw},alph, ax)
-            shadedErrorBar(obj(1).time,tempmean(:,8),temperror(:,8),{'Color',clrs.lhit_aw,'LineWidth',lw},alph, ax)
+            shadedErrorBar(obj(1).time,tempmean(:,7),temperror(:,7),{'Color',clrs.rhit,'LineWidth',lw,'LineStyle','--'},alph, ax)
+            shadedErrorBar(obj(1).time,tempmean(:,8),temperror(:,8),{'Color',clrs.lhit,'LineWidth',lw,'LineStyle','--'},alph, ax)
         end
     end
 

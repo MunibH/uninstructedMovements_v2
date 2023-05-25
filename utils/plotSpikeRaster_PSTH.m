@@ -40,7 +40,7 @@ ms = 1;
 sm = 41;
 
 % for each cluster
-for i = 1:size(obj.psth,2)
+for i = 17%1:size(obj.psth,2)
 
     % plot raster
     clu = obj.clu{params.probe}(params.cluid(i));
@@ -82,9 +82,9 @@ for i = 1:size(obj.psth,2)
     end
 
     title(ax.raster,[meta.anm ' ' meta.date ' | Cell ' num2str(params.cluid(i))],'FontSize',8)
-    pause
-    cla(ax.raster)
-    cla(ax.psth)
+    % pause
+    % cla(ax.raster)
+    % cla(ax.psth)
 end
 %%
 

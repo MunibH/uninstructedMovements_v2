@@ -76,9 +76,10 @@ meta = loadEKH1_ALMVideo(meta,datapth);
 % meta = loadEKH3_ALMVideo(meta,datapth); % not usable b/c no usable left miss trials
 meta = loadJGR2_ALMVideo(meta,datapth);
 meta = loadJGR3_ALMVideo(meta,datapth);
-% meta = loadJEB13_ALMVideo(meta,datapth);
-% meta = loadJEB14_ALMVideo(meta,datapth);
-% meta = loadJEB15_ALMVideo(meta,datapth);
+meta = loadJEB13_ALMVideo(meta,datapth);
+meta = loadJEB14_ALMVideo(meta,datapth);
+meta = loadJEB15_ALMVideo(meta,datapth);
+meta = loadJEB19_ALMVideo(meta,datapth);
 
 % --- M1TJ ---
 % meta = loadJEB14_M1TJVideo(meta,datapth);
@@ -106,7 +107,7 @@ end
 
 clear boot bootobj bootparams
 
-boot.iters = 100; % number of bootstrap iterations (most papers do 1000)
+boot.iters = 1000; % number of bootstrap iterations (most papers do 1000)
 
 boot.N.anm = 5; % number of animals to sample w/ replacement
 boot.N.sess = 2; % number of sessions to sample w/ replacement (if Nsessions for an animal is less than this number, sample Nsessions)
@@ -265,9 +266,9 @@ close all
 
 sav = 0; % 1=save, 0=no_save
 
-plotmiss = 1;
-plotaw = 0;
-plotCDProj(rez,obj(1),sav,plotmiss,plotaw,params(1).alignEvent,boot.iters)
+plotmiss = 0;
+plotaw = 1;
+plotCDProj(rez,obj(1),sav,plotmiss,plotaw,params(1).alignEvent,3)
 
 % plotCDVarExp(allrez,sav)
 % plotSelectivity(allrez,rez,sav)
