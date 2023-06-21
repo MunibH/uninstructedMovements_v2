@@ -7,9 +7,11 @@ function [nmag,pmag] = plotME_NPMagnitude_singleTrials(meta,obj,params,me,rez,co
 cols = linspecer(numel(rez));
 defcols = getColors;
 
-% xlims = [-2 2];
+% xlims = [-2.4 2];
+
 xlims = [-0.9 0];
 % xlims = [params(1).tmin, params(1).tmax];
+
 
 edges = xlims;
 for i = 1:numel(edges)
@@ -18,10 +20,16 @@ end
 tix(1) = 1;
 tix(2) = numel(obj(1).time);
 
+sample = mode(obj(1).bp.ev.sample) - 2.5;
+delay = mode(obj(1).bp.ev.delay) - 2.5;
+gc = 0;
 
-for sessix = 3%1:numel(rez)
-    % f = figure;
-    % f.Position = [282         358        1105         382];
+sm = 0;
+
+for sessix = 3%1:numel(rez) % 15
+   f = figure;
+    f.Renderer = 'painters';
+    f.Position = [194   499   904   273];
 
     % get trials
     trix = cell2mat(params(sessix).trialid(cond2use)');
@@ -33,10 +41,14 @@ for sessix = 3%1:numel(rez)
     temprez = rez(sessix);
 
     potent = temprez.N_potent(:,trix,:);
-    potent = abs(mean(potent.^2,3));
+    potent = (mean(potent.^2,3));
 
     null = temprez.N_null(:,trix,:);
-    null = abs(mean(null.^2,3));
+    null = (mean(null.^2,3));
+    gct = [0 2];
+    gcix = findTimeIX(obj(1).time,gct);
+    gcix = gcix(1):gcix(2);
+    null(gcix,:) = null(gcix,:)/1.5;
 
     % sort trials by avg late delay motion energy
     edges = [-0.4 -0.02];
@@ -45,7 +57,7 @@ for sessix = 3%1:numel(rez)
     end
     [~,sortix] = sort(mean(tempme(t(1):t(2),:),1),'descend');
 
-    sm = 3;
+    
     tempme = tempme(tix(1):tix(2),:);
     tempme = mySmooth(tempme,11,'reflect');
     potent = potent(tix(1):tix(2),:);
@@ -57,61 +69,52 @@ for sessix = 3%1:numel(rez)
     time = obj(sessix).time(tix(1):tix(2));
 
     % PLOT MOTION ENERGY
-    % ax = subplot(1,3,1);
-    f = figure;
-    f.Position = [680   591   321   387];
-    ax = gca;
+    ax1 = subplot(1,3,1);
     imagesc(time,1:numel(trix),tempme(:,sortix)');
-    colormap(ax,parula)
+    colormap(ax1,parula)
     c = colorbar;
-    lims = clim;
-    % c.Limits = [50 100];
+    line([sample sample], [1 numel(trix)],'Color','w','LineStyle','--');
+    line([delay delay], [1 numel(trix)],'Color','w','LineStyle','--');
+    line([gc gc], [1 numel(trix)],'Color','w','LineStyle','--');
     clim([0 80]);
-    %     clim([lims(1) lims(2) / 1])
     xlim(xlims)
+    ax1 = prettifyPlot(ax1);
 %     xlabel('Time (s) from go cue')
 %     ylabel('Trials')
 %     c.Label.String = 'Motion Energy (a.u.)';
 
-    clims = [-0.75 6];
     % PLOT POTENT
-    f = figure;
-    f.Position = [680   591   321   387];
-    % potentax =subplot(1,3,2);
-    potentax = gca;
+    ax2 = subplot(1,3,2);
     pmag = potent(:,sortix);
     imagesc(time,1:numel(trix),potent(:,sortix)');
-    colormap(potentax,linspecer);
+    colormap(ax2,linspecer);
     % cm = colorbarpwn(0, 10, 'level', 20, 'colorN',defcols.potent, 'colorP', defcols.potent);
     c = colorbar;
+    line([sample sample], [1 numel(trix)],'Color','w','LineStyle','--');
+    line([delay delay], [1 numel(trix)],'Color','w','LineStyle','--');
+    line([gc gc], [1 numel(trix)],'Color','w','LineStyle','--');
     lims = clim;
-    % lims(1) = -0.8; clim(lims);
-    % clim(clims)
-    %     clim([lims(1) lims(2) / 1.5])
+    % clim([lims(1)+0.5 lims(2)/4])
     xlim(xlims)
+    ax2 = prettifyPlot(ax2);
 %     c.Label.String = 'Potent - Magnitude (a.u.)';
 
     % PLOT NULL
-    f = figure;
-    f.Position = [680   591   321   387];
-    ax = gca;
-    % ax = subplot(1,3,3);
+    ax3 = subplot(1,3,3);
     nmag = null(:,sortix);
     imagesc(time,1:numel(trix), null(:,sortix)');
-    colormap(ax,linspecer)
+    colormap(ax3,linspecer)
     c = colorbar;
+    line([sample sample], [1 numel(trix)],'Color','w','LineStyle','--');
+    line([delay delay], [1 numel(trix)],'Color','w','LineStyle','--');
+    line([gc gc], [1 numel(trix)],'Color','w','LineStyle','--');
     lims = clim;
-    % lims(1) = -0.8; clim(lims);
-    % clim(clims)
-    clim_null = clim;
-%     clim([clim_null(1) clim_null(2)/1.5])
+    clim([lims(1) lims(2)/1.5])
     xlim(xlims)
 %     c.Label.String = 'Null - Magnitude (a.u.)';
+    ax3 = prettifyPlot(ax3);
 
-    % axes(potentax);
-%     clim(clim_null)
-
-%     sgtitle([meta(sessix).anm ' ' meta(sessix).date])
+    sgtitle([meta(sessix).anm ' ' meta(sessix).date])
 
     % break
 end

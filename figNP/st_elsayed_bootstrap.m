@@ -45,10 +45,10 @@ params.condition(end+1) = {'hit&~stim.enable&~autowater'};               % all h
 % autowater
 params.condition(end+1) = {'R&hit&~stim.enable&autowater&~early'};             % right hits, no stim, aw off (13)
 params.condition(end+1) = {'L&hit&~stim.enable&autowater&~early'};             % left hits, no stim, aw off  (14)
-params.condition(end+1) = {'R&miss&~stim.enable&autowater&~early'};             % right hits, no stim, aw off (15)
-params.condition(end+1) = {'L&miss&~stim.enable&autowater&~early'};             % left hits, no stim, aw off  (16)
+params.condition(end+1) = {'R&miss&~stim.enable&autowater'};             % right hits, no stim, aw off (15)
+params.condition(end+1) = {'L&miss&~stim.enable&autowater'};             % left hits, no stim, aw off  (16)
 
-params.tmin = -2.35;
+params.tmin = -2.4;
 params.tmax = 2.5;
 params.dt = 1/50;
 
@@ -137,7 +137,8 @@ for sessix = 1:numel(meta)
     nullalltime = 0; % use all time points to estimate null space if 1
     onlyAW = 0; % only use AW trials
     delayOnly = 0; % only use delay period
-    rez(sessix) = singleTrial_elsayed_np(trialdat_zscored, obj(sessix), me(sessix), params(sessix), cond2use, cond2proj, nullalltime, onlyAW, delayOnly);
+    responseOnly = 0;
+    rez(sessix) = singleTrial_elsayed_np(trialdat_zscored, obj(sessix), me(sessix), params(sessix), cond2use, cond2proj, nullalltime, onlyAW, delayOnly, responseOnly);
 end
 disp('DONE')
 
@@ -146,13 +147,13 @@ disp('DONE')
 
 clear boot bootobj bootparams
 
-boot.iters = 100; % number of bootstrap iterations (most papers do 1000)
+boot.iters = 1000; % number of bootstrap iterations (most papers do 1000)
 
 boot.N.anm = 5; % number of animals to sample w/ replacement
 boot.N.sess = 2; % number of sessions to sample w/ replacement (if Nsessions for an animal is less than this number, sample Nsessions)
-boot.N.trials.hit = 50; % number of hit trials to sample w/o replacement
-boot.N.trials.miss = 20; % number of miss trials to sample w/o replacement
-boot.N.clu = 20; % number of neurons to sample w/o replacement
+boot.N.trials.hit = 50; % number of hit trials to sample 
+boot.N.trials.miss = 20; % number of miss trials to sample 
+boot.N.clu = 20; % number of neurons to sample 
 
 
 
@@ -237,16 +238,22 @@ for iboot = 1:boot.iters
             trialdat.potent = rez(sessix).recon.potent(:,:,samp.cluid{ianm}{isess});
             trialdat.me = me(sessix).data;
             trialid = bootparams.trialid;
-            for icond = 1:numel(trialid)-4 % -4 for aw only
+            for icond = 1:numel(trialid) % -4 for aw only
                 % control
-                try
+                if numel(trialid{icond}) == 0
+                    if ismember(icond,[4 5 8 9 15 16])
+                        nt = 20;
+                    else
+                        nt = 50;
+                    end
+                    tocat = nan(245,20,80);
+                    samp.trialdat.null{icond} = cat(3,samp.trialdat.null{icond},tocat);
+                    samp.trialdat.potent{icond} = cat(3,samp.trialdat.potent{icond},tocat);
+                else
                     samp.trialdat.null{icond} = cat(3,samp.trialdat.null{icond},trialdat.null(:,trialid{icond},:));
-                catch
-                end
-                try
                     samp.trialdat.potent{icond} = cat(3,samp.trialdat.potent{icond},trialdat.potent(:,trialid{icond},:));
-                catch
                 end
+
 
                 samp.me{icond} = cat(2,samp.me{icond},trialdat.me(:,trialid{icond}));
 
@@ -272,14 +279,21 @@ for iboot = 1:boot.iters
         end
     end
 
-    for icond = 1:numel(samp.trialdat.null)-4 % -4 for aw only
-        samp.psth.null(:,:,icond) = squeeze(mean(samp.trialdat.null{icond},2));
-        samp.psth.potent(:,:,icond) = squeeze(mean(samp.trialdat.potent{icond},2));
+    for icond = 1:numel(samp.trialdat.null) % -4 for aw only
+        try
+            samp.psth.null(:,:,icond) = squeeze(mean(samp.trialdat.null{icond},2));
+            samp.psth.potent(:,:,icond) = squeeze(mean(samp.trialdat.potent{icond},2));
 
-        samp.psth.shuf.null(:,:,icond) = squeeze(mean(samp.trialdat.shuf.null{icond},2));
-        samp.psth.shuf.potent(:,:,icond) = squeeze(mean(samp.trialdat.shuf.potent{icond},2));
+            % samp.psth.shuf.null(:,:,icond) = squeeze(mean(samp.trialdat.shuf.null{icond},2));
+            % samp.psth.shuf.potent(:,:,icond) = squeeze(mean(samp.trialdat.shuf.potent{icond},2));
 
-        samp.meavg(:,icond) = mean(samp.me{icond},2);
+            samp.meavg(:,icond) = mean(samp.me{icond},2);
+        catch
+            
+        end
+
+
+        
     end
     me_(iboot).trialdat = samp.me;
     me_(iboot).conddat  = samp.meavg;

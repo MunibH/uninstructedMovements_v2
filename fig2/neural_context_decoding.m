@@ -61,7 +61,7 @@ meta = [];
 % --- ALM ---
 meta = loadJEB6_ALMVideo(meta,datapth);
 meta = loadJEB7_ALMVideo(meta,datapth);
-meta = loadEKH1_ALMVideo(meta,datapth);
+% meta = loadEKH1_ALMVideo(meta,datapth);
 meta = loadEKH3_ALMVideo(meta,datapth);
 meta = loadJGR2_ALMVideo(meta,datapth);
 meta = loadJGR3_ALMVideo(meta,datapth);
@@ -270,8 +270,9 @@ trialStart = mode(obj(1).bp.ev.bitStart) - mode(obj(1).bp.ev.goCue);
 
 f = figure;
 f.Position = [644   517   335   258];
-f.Renderer = 'painters';
 ax = gca;
+f.Renderer = 'painters';
+ax = prettifyPlot(ax);
 hold on;
 
 tempacc = cat(1,mean(acc(1,:),2)*ones(size(acc)),acc);

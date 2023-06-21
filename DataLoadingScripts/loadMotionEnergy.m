@@ -1,5 +1,10 @@
-function me = loadMotionEnergy(obj,meta,params,datapth)
+function me = loadMotionEnergy(obj,meta,params,datapth,varargin)
 
+if nargin > 4
+    returnAfterLoad = varargin{1};
+else
+    returnAfterLoad = 0;
+end
 
 % %------------------------------------------------------------
 % % --first check to see if obj has an 'me' and has thresh--
@@ -44,6 +49,10 @@ me = temp.me;
 
 if isstruct(me.data)
     me.data = me.data.data;
+end
+
+if returnAfterLoad
+    return
 end
 
 vidshift = findVideoOffset(obj);

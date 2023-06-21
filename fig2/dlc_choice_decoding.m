@@ -63,7 +63,7 @@ meta = [];
 % --- ALM ---
 meta = loadJEB6_ALMVideo(meta,datapth);
 meta = loadJEB7_ALMVideo(meta,datapth);
-meta = loadEKH1_ALMVideo(meta,datapth);
+% meta = loadEKH1_ALMVideo(meta,datapth);
 meta = loadEKH3_ALMVideo(meta,datapth);
 meta = loadJGR2_ALMVideo(meta,datapth);
 meta = loadJGR3_ALMVideo(meta,datapth);
@@ -226,7 +226,7 @@ for ifeat = 1:numel(featGroups)
 
         % decoding
 
-        acc(:,sessix,ifeat) = DLC_ChoiceDecoder(in,rez,trials);
+        acc(:,sessix,ifeat) = DLC_ChoiceDecoder(in,rez,trials); % (time,sessions,features)
 
 
         % shuffle labels for a 'null' distribution
@@ -240,7 +240,7 @@ for ifeat = 1:numel(featGroups)
         in.test.y  = Y(trials.testidx);
         
         for ishuf = 1:rez.nShuffles
-            acc_shuf(:,sessix,ishuf,ifeat) = DLC_ChoiceDecoder(in,rez,trials);
+            acc_shuf(:,sessix,ishuf,ifeat) = DLC_ChoiceDecoder(in,rez,trials); % (times,session,ishuf)
         end
 
 
@@ -248,7 +248,7 @@ for ifeat = 1:numel(featGroups)
 
 end
 
-acc_shuf_ = reshape(acc_shuf,size(acc_shuf,1),size(acc_shuf,2)*size(acc_shuf,3));
+acc_shuf_ = reshape(acc_shuf,size(acc_shuf,1),size(acc_shuf,2)*size(acc_shuf,3)); % (time,session*ishuf)
 
 
 %% plot
@@ -266,16 +266,18 @@ trialStart = mode(obj(1).bp.ev.bitStart) - mode(obj(1).bp.ev.goCue);
 f = figure;
 f.Position = [644   517   335   258];
 ax = gca;
+f.Renderer = 'painters';
+ax = prettifyPlot(ax);
 hold on;
 
 tempacc = cat(1,mean(acc(1,:),2)*ones(size(acc)),acc);
-ctrl = mySmooth(tempacc, 11,'reflect');
+ctrl = mySmooth(tempacc, 9,'reflect');
 ctrl = ctrl(size(tempacc)/2+1:end,:);
 acc_shuff_ = cat(2,acc_shuf_,acc_shuf_);
 shuffed = mySmooth(acc_shuff_, 15,'reflect');
 
 shadedErrorBar(rez.tm(1:end-1),mean(ctrl,2),getCI(ctrl),{'Color',cols{1},'LineWidth',2},alph,ax)
-shadedErrorBar(rez.tm(1:end-1),mean(shuffed,2),getCI(shuffed,0)/2,{'Color',cols{2},'LineWidth',2},alph,ax)
+shadedErrorBar(rez.tm(1:end-1),mean(shuffed,2),getCI(shuffed,0),{'Color',cols{2},'LineWidth',2},alph,ax)
 
 % shadedErrorBar(rez.tm(1:end-1),mean(acc,2),std(acc,[],2)./sqrt(numel(obj)),{'Color',cols{1},'LineWidth',2},alph,ax)
 % shadedErrorBar(rez.tm(1:end-1),mean(acc_shuf_,2),std(acc_shuf_,[],2)./sqrt(numel(obj)),{'Color',cols{2},'LineWidth',2},alph,ax)
@@ -303,47 +305,5 @@ title('Kinematic choice decoding','FontSize',8)
 % ax.FontSize = 10;
 
 
-%% same plot but for each session
-
-cols = linspecer(size(acc,3));
-
-alph = 0.5;
-
-sample = mode(obj(1).bp.ev.sample) - mode(obj(1).bp.ev.goCue);
-delay = mode(obj(1).bp.ev.delay) - mode(obj(1).bp.ev.goCue);
-
-figure;
-t = tiledlayout('flow');
-for sessix = 1:size(acc,2)
-    ax = nexttile;
-    hold on
-    temp = mySmooth(squeeze(acc(:,sessix,:)),21);
-    for ifeat = 1:size(acc,3)
-        temp2 = temp(:,ifeat);
-        shadedErrorBar(rez.tm(1:end-1),mean(temp2,2),std(temp2,[],2)./sqrt(numel(obj)),{'Color',cols(ifeat,:),'LineWidth',2},alph,ax)
-    end
-    title([meta(sessix).anm ' ' meta(sessix).date])
-    xline(0,'k:','LineWidth',2)
-    xline(sample,'k:','LineWidth',2)
-    xline(delay,'k:','LineWidth',2)
-
-    ylim([0.4 1])
-
-%     if sessix == 1
-%         h = zeros(numel(featGroups), 1);
-%         for i = 1:numel(h)
-%             h(i) = plot(NaN,NaN,'-','Color',cols(i,:),'LineWidth',2);
-%         end
-%         legString = cellfun(@(x) strrep(x{1},'_',' '), featGroups,'UniformOutput',false);
-% 
-%         leg = legend(h, legString);
-%         leg.EdgeColor = 'none';
-%         leg.Location = 'best';
-%     end
-end
-
-
-xlabel(t,'Time (s) from go cue')
-ylabel(t,[num2str(rez.nFolds) '-Fold CV Accuracy'])
 
 

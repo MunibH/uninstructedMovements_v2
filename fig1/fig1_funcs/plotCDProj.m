@@ -19,9 +19,11 @@ for i = 1:numel(allrez.cd_labels) % for each coding direction
 
     f = figure; hold on
     f.Position = [698   436   343   230];
+    f.Renderer = 'painters';
     ax = gca;
+    ax = prettifyPlot(ax);
     %     ax = nexttile; hold on;
-    tempdat = squeeze(allrez.cd_proj(:,:,i,:));
+    tempdat = squeeze(allrez.cd_proj(:,:,i,:)) * -1;
     tempmean = nanmean(tempdat,3);
     temperror = nanstd(tempdat,[],3)./sqrt(stdErrDenom);
 %     for j = 1:size(tempdat,2)
@@ -48,7 +50,7 @@ for i = 1:numel(allrez.cd_labels) % for each coding direction
     end
 
     %     xlim([rez(1).time(1);rez(1).time(end)])
-    xlim([obj(1).time(5);2])
+    xlim([-2.4;2])
 
     title(allrez.cd_labels{i},'FontSize',8)
     xlabel(['Time from ' alignEvent ' (s)'])

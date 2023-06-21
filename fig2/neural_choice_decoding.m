@@ -58,8 +58,8 @@ params.advance_movement = 0.0;
 %% SPECIFY DATA TO LOAD
 
 
-datapth = '/Users/Munib/Documents/Economo-Lab/data/';
-datapth = '/users/munib/Economo-Lab/data/';
+datapth = 'C:\Users\munib\Documents\Economo-Lab\data';
+% datapth = '/users/munib/Economo-Lab/data/';
 
 
 meta = [];
@@ -67,14 +67,14 @@ meta = [];
 % --- ALM ---
 meta = loadJEB6_ALMVideo(meta,datapth);
 meta = loadJEB7_ALMVideo(meta,datapth);
-meta = loadEKH1_ALMVideo(meta,datapth);
+% % meta = loadEKH1_ALMVideo(meta,datapth);
 meta = loadEKH3_ALMVideo(meta,datapth);
 meta = loadJGR2_ALMVideo(meta,datapth);
 meta = loadJGR3_ALMVideo(meta,datapth);
 meta = loadJEB13_ALMVideo(meta,datapth);
 meta = loadJEB14_ALMVideo(meta,datapth);
 meta = loadJEB15_ALMVideo(meta,datapth);
-
+meta = loadJEB19_ALMVideo(meta,datapth);
 
 % --- M1TJ ---
 % meta = loadJEB14_M1TJVideo(meta,datapth);
@@ -203,10 +203,12 @@ trialStart = mode(obj(1).bp.ev.bitStart) - mode(obj(1).bp.ev.goCue);
 f = figure;
 f.Position = [644   517   335   258];
 ax = gca;
+f.Renderer = 'painters';
+ax = prettifyPlot(ax);
 hold on;
 
 tempacc = cat(1,mean(acc(1,:),2)*ones(size(acc)),acc);
-ctrl = mySmooth(tempacc, 11,'reflect');
+ctrl = mySmooth(tempacc, 7,'reflect');
 ctrl = ctrl(size(tempacc)/2+1:end,:);
 acc_shuff_ = cat(2,acc_shuf_,acc_shuf_);
 shuffed = mySmooth(acc_shuff_, 15,'reflect');

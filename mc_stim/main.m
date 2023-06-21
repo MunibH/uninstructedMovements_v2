@@ -36,7 +36,7 @@ dfparams.times = [-2 2.5]; % relative to delay
 dfparams.dt_vid = 0.0025;
 dfparams.time = dfparams.times(1):dfparams.dt_vid:dfparams.times(2);
 
-dfparams.warp = 0; % 0 means no warping, 1 means warp delay period to 
+dfparams.warp = 0; % 0 means no warping, 1 means warp delay period to
 
 
 % -- trial type params --
@@ -56,12 +56,12 @@ dfparams.cond(end+1) = {'L&hit&stim.enable&~autowater&~early'};  % left hit tria
 % dfparams.cond(end+1) = {'L&miss&stim.enable&~autowater&~autolearn'};  % left hit trials, stim, no autowater
 
 % -- stim types --
-dfparams.stim.types = {'Bi_MC','Right_MC','Left_MC','Bi_ALM','Bi_M1TJ','Right_ALM','Right_M1TJ','Left_ALM','Left_M1TJ'}; 
+dfparams.stim.types = {'Bi_MC','Right_MC','Left_MC','Bi_ALM','Bi_M1TJ','Right_ALM','Right_M1TJ','Left_ALM','Left_M1TJ'};
 % dfparams.stim.num   = logical([1 1 1 1 1 1 1 1 1]);   % ALL
 % dfparams.stim.num   = logical([0 0 0 0 0 1 1 1 1]);   % Right_ALM / Left_ALM / Right_M1TJ / Left_M1TJ
 % dfparams.stim.num   = logical([0 0 0 1 0 0 0 0 0]);   % Bi_ALM
-% dfparams.stim.num   = logical([0 0 0 0 1 0 0 0 0]);   % Bi_M1TJ
-dfparams.stim.num   = logical([1 0 0 0 0 0 0 0 0]);   % Bi_MC
+dfparams.stim.num   = logical([0 0 0 0 1 0 0 0 0]);   % Bi_M1TJ
+% dfparams.stim.num   = logical([1 0 0 0 0 0 0 0 0]);   % Bi_MC
 % dfparams.stim.num   = logical([0 0 0 1 1 0 0 0 0]);   % Bi_M1TJ Bi_ALM
 % dfparams.stim.num   = logical([0 1 1 0 0 0 0 0 0]);   % Right_MC
 % dfparams.stim.num   = logical([0 0 1 0 0 0 0 0 0]);   % Left_MC
@@ -119,7 +119,6 @@ disp(['Stim Loc: ' stim2use])
 disp(['    Stim Power: ' num2str(pow2use)])
 disp('')
 
-meta = meta(11);
 
 obj = loadObjs(meta);
 
@@ -162,35 +161,6 @@ plotPerformanceAllMice(meta,obj,rez,dfparams,params,cond2use,connectConds)
 % plotPerformanceEachMouse(meta,obj,rez,dfparams,params) % TODO
 
 
-%% number of early licks per trial
-
-% % TODO: classify early licks by kinematics, not bpod data
-% 
-% cond2use = 3:6;
-% early_per_trial = nan(numel(obj),numel(cond2use)); % (sessions,conds)
-% for sessix = 1:numel(obj)
-%     for condix = 1:numel(cond2use)
-%         trials2use = params(sessix).trialid{cond2use(condix)};
-%         nTrials = numel(trials2use);
-% 
-%         nEarly = sum(obj(sessix).bp.early(trials2use));
-%         early_per_trial(sessix,condix) = nEarly / nTrials;
-%     end
-% end
-% 
-% f = figure; 
-% f.Position = [316          73        1232         905];
-% ax = axes(f);
-% nCond = numel(cond2use);
-% violincols = reshape(cell2mat(dfparams.plt.color(cond2use)),3,nCond)';
-% vs = violinplot(early_per_trial,dfparams.cond(cond2use),...
-%     'EdgeColor',[1 1 1], 'ViolinAlpha',{0.2,1}, 'ViolinColor', violincols);
-% ylabel('fraction of early licks per trial')
-% ylim([0,1])
-% title('early licks all sessions, all mice')
-% ax.FontSize = 20;
-
-
 
 %% plot kinematics
 close all
@@ -216,25 +186,59 @@ clim([0 100])
 %% avg jaw velocity during stim
 close all
 if strcmpi(dfparams.alignEv,'delay') % function depends on data aligned to delay period, since we use the stim period to measure avgjawvel
-%     feats2plot = {'jaw_ydisp_view1',...
-%         'jaw_yvel_view1',...
-%         'motion_energy'};
-%     feats2plot = {'jaw_yvel_view1',...
-%         'tongue_ydisp_view1'};
+    %     feats2plot = {'jaw_ydisp_view1',...
+    %         'jaw_yvel_view1',...
+    %         'motion_energy'};
+    %     feats2plot = {'jaw_yvel_view1',...
+    %         'tongue_ydisp_view1'};
     feats2plot = {'motion_energy'};
     cond2plot = 3:6;
     sav = 0;
 
     plotAvgFeatValDuringStim_v2(meta,obj,dfparams,params,kin,kinfeats,feats2plot,cond2plot,sav)
 
-%     plotAvgFeatValDuringStim(meta,obj,dfparams,params,kin,kinfeats,feats2plot,cond2plot,sav)
-%     plotAvgFeatValDuringStim_singleTrials(meta,obj,dfparams,params,kin,kinfeats,feats2plot,cond2plot,sav)
+    %     plotAvgFeatValDuringStim(meta,obj,dfparams,params,kin,kinfeats,feats2plot,cond2plot,sav)
+    %     plotAvgFeatValDuringStim_singleTrials(meta,obj,dfparams,params,kin,kinfeats,feats2plot,cond2plot,sav)
 end
 
+%% stats
 
 
+%% motion energy between control and stim trials (t-test)
+clear dat
+
+feat = 'motion_energy';
+conds = 1:2;
+times = [0.5 0.7]; % relative to alignEv (should be delay)
+ix = findTimeIX(dfparams.time,times);
+ix = ix(1):ix(2);
+
+featix = find(ismember(kin(1).featLeg,feat));
 
 
+for i = 1:numel(meta)
+    for j = 1:numel(conds)
+        trials = params(i).trialid{conds(j)};
+        temp = kinfeats{i}(ix,trials,featix);
+        dat(i,j) = mean(mean(temp));
+    end
+end
 
+% mus = cellfun(@(x) mean(x,1),dat,'uni',0);
 
+[h,p] = ttest(dat(:,1),dat(:,2))
+
+%% performance
+clear dat perf
+
+cond2use = 1:2;
+
+for i = 1:numel(rez)
+    perf{i} = rez(i).perf;
+end
+perf = cell2mat(perf'); % (sessions,conditions)
+
+perf = perf(:,cond2use);
+
+[h,p] = ttest(perf(:,1),perf(:,2))
 

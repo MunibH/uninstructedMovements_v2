@@ -12,6 +12,8 @@ rmpath(genpath(fullfile(utilspth,'MotionMapper/')))
 % add paths for figure specific functions
 addpath(genpath(pwd))
 
+clc
+
 %% PARAMETERS
 params.alignEvent          = 'goCue'; % 'jawOnset' 'goCue'  'moveOnset'  'firstLick'  'lastLick'
 

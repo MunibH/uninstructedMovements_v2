@@ -40,7 +40,7 @@ params.condition(end+1) = {'L&hit&~stim.enable&autowater&~early'};       % left 
 params.condition(end+1) = {'R&no&~stim.enable&~autowater&~early'};       % right no, 2afc   (10)
 params.condition(end+1) = {'L&no&~stim.enable&~autowater&~early'};       % left no, 2afc    (11)
 % for ramping
-params.condition(end+1) = {'hit&~stim.enable&~autowater'};               % all hits, no stim, aw off (12)
+params.condition(end+1) = {'hit&~stim.enable&~autowater&~early'};               % all hits, no stim, aw off (12)
 
 params.tmin = -2.5;
 params.tmax = 2.5;
@@ -269,6 +269,33 @@ sav = 0; % 1=save, 0=no_save
 plotmiss = 0;
 plotaw = 1;
 plotCDProj(rez,obj(1),sav,plotmiss,plotaw,params(1).alignEvent,3)
+
+%%
+% center data for go mode
+close all
+alph = 0.2;
+lw = 2;
+
+rampcd = 3;
+cond = [1 2];
+rampproj = squeeze(rez.cd_proj(:,cond,rampcd,:));
+rampproj = squeeze(mean(rampproj,2));
+mu = mean(rampproj,2)*-1;
+sd = std(rampproj,[],2);
+f = figure;
+f.Position = [698   436   343   230];
+f.Renderer = 'painters';
+ax = gca;
+ax = prettifyPlot(ax);
+shadedErrorBar(obj(1).time,mu,sd,{'Color','k','LineWidth',lw},alph,ax)
+% xlim([obj(1).time(5);2])
+% 
+% title('ramp','FontSize',8)
+% xlabel(['Time from go cue (s)'])
+% ylabel('Activity (a.u.)')
+% ax.FontSize = 10;
+% ax = prettifyPlot(ax);
+%%
 
 % plotCDVarExp(allrez,sav)
 % plotSelectivity(allrez,rez,sav)

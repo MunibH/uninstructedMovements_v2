@@ -81,7 +81,7 @@ meta = [];
 % --- ALM ---
 meta = loadJEB6_ALMVideo(meta,datapth);
 meta = loadJEB7_ALMVideo(meta,datapth); % selectivity in ME
-% meta = loadEKH1_ALMVideo(meta,datapth); % selectivity in ME
+% % % meta = loadEKH1_ALMVideo(meta,datapth); % selectivity in ME
 meta = loadEKH3_ALMVideo(meta,datapth); % selectivity in ME
 meta = loadJGR2_ALMVideo(meta,datapth);
 meta = loadJGR3_ALMVideo(meta,datapth);
@@ -95,6 +95,7 @@ meta = loadJEB19_ALMVideo(meta,datapth);
 
 params.probe = {meta.probe}; % put probe numbers into params, one entry for element in meta, just so i don't have to change code i've already written
 
+% meta = meta(1);
 
 %% LOAD DATA
 
@@ -140,7 +141,8 @@ for sessix = 1:numel(meta)
     nullalltime = 0; % use all time points to estimate null space if 1
     onlyAW = 0; % only use AW trials
     delayOnly = 0; % only use delay period
-    rez(sessix) = singleTrial_elsayed_np(trialdat_zscored, obj(sessix), me(sessix), params(sessix), cond2use, cond2proj, nullalltime, onlyAW, delayOnly);
+    responseOnly = 0; 
+    rez(sessix) = singleTrial_elsayed_np(trialdat_zscored, obj(sessix), me(sessix), params(sessix), cond2use, cond2proj, nullalltime, onlyAW, delayOnly, responseOnly);
 
     % -- coding dimensions
     cond2use = [1 2]; % right hits, left hits (corresponding to null/potent psths in rez)
@@ -427,13 +429,15 @@ mu.potent = cellfun(@(x) squeeze(nanmean(nanmean(x,3),2)),r.potent,'UniformOutpu
 nullcc = cell2mat(mu.null);
 potentcc = cell2mat(mu.potent);
 
-% plots
+%% plots
 col = getColors();
 lw = 2;
 alph = 0.2;
 f = figure;
 f.Position = [680   694   383   284];
+f.Renderer = "painters";
 ax = gca;
+ax = prettifyPlot(ax);
 hold on;
 % shadedErrorBar(lagtm*dt,mean(nullcc,2),std(nullcc,[],2)./sqrt(numel(meta)),{'Color',col.null,'LineWidth',lw},alph,ax);
 % shadedErrorBar(lagtm*dt,mean(potentcc,2),std(potentcc,[],2)./sqrt(numel(meta)),{'Color',col.potent,'LineWidth',lw},alph,ax);
@@ -443,7 +447,7 @@ shadedErrorBar(lagtm*dt,mean(potentcc,2),getCI(potentcc),{'Color',col.potent,'Li
 
 xlabel('Time lag, movement and subspace activity (s)')
 ylabel('Correlation')
-title('st-elsayed')
+% title('st-elsayed')
 
 %% onset of selectivity in potent space and motion energy (just exploring)
 

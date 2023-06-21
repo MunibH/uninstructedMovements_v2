@@ -172,7 +172,9 @@ for sessix = 2%:numel(obj)
 
     f = figure; hold on;
     f.Position = [339   493   549   202];
+    f.Renderer = 'painters';
     ax = gca;
+    ax = prettifyPlot(ax);
     plot((1:obj(sessix).bp.Ntrials), hits_,'k', 'LineWidth',1.5)
     plot((1:obj(sessix).bp.Ntrials), miss_,'Color',[0.5 0.5 0.5], 'LineWidth',1.5)
     plot((1:obj(sessix).bp.Ntrials), no_,'Color',[50, 168, 82]./255, 'LineWidth',1.5)
@@ -203,9 +205,9 @@ for sessix = 2%:numel(obj)
 
     xlabel('Trial number')
     ylabel('Rate (%)')
-    title([meta(sessix).anm ' ' meta(sessix).date]);
-    ax.FontSize = 10;
-    ax.Title.FontSize = 8;
+    % title([meta(sessix).anm ' ' meta(sessix).date]);
+    % ax.FontSize = 10;
+    % ax.Title.FontSize = 8;
     xlim([1 obj(sessix).bp.Ntrials])
 
 

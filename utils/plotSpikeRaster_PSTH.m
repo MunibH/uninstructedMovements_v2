@@ -5,17 +5,20 @@ function plotSpikeRaster_PSTH(meta,obj,params,cond2plot,cols)
 %%
 f = figure;
 f.Position = [500   572   249   328];
+f.Renderer = 'painters';
 ax.raster = axes('Parent',f);
 ax.psth = axes('Parent',f);
 hold(ax.raster,'on')
 hold(ax.psth,'on')
+ax.raster = prettifyPlot(ax.raster);
+ax.psth = prettifyPlot(ax.psth);
 
 % position
 set(ax.raster,'Units','normalized','Position',[0.2 .42 0.7 .3]);
 set(ax.psth,'Units','normalized','Position',  [0.2  0.15 0.7 .2]);
 
 % turn off xticks for raster plot
-ax.raster.XTick = [];
+% ax.raster.XTick = [];
 ax.raster.YLabel.String = 'Trials';
 ax.psth.XLabel.String = 'Time from go cue (s)';
 ax.psth.YLabel.String = 'Spikes / s';

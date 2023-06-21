@@ -1,6 +1,6 @@
 function trialdat_zscored = zscore_singleTrialNeuralData(obj)
 % zscore obj.trialdat, which is single trial binned neural data
-% (time,neurons,trials)
+% (time,trials,neurons)
 % The zscoring takes place on the matrix of (time*trials,neurons) for all
 % neurons
 % trialdat_zscored is of size(time,trials,neurons)

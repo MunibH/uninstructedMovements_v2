@@ -38,7 +38,6 @@ params.condition(end+1) = {'hit&~stim.enable&autowater&~early&((1:Ntrials)>20)'}
 params.condition(end+1) = {'R&hit&~stim.enable&autowater&~early&((1:Ntrials)>20)'};       % right hits, aw   (8)
 params.condition(end+1) = {'L&hit&~stim.enable&autowater&~early&((1:Ntrials)>20)'};       % left hits, aw    (9)
 
-
 params.tmin = -2.5;
 params.tmax = 2.5;
 params.dt = 1/100;
@@ -48,8 +47,8 @@ params.smooth = 15;
 params.bctype = 'reflect'; % reflect, zeropad, none
 
 % cluster qualities to use
-params.quality = {'all'}; % accepts any cell array of strings - special character 'all' returns clusters of any quality
-
+% params.quality = {'all'}; % accepts any cell array of strings - special character 'all' returns clusters of any quality
+params.quality = {'Excellent','Great','Good','Fair'};
 
 params.traj_features = {{'tongue','left_tongue','right_tongue','jaw','trident','nose'},...
     {'top_tongue','topleft_tongue','bottom_tongue','bottomleft_tongue','jaw','top_paw','bottom_paw','top_nostril','bottom_nostril'}};
@@ -165,7 +164,7 @@ cmapfn = 'ContextColormap.mat';
 temp = load(fullfile('C:\Users\munib\Documents\Economo-Lab\code\uninstructedMovements_v3\utils',cmapfn));
 contextcmap = flipud(temp.ContextColormap);
 
-for sessix = 1:numel(meta)
+for sessix = 7%:numel(meta)
     disp([num2str(sessix) ' / ' num2str(numel(meta))])
 
     % predict 'trialdat' from par.feats (kinematic features of interest)
@@ -291,7 +290,9 @@ for sessix = 1:numel(meta)
     heatmapsm = 11;
 
     f = figure;
+    f.Renderer = 'painters';
     ax = subplot(1,2,1);
+    ax = prettifyPlot(ax);
     hold on;
     temp = mySmooth(cat(2,ydr,ywc),heatmapsm);
 
@@ -309,6 +310,7 @@ for sessix = 1:numel(meta)
     ylim(ax,[1 size(y,2)])
 
     ax = subplot(1,2,2);
+    ax = prettifyPlot(ax);
 
     temp = mySmooth(cat(2,yhatdr,yhatwc),heatmapsm);
     % temp(temp<-100) = -100;
@@ -349,6 +351,8 @@ for sessix = 1:numel(meta)
     f = figure;
     f.Position = [644   483   338   231];
     ax = gca;
+    f.Renderer = 'painters';
+    ax = prettifyPlot(ax);
     hold on;
     shadedErrorBar(obj(1).time,mu.ydr,sd.ydr,{'Color',cols.afc,'LineWidth',lw,'LineStyle','-'},alph,ax)
     shadedErrorBar(obj(1).time,mu.ywc,sd.ywc,{'Color',cols.aw,'LineWidth',lw,'LineStyle','-'},alph,ax)
@@ -387,6 +391,8 @@ for sessix = 1:numel(meta)
     f = figure;
     f.Position = [644   483   338   231];
     ax = gca;
+    f.Renderer = 'painters';
+    ax = prettifyPlot(ax);
     hold on;
     scatter(shatdr,sdr,30,'filled','MarkerEdgeColor','w','MarkerFaceColor',cols.afc);
     scatter(shatwc,swc,30,'filled','MarkerEdgeColor','w','MarkerFaceColor',cols.aw);
@@ -407,6 +413,8 @@ end
 f = figure;
 f.Position = [748   394   193   272];
 ax = gca;
+f.Renderer = 'painters';
+ax = prettifyPlot(ax);
 hold on;
 
 dat = r2;

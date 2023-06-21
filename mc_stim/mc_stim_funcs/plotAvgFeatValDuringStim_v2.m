@@ -34,51 +34,66 @@ for ianm = 1:nAnm
     end
 end
 
+
+dat = cell2mat(val'); % (sessions,cond)
+
 %% plot
 
-ms = {'o','^','square','pentagram'};
+ms = {'o','o','o','o'};
 col = {[0 0 1] ; [1 0 0]};
-sz = 15;
+sz = 40;
 
 % plot each pair of ctrl/stim for l/r against each other
 f = figure;
 f.Position = [680   774   327   204];
+f.Renderer = 'painters';
 ax = gca;
+ax = prettifyPlot(ax);
 hold on;
-for ianm = 1:nAnm
-    tempanm = val{ianm};
-    c = 1;
-    for icond = 1:2:numel(cond2plot)
-        s = scatter(tempanm(:,icond),tempanm(:,icond+1),sz,'MarkerEdgeColor','k','MarkerFaceColor',col{c},'Marker',ms{ianm});
-        c = c + 1;
-    end
+c = 1;
+for icond = 1:2:numel(cond2plot)
+    s = scatter(dat(:,icond),dat(:,icond+1),sz,'MarkerEdgeColor','k','MarkerFaceColor',col{c},'Marker',ms{ianm});
+    c = c + 1;
 end
+% for ianm = 1:nAnm
+%     tempanm = val{ianm};
+%     c = 1;
+%     for icond = 1:2:numel(cond2plot)
+%         s = scatter(tempanm(:,icond),tempanm(:,icond+1),sz,'MarkerEdgeColor','k','MarkerFaceColor',col{c},'Marker',ms{ianm});
+%         c = c + 1;
+%     end
+% end
 
 xlabel([feats2plot ', ctrl (a.u.)'],'Interpreter','none')
 ylabel([feats2plot ', stim (a.u.)'],'Interpreter','none')
 ax.FontSize = 9;
 axis(ax,'equal')
 
+setLimits(ax,0.2);
+
 mins = min([ax.XLim(1) ax.YLim(1)]);
 maxs = max([ax.XLim(2) ax.YLim(2)]);
 
+% xlim([mins maxs])
+% ylim([mins maxs])
 xlim([0 maxs])
 ylim([0 maxs])
 ax = gca;
 plot(ax.XLim,ax.YLim,'k--','LineWidth',1)
+
 % view([90 -90])
 
 
-h = zeros(nAnm, 1);
-for ianm = 1:numel(h)
-    h(ianm) = scatter(NaN,NaN,sz,'MarkerEdgeColor','k','MarkerFaceColor','none','Marker',ms{ianm});
-end
-legString = uAnm;
-
-leg = legend(h, legString);
-leg.EdgeColor = 'none';
-leg.Color = 'none';
-leg.Location = 'best';
+% h = zeros(nAnm, 1);
+% for ianm = 1:numel(h)
+%     h(ianm) = scatter(NaN,NaN,sz,'MarkerEdgeColor','k','MarkerFaceColor','none','Marker',ms{ianm});
+% end
+% legString = uAnm;
+% 
+% leg = legend(h, legString);
+% leg.EdgeColor = 'none';
+% leg.Color = 'none';
+% leg.Location = 'best';
 
 
 end

@@ -4,14 +4,16 @@ function [corr_me_null, corr_me_potent] = corr_ME_NPMagnitude(meta,obj,params,me
 % plot by mouse and session
 
 ms = {'o','<','^','v','>','square','diamond','o','<'};
-sz = 50;
+sz = 40;
 
 [objix,uAnm]  = groupSessionsByAnimal(meta);
 nAnm = numel(uAnm);
 
 f = figure;
 f.Position = [680   692   299   186];
+f.Renderer = 'painters';
 ax = gca;
+ax = prettifyPlot(ax);
 hold on;
 
 % edges = [params(1).tmin, params(1).tmax];

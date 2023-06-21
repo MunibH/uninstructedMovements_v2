@@ -36,8 +36,8 @@ params.condition(end+1) = {'R&no&~stim.enable&~autowater&~early'};            % 
 params.condition(end+1) = {'L&no&~stim.enable&~autowater&~early'};            % no left, no stim, aw off
 
 params.tmin = -2.4;
-params.tmax = 2.5;
-params.dt = 1/50;
+params.tmax = 2.1;
+params.dt = 1/100;
 
 % smooth with causal gaussian kernel
 params.smooth = 15;
@@ -65,7 +65,7 @@ meta = [];
 % --- ALM ---
 meta = loadJEB6_ALMVideo(meta,datapth);
 meta = loadJEB7_ALMVideo(meta,datapth);
-meta = loadEKH1_ALMVideo(meta,datapth);
+% % % meta = loadEKH1_ALMVideo(meta,datapth);
 meta = loadEKH3_ALMVideo(meta,datapth);
 meta = loadJGR2_ALMVideo(meta,datapth);
 meta = loadJGR3_ALMVideo(meta,datapth);
@@ -126,13 +126,13 @@ for sessix = 1:numel(meta)
 
     % epochs
     % prep
-    edges = [-1 -0.2];
+    edges = [-1 -0.01];
     [~,e1] = min(abs(rez(sessix).time - edges(1)));
     [~,e2] = min(abs(rez(sessix).time - edges(2)));
     rez(sessix).prepix = e1:e2;
 
     % move
-    edges = [0.1 1];
+    edges = [0.01 1];
     [~,e1] = min(abs(rez(sessix).time - edges(1)));
     [~,e2] = min(abs(rez(sessix).time - edges(2)));
     rez(sessix).moveix = e1:e2;
@@ -232,18 +232,6 @@ for sessix = 1:numel(rez)
     ai(4,sessix) = rez(sessix).Qmove_potent_ve ./ 100;
 end
 
-[objix,uAnm] = groupSessionsByAnimal(meta);
-nAnm = numel(uAnm);
-
-for ianm = 1:nAnm
-    ix = find(objix{ianm});
-    anmVE.null_prep(ianm) = mean(ai(1,ix));
-    anmVE.null_move(ianm) = mean(ai(3,ix));
-    anmVE.potent_prep(ianm) = mean(ai(2,ix));
-    anmVE.potent_move(ianm) = mean(ai(4,ix));
-end
-
-
 defcols = getColors();
 clear cols
 cols(1,:) = defcols.null * 255;
@@ -252,14 +240,17 @@ cols(3,:) = defcols.null * 255;
 cols(4,:) = defcols.potent * 255;
 cols = cols ./ 255;
 
-fns = fieldnames(anmVE);
+fns = {'Ndelay','Pdelay','Nresponse','Presponse'};
 
 f = figure;
 f.Position = [688   501   291   319];
+f.Renderer = "painters";
 ax = gca; hold on;
+ax = prettifyPlot(ax);
 xs = [1 2 4 5];
-for i = 1:numel(fns)
-    temp = anmVE.(fns{i});
+for i = 1:numel(xs)
+    temp = ai(i,:);
+    n = numel(temp);
     h(i) = bar(xs(i),mean(temp)); % mean across dims and sessions
     cix = i;
     h(i).FaceColor = cols(cix,:);
@@ -272,19 +263,19 @@ for i = 1:numel(fns)
     e.LineWidth = 0.5;
     e.CapSize = 2;
 
-    vs(i) = scatter(randn(nAnm,1) * 0.1 + xs(i)*ones(nAnm,1),temp,10,'MarkerFaceColor','k',...
-        'MarkerEdgeColor','k','LineWidth',1);
+    % vs(i) = scatter(randn(n,1) * 0.1 + xs(i)*ones(n,1),temp,30,'MarkerFaceColor','k',...
+    %     'MarkerEdgeColor','w');
 
 
 
-    xs_(:,i) = vs(i).XData';
-    ys_(:,i) = temp;
+    % xs_(:,i) = vs(i).XData';
+    % ys_(:,i) = temp;
 end
 
-for i = 1:size(xs_,1)
-    patchline(xs_(i,1:2),ys_(i,1:2),'EdgeAlpha',0.4,'LineWidth',0.1)
-    patchline(xs_(i,3:4),ys_(i,3:4),'EdgeAlpha',0.4,'LineWidth',0.1)
-end
+% for i = 1:size(xs_,1)
+%     line(xs_(i,1:2),ys_(i,1:2),'LineWidth',0.1,'Color','k')
+%     line(xs_(i,3:4),ys_(i,3:4),'LineWidth',0.1,'Color','k')
+% end
 
 % ylim([-0.001 ax.YLim(2)])
 ax.XTick = xs;
@@ -292,9 +283,9 @@ xlabels  = strrep(fns,'_','-');
 xticklabels(xlabels);
 
 ylabel('Fraction of normVE')
-ax.FontSize = 12;
+% ax.FontSize = 12;
 
-title('Covariances')
+% title('Covariances')
 
 
 %% single trial r2 b/w (me,potent) and (me,null)
@@ -302,10 +293,12 @@ close all
 
 f = figure;
 f.Position = [680   692   299   186];
+f.Renderer = 'painters';
 ax = gca;
+ax = prettifyPlot(ax);
 hold on;
 
-sz = 50;
+sz = 40;
 cond2use = [2 3];
 % for each session, calculate avg feat value over trials
 for isess = 1:numel(meta)
@@ -340,84 +333,6 @@ ax = gca;
 plot(ax.XLim,ax.YLim,'k--','LineWidth',2)
 
 
-%%
-
-
-
-% correlate magnitude of activity in N/Ps and ME
-% plot by mouse and session
-
-ms = {'o','<','^','v','>','square','diamond','o','<'};
-sz = 50;
-
-[objix,uAnm]  = groupSessionsByAnimal(meta);
-nAnm = numel(uAnm);
-
-cond2use = [2 3];
-
-f = figure;
-ax = gca;
-hold on;
-
-for ianm = 1:nAnm
-    % get sessions for current animal
-    ix = find(objix{ianm});
-
-    % for each session, calculate avg feat value over trials
-    for isess = 1:numel(ix)
-        sessix = ix(isess);
-
-        trix = cell2mat(params(sessix).trialid(cond2use)');
-
-        thisme = me(sessix).data(:,trix);
-        null = rez(sessix).null_ssm;
-        potent = rez(sessix).potent_ssm;
-
-        r2.null{ianm}(isess) = corr(thisme(:),null(:)).^2;
-        r2.potent{ianm}(isess) = corr(thisme(:),potent(:)).^2;
-    end
-
-    mu.potent = nanmean(r2.potent{ianm});
-    mu.null = nanmean(r2.null{ianm});
-    if ianm > 7
-        s = scatter(mu.null,mu.potent,sz, ...
-            'MarkerEdgeColor','k','MarkerFaceColor','none','Marker',ms{ianm});
-    else
-        s = scatter(mu.null,mu.potent,sz, ...
-            'MarkerEdgeColor','w','MarkerFaceColor','k','Marker',ms{ianm});
-    end
-end
-
-xlabel('R2(ME,Null)', 'Interpreter','none')
-ylabel('R2(ME,Potent)', 'Interpreter','none')
-ax.FontSize = 9;
-axis(ax,'equal')
-
-mins = min([ax.XLim(1) ax.YLim(1)]);
-maxs = max([ax.XLim(2) ax.YLim(2)]);
-
-xlim([0 maxs])
-ylim([0 maxs])
-ax = gca;
-plot(ax.XLim,ax.YLim,'k--','LineWidth',2)
-% view([90 -90])
-
-
-h = zeros(nAnm, 1);
-for ianm = 1:numel(h)
-    if ianm > 7
-        h(ianm) = scatter(NaN,NaN,sz,'MarkerEdgeColor','k','MarkerFaceColor','none','Marker',ms{ianm});
-    else
-        h(ianm) = scatter(NaN,NaN,sz,'MarkerEdgeColor','none','MarkerFaceColor','k','Marker',ms{ianm});
-    end
-
-end
-legString = uAnm;
-
-leg = legend(h, legString);
-leg.EdgeColor = 'none';
-leg.Color = 'none';
-leg.Location = 'best';
 
 
 %% single trial cross-corr b/w (me,potent) and (me,null)
@@ -430,9 +345,7 @@ dt = params(1).dt;
 maxlag = 2 / dt;
 
 tt = [-2 0]; % only use time points before go cue
-for i = 1:numel(tt)
-    [~,tix(i)] = min(abs(obj(1).time - tt(i)));
-end
+tix = findTimeIX(obj(1).time,tt);
 tix = tix(1):tix(2);
 
 cond2use = [2 3];
@@ -449,6 +362,8 @@ for sessix = 1:numel(meta)
 
         [r.null{sessix}(:,t),lagtm] = xcorr(thisme(:,t),null(:,t),maxlag,'normalized');
         r.potent{sessix}(:,t) = xcorr(thisme(:,t),potent(:,t),maxlag,'normalized');
+        % [r.null{sessix}(:,t),lagtm] = xcorr(thisme(:,t),null(:,t),maxlag,'none');
+        % r.potent{sessix}(:,t) = xcorr(thisme(:,t),potent(:,t),maxlag,'none');
     end
 
 
@@ -465,14 +380,16 @@ lw = 2;
 alph = 0.2;
 f = figure;
 f.Position = [680   694   383   284];
+f.Renderer = 'painters';
 ax = gca;
+ax = prettifyPlot(ax);
 hold on;
-shadedErrorBar(lagtm*dt,mean(nullcc,2),getCI(nullcc),{'Color',col.null,'LineWidth',lw},alph,ax);
-shadedErrorBar(lagtm*dt,mean(potentcc,2),getCI(potentcc),{'Color',col.potent,'LineWidth',lw},alph,ax);
+shadedErrorBar(lagtm*dt,mean(nullcc,2),getCI(nullcc,1),{'Color',col.null,'LineWidth',lw},alph,ax);
+shadedErrorBar(lagtm*dt,mean(potentcc,2),getCI(potentcc,1),{'Color',col.potent,'LineWidth',lw},alph,ax);
 
 xlabel('Time lag, movement and subspace activity (s)')
 ylabel('Correlation')
-title('ta-elsayed')
+% title('ta-elsayed')
 
 
 
@@ -500,10 +417,12 @@ delay = (mode(obj(1).bp.ev.delay) - 2.5);
 
 
 cond2use = [2 3];
-for sessix = 1:numel(meta)
+for sessix = 16%:numel(meta)
     f = figure;
     f.Position = [698   436   343   230];
+    f.Renderer = 'painters';
     ax = gca;
+    ax = prettifyPlot(ax);
     hold on;
     for c = 1:numel(cond2use)
         null = rez(sessix).null_trialdat(:,params(sessix).trialid{cond2use(c)},:);
@@ -518,8 +437,8 @@ for sessix = 1:numel(meta)
         sig = nanstd(potent,[],2) ./ sqrt(rez(sessix).dMove);
         shadedErrorBar(obj(1).time,mu,getCI(potent),{'Color',col.potent{c},'LineWidth',lw},alph,ax)
     end
-    title([meta(sessix).anm ' ' meta(sessix).date])
-    ax.FontSize = 12;
+    % title([meta(sessix).anm ' ' meta(sessix).date])
+    % ax.FontSize = 12;
     xline(sample,'k--')
     xline(delay,'k--')
     xline(0,'k--')
@@ -535,14 +454,17 @@ end
 
 close all
 
-edges = [-0.4 -0.02]; % relative to to go cue
-for i = 1:numel(edges)
-    [~,tix(i)] = min(abs(obj(1).time - edges(i)));
-end
+xlims = [-2.3 2];
 
 sm = 7;
 
-for sessix = 15%:numel(rez)
+tt = [-0.4 -0.02];
+for i = 1:numel(tt)
+    [~,tix(i)] = min(abs(obj(1).time - tt(i)));
+end
+tix = tix(1):tix(2);
+
+for sessix = 1:numel(rez)
     temprez = rez(sessix);
     trix = cell2mat(params(sessix).trialid(2:3)');
 
@@ -556,6 +478,9 @@ for sessix = 15%:numel(rez)
 
     f = figure;
     f.Position = [680   591   321   387];
+    f.Renderer = "painters";
+    ax = gca;
+    ax = prettifyPlot(ax);
 
     %     ax1 = subplot(1,3,1);
     plotme = mySmooth(tempme(:,trix),2);
@@ -564,34 +489,132 @@ for sessix = 15%:numel(rez)
     lims = clim;
     %     clim([lims(1) lims(2) / 1])
     colorbar;
+    xlim(xlims)
+    ax = prettifyPlot(ax);
     %     ylabel('Trials')
-
-    %     ax2 = subplot(1,3,2);
-    f = figure;
-    f.Position = [680   591   321   387];
-    potent = mySmooth(normalize(potent(:,trix)),sm);
-    imagesc(obj(sessix).time,1:numel(trix),potent');
-    colormap(linspecer);
-    lims = clim;
-    %     clim([lims(1) lims(2) / 1.5])
-    colorbar;
-    %     xlabel('Time from go cue (s)')
+    % 
+    % %     ax2 = subplot(1,3,2);
+    % f = figure;
+    % f.Position = [680   591   321   387];
+    % f.Renderer = "painters";
+    % ax = gca;
+    % ax = prettifyPlot(ax);
+    % potent = mySmooth(normalize(potent(:,trix)),sm);
+    % imagesc(obj(sessix).time,1:numel(trix),potent');
+    % colormap(linspecer);
+    % lims = clim;
+    % %     clim([lims(1) lims(2) / 1.5])
+    % colorbar;
+    % xlim(xlims)
+    % ax = prettifyPlot(ax);
+    % %     xlabel('Time from go cue (s)')
 
     %     ax3 = subplot(1,3,3);
     f = figure;
     f.Position = [680   591   321   387];
+    f.Renderer = "painters";
+    ax = gca;
+    ax = prettifyPlot(ax);
     null = mySmooth(normalize(null(:,trix)),sm);
     imagesc(obj(sessix).time,1:numel(trix), null');
     colormap(linspecer)
     lims = clim;
     %     clim([lims(1) lims(2) / 1.5])
     colorbar;
-
+    xlim(xlims)
+    ax = prettifyPlot(ax);
     %     sgtitle([meta(sessix).anm ' ' meta(sessix).date])
     %     pause
     %     close all
 
 end
+
+
+%% plot me np single trial heatmaps (subplots)
+
+close all
+
+xlims = [-2.4 2];
+
+sample = mode(obj(1).bp.ev.sample) - 2.5;
+delay = mode(obj(1).bp.ev.delay) - 2.5;
+gc = 0;
+
+sm = 31;
+
+tt = [-0.4 -0.02];
+for i = 1:numel(tt)
+    [~,tix(i)] = min(abs(obj(1).time - tt(i)));
+end
+tix = tix(1):tix(2);
+
+
+
+for sessix = 1:numel(rez) % 18,22
+
+    f = figure;
+    f.Renderer = 'painters';
+    f.Position = [194   499   904   273];
+
+    temprez = rez(sessix);
+    trix = cell2mat(params(sessix).trialid(2:3)');
+
+    tempme = me(sessix).data(:,trix);
+
+    null = rez(sessix).null_ssm;
+    potent = rez(sessix).potent_ssm;
+
+    [~,ix] = sort(mean(tempme(tix(1):tix(2),:),1),'descend');
+    trix = ix;
+
+
+    ax1 = subplot(1,3,1);
+    plotme = mySmooth(tempme(:,trix),2);
+    imagesc(obj(sessix).time,1:numel(trix),plotme');
+    colormap(ax1,parula)
+    line([sample sample], [1 numel(trix)],'Color','w','LineStyle','--');
+    line([delay delay], [1 numel(trix)],'Color','w','LineStyle','--');
+    line([gc gc], [1 numel(trix)],'Color','w','LineStyle','--');
+    % lims = clim;
+    clim([0 80])
+    colorbar;
+    xlim(xlims)
+    ax1 = prettifyPlot(ax1);
+    
+    ax2 = subplot(1,3,2);
+    potent = mySmooth((potent(:,trix)),sm);
+    imagesc(obj(sessix).time,1:numel(trix),potent');
+    colormap(ax2,linspecer);
+    line([sample sample], [1 numel(trix)],'Color','w','LineStyle','--');
+    line([delay delay], [1 numel(trix)],'Color','w','LineStyle','--');
+    line([gc gc], [1 numel(trix)],'Color','w','LineStyle','--');
+    lims = clim;
+    clim([lims(1)+0.5 lims(2)])
+    colorbar;
+    xlim(xlims)
+    ax2 = prettifyPlot(ax2);
+
+    ax3 = subplot(1,3,3);
+    null = mySmooth((null(:,trix)),sm);
+    imagesc(obj(sessix).time,1:numel(trix),null');
+    colormap(ax3,linspecer);
+    line([sample sample], [1 numel(trix)],'Color','w','LineStyle','--');
+    line([delay delay], [1 numel(trix)],'Color','w','LineStyle','--');
+    line([gc gc], [1 numel(trix)],'Color','w','LineStyle','--');
+    lims = clim;
+    clim([lims(1)+0.5 lims(2)])
+    colorbar;
+    xlim(xlims)
+    ax3 = prettifyPlot(ax3);
+
+
+    sgtitle([meta(sessix).anm ' ' meta(sessix).date])
+
+
+end
+
+
+
 
 
 

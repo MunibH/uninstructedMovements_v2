@@ -16,7 +16,8 @@ end
 
 % CI for a time series (time,dim2)
 SEM = nanstd(ts, [], 2) ./ den;%./ sqrt(size(ts,2));               % Standard Error
-t = tinv([0.025  0.975],size(ts,2)-1);      % T-Score
+% t = tinv([0.025  0.975],size(ts,2)-1);      % T-Score
+t = tinv([0.05  0.95],size(ts,2)-1);      % T-Score
 % CI = 1.96 * SEM;
 CI = t(1) * SEM;
 % CI(:,1) = mean(ts,2) + t(2)*SEM;                      % Confidence Intervals

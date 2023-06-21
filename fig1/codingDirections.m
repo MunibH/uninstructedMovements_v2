@@ -27,14 +27,17 @@ params.lowFR               = 1; % remove clusters with firing rates across all t
 
 % set conditions to calculate PSTHs for
 params.condition(1)     = {'(hit|miss|no)'};                                              % all trials       (1)
-params.condition(end+1) = {'R&hit&~stim.enable&~autowater&~early&((1:Ntrials)>20)'};      % right hits, 2afc (2)
-params.condition(end+1) = {'L&hit&~stim.enable&~autowater&~early&((1:Ntrials)>20)'};      % left hit, 2afc   (3)
-params.condition(end+1) = {'R&miss&~stim.enable&~autowater&~early&((1:Ntrials)>20)'};     % right miss, 2afc (4)
-params.condition(end+1) = {'L&miss&~stim.enable&~autowater&~early&((1:Ntrials)>20)'};     % left miss, 2afc  (5)
-params.condition(end+1) = {'hit&~stim.enable&~autowater&~early&((1:Ntrials)>20)'};        % 2afc hits        (6)
-params.condition(end+1) = {'hit&~stim.enable&autowater&~early&((1:Ntrials)>20)'};         % aw hits          (7)
-params.condition(end+1) = {'R&hit&~stim.enable&autowater&~early&((1:Ntrials)>20)'};       % right hits, aw   (8)
-params.condition(end+1) = {'L&hit&~stim.enable&autowater&~early&((1:Ntrials)>20)'};       % left hits, aw    (9)
+params.condition(end+1) = {'R&hit&~stim.enable&~autowater&~early'};      % right hits, 2afc (2)
+params.condition(end+1) = {'L&hit&~stim.enable&~autowater&~early'};      % left hit, 2afc   (3)
+params.condition(end+1) = {'R&miss&~stim.enable&~autowater&~early'};     % right miss, 2afc (4)
+params.condition(end+1) = {'L&miss&~stim.enable&~autowater&~early'};     % left miss, 2afc  (5)
+params.condition(end+1) = {'hit&~stim.enable&~autowater&~early'};        % 2afc hits        (6)
+params.condition(end+1) = {'hit&~stim.enable&autowater&~early'};         % aw hits          (7)
+params.condition(end+1) = {'R&hit&~stim.enable&autowater&~early'};       % right hits, aw   (8)
+params.condition(end+1) = {'L&hit&~stim.enable&autowater&~early'};       % left hits, aw    (9)
+params.condition(end+1) = {'hit&~stim.enable&~autowater&~early'};        % ramping          (10)
+
+% params.condition(end+1) = {'L&hit&~stim.enable&autowater&~early&((1:Ntrials)>20)'};       % left hits, aw    (9)
 
 
 params.tmin = -3;
@@ -65,15 +68,15 @@ datapth = '/Users/Munib/Documents/Economo-Lab/data/';
 meta = [];
 
 % --- ALM --- 
-% meta = loadJEB6_ALMVideo(meta,datapth);
+meta = loadJEB6_ALMVideo(meta,datapth);
 meta = loadJEB7_ALMVideo(meta,datapth);
-% meta = loadEKH1_ALMVideo(meta,datapth);
+meta = loadEKH1_ALMVideo(meta,datapth);
 % meta = loadEKH3_ALMVideo(meta,datapth);
-% meta = loadJGR2_ALMVideo(meta,datapth);
-% meta = loadJGR3_ALMVideo(meta,datapth);
-% meta = loadJEB14_ALMVideo(meta,datapth);
-% meta = loadJEB15_ALMVideo(meta,datapth);
-% meta = loadJEB19_ALMVideo(meta,datapth);
+meta = loadJGR2_ALMVideo(meta,datapth);
+meta = loadJGR3_ALMVideo(meta,datapth);
+meta = loadJEB14_ALMVideo(meta,datapth);
+meta = loadJEB15_ALMVideo(meta,datapth);
+meta = loadJEB19_ALMVideo(meta,datapth);
 
 % --- M1TJ ---
 % meta = loadJEB14_M1TJVideo(meta,datapth);
@@ -96,8 +99,9 @@ clearvars -except obj meta params sel_corr_mat
 
 % % 2afc (early, late, go)
 cond2use = [2 3]; % left hit, right hit
-cond2proj = [2 3 4 5 6 7 8 9];
-rez_2afc = getCodingDimensions_2afc(obj,params,cond2use,cond2proj);
+cond2proj = [2 3 4 5 6 7 8 9];      
+rampcond = 10;
+rez_2afc = getCodingDimensions_2afc(obj,params,cond2use,cond2proj,rampcond);
 
 % % aw (context mode)
 cond2use = [6 7]; % hit 2afc, hit aw
@@ -127,9 +131,35 @@ plotCDProj(allrez,obj(1),sav,plotmiss,plotaw,params(1).alignEvent)
 
 
 
+%%
 
 
+alph = 0.2;
+cols = getColors;
 
+
+f = figure;
+f.Renderer = 'painters';
+ax = gca;
+ax = prettifyPlot(ax);
+hold on;
+icd = 3;
+cond = [1 2]; 
+lw = 1.5;
+ls = '-';
+temp = squeeze(allrez.cd_proj(:,cond,icd,:)) * -1 - 7;
+mu = nanmean(temp,3);
+sd = nanstd(temp,[],3) ./ sqrt(numel(obj)) / 2;
+shadedErrorBar(obj(1).time,mu(:,1),sd(:,1),{'Color',cols.rhit,'LineWidth',lw,'LineStyle',ls},alph,ax)
+shadedErrorBar(obj(1).time,mu(:,2),sd(:,2),{'Color',cols.lhit,'LineWidth',lw,'LineStyle',ls},alph,ax)
+cond = [7 8]; 
+lw = 1.5;
+ls = '--';
+temp = squeeze(allrez.cd_proj(:,cond,icd,:)) * -1 - 10;
+mu = nanmean(temp,3);
+sd = nanstd(temp,[],3) ./ sqrt(numel(obj)) / 2;
+shadedErrorBar(obj(1).time,mu(:,1),sd(:,1),{'Color',cols.rhit,'LineWidth',lw,'LineStyle',ls},alph,ax)
+shadedErrorBar(obj(1).time,mu(:,2),sd(:,2),{'Color',cols.lhit,'LineWidth',lw,'LineStyle',ls},alph,ax)
 
 
 

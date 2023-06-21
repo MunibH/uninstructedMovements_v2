@@ -39,6 +39,7 @@ for i = 1:numel(meta)
     end
     psme = mean(tempme(psix(1):psix(2),:),1);
     tempme = tempme - psme;    
+    % tempme = tempme;
 
     kinfeats{i} = cat(3, kinfeats{i}, tempme);
     kin(i).featLeg{end+1} = 'motion_energy';
