@@ -1,0 +1,104 @@
+%% choice
+close all
+
+
+sample = mode(obj(1).bp.ev.sample) - 2.5;
+delay = mode(obj(1).bp.ev.delay) - 2.5;
+gc = 0;
+
+nullsm = 0;
+potentsm = 0;
+
+% only show delay period
+
+
+edges = [-0.4 -0.02]; % motion energy sort times
+t = findTimeIX(obj(1).time,edges);
+
+cdix = 1;
+cond2use = [8 9];
+for sessix = 1:numel(meta)  %[2 3 ]
+    trix{1} = params(sessix).trialid{cond2use(1)};
+    trix{2} = params(sessix).trialid{cond2use(2)};
+    % trix = cell2mat(params(sessix).trialid(cond2use)');
+
+    dat = rez(sessix).recon.null;
+    W = cd_null(sessix).cd_mode_orth(:,cdix);
+    proj.null = tensorprod(dat,W,3,1);
+
+    dat = rez(sessix).recon.potent;
+    W = cd_potent(sessix).cd_mode_orth(:,cdix);
+    proj.potent = tensorprod(dat,W,3,1);
+
+    for j = 1:numel(trix)
+        tempme{j} = me(sessix).data(:,trix{j});
+        nullts{j} = proj.null(:,trix{j});
+        potentts{j} = proj.potent(:,trix{j});
+
+        % sort trials by avg late delay motion energy
+        [~,sortix] = sort(mean(tempme{j}(t(1):t(2),:),1),'descend');
+
+        tempme{j} = tempme{j}(:,sortix);
+        nullts{j} = nullts{j}(:,sortix);
+        potentts{j} = potentts{j}(:,sortix);
+
+    end
+    
+    plt.me = cat(2,tempme{1},tempme{2});
+    plt.null = cat(2,nullts{1},nullts{2});
+    plt.potent = cat(2,potentts{1},potentts{2});
+
+    plt.null = zscore(plt.null);
+    plt.potent = zscore(plt.potent);
+
+    
+    f = figure;
+    f.Position = [412   417   929   336];
+    f.Renderer = 'painters';
+
+    nTrials = size(plt.me,2);
+    nCond = size(tempme{1},2);
+
+    ax = subplot(1,3,1);
+    imagesc(obj(1).time,1:size(plt.me,2),plt.me'); colorbar; %clim([-5 10])
+    ax = prettifyPlot(ax);
+    colormap(ax,parula);
+    line([sample sample], [1 nTrials],'Color','w','LineStyle','--');
+    line([delay delay], [1 nTrials],'Color','w','LineStyle','--');
+    line([gc gc], [1 nTrials],'Color','w','LineStyle','--');
+    line([obj(1).time(1) obj(1).time(end)], [nCond nCond],'Color','w','LineStyle','--');
+
+    ax = subplot(1,3,2);
+    imagesc(obj(1).time,1:size(plt.me,2),plt.potent'); colorbar; %clim([-5 5])
+    ax = prettifyPlot(ax);
+    colormap(ax,parula);
+    line([sample sample], [1 nTrials],'Color','w','LineStyle','--');
+    line([delay delay], [1 nTrials],'Color','w','LineStyle','--');
+    line([gc gc], [1 nTrials],'Color','w','LineStyle','--');
+    line([obj(1).time(1) obj(1).time(end)], [nCond nCond],'Color','w','LineStyle','--');
+
+    ax = subplot(1,3,3);
+    imagesc(obj(1).time,1:size(plt.me,2),plt.null'); colorbar; %clim([-5 10])
+    ax = prettifyPlot(ax);
+    colormap(ax,parula);
+    line([sample sample], [1 nTrials],'Color','w','LineStyle','--');
+    line([delay delay], [1 nTrials],'Color','w','LineStyle','--');
+    line([gc gc], [1 nTrials],'Color','w','LineStyle','--');
+    line([obj(1).time(1) obj(1).time(end)], [nCond nCond],'Color','w','LineStyle','--');
+
+    sgtitle([meta(sessix).anm ' ' meta(sessix).date])
+
+    % break
+
+end
+
+% figure; hold on; plot(potentts{1},'b'); plot(potentts{2},'r')
+% figure; hold on; plot(nullts{1},'b'); plot(nullts{2},'r')
+% figure; hold on; plot(tempme{1},'b'); plot(tempme{2},'r')
+
+
+%% ramp
+
+
+cdix = 3;
+

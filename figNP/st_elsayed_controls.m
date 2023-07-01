@@ -59,9 +59,9 @@ params.smooth = 15;
 params.bctype = 'reflect';
 
 % cluster qualities to use
-params.quality = {'all'}; % accepts any cell array of strings - special character 'all' returns clusters of any quality
+% params.quality = {'all'}; % accepts any cell array of strings - special character 'all' returns clusters of any quality
 % params.quality = {'Excellent','Great','Good','Fair','Multi'};
-% params.quality = {'Excellent','Great','Good','Fair'};
+params.quality = {'Excellent','Great','Good','Fair'};
 
 params.traj_features = {{'tongue','left_tongue','right_tongue','jaw','trident','nose'},...
     {'top_tongue','topleft_tongue','bottom_tongue','bottomleft_tongue','jaw','top_paw','bottom_paw','top_nostril','bottom_nostril'}};
