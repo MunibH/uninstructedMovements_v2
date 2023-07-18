@@ -1,7 +1,7 @@
 clear, clc, close all
 
 % add paths for data loading scripts, all fig funcs, and utils
-utilspth = 'C:\Users\munib\Documents\Economo-Lab\code\uninstructedMovements_v3';
+utilspth = '/Users/munib/Economo-Lab/code/uninstructedMovements_v3/';
 addpath(genpath(fullfile(utilspth,'DataLoadingScripts')));
 addpath(genpath(fullfile(utilspth,'funcs')));
 addpath(genpath(fullfile(utilspth,'utils')));
@@ -60,8 +60,8 @@ dfparams.stim.types = {'Bi_MC','Right_MC','Left_MC','Bi_ALM','Bi_M1TJ','Right_AL
 % dfparams.stim.num   = logical([1 1 1 1 1 1 1 1 1]);   % ALL
 % dfparams.stim.num   = logical([0 0 0 0 0 1 1 1 1]);   % Right_ALM / Left_ALM / Right_M1TJ / Left_M1TJ
 % dfparams.stim.num   = logical([0 0 0 1 0 0 0 0 0]);   % Bi_ALM
-dfparams.stim.num   = logical([0 0 0 0 1 0 0 0 0]);   % Bi_M1TJ
-% dfparams.stim.num   = logical([1 0 0 0 0 0 0 0 0]);   % Bi_MC
+% dfparams.stim.num   = logical([0 0 0 0 1 0 0 0 0]);   % Bi_M1TJ
+dfparams.stim.num   = logical([1 0 0 0 0 0 0 0 0]);   % Bi_MC
 % dfparams.stim.num   = logical([0 0 0 1 1 0 0 0 0]);   % Bi_M1TJ Bi_ALM
 % dfparams.stim.num   = logical([0 1 1 0 0 0 0 0 0]);   % Right_MC
 % dfparams.stim.num   = logical([0 0 1 0 0 0 0 0 0]);   % Left_MC
@@ -88,7 +88,7 @@ dfparams.plt.ms = {'.','.','x','x','o','o'};
 
 %% load data objects
 
-datapth = '/Users/Munib/Documents/Economo-Lab/data/';
+datapth = '/Users/munib/Economo-Lab/data/';
 
 meta = [];
 meta = loadMAH13_MCStim(meta,datapth);

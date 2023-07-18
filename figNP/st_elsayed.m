@@ -1,7 +1,7 @@
 clear,clc,close all
 
 % add paths for data loading scripts, all fig funcs, and utils
-utilspth = 'C:\Users\munib\Documents\Economo-Lab\code\uninstructedMovements_v3';
+utilspth = '/Users/munib/Economo-Lab/code/uninstructedMovements_v3';
 addpath(genpath(fullfile(utilspth,'DataLoadingScripts')));
 addpath(genpath(fullfile(utilspth,'funcs')));
 addpath(genpath(fullfile(utilspth,'utils')));
@@ -52,7 +52,7 @@ params.condition(end+1) = {'L&miss&~stim.enable&autowater&~early'};             
 
 params.tmin = -2.4;
 params.tmax = 2.5;
-params.dt = 1/50;
+params.dt = 1/100;
 
 % smooth with causal gaussian kernel
 params.smooth = 15;
@@ -74,21 +74,22 @@ params.advance_movement = 0;
 
 %% SPECIFY DATA TO LOAD
 
-datapth = 'C:\Users\munib\Documents\Economo-Lab\data';
+datapth = '/Users/munib/Economo-Lab/data';
 
 meta = [];
 
 % --- ALM ---
-meta = loadJEB6_ALMVideo(meta,datapth);
-meta = loadJEB7_ALMVideo(meta,datapth); % selectivity in ME
-% meta = loadEKH1_ALMVideo(meta,datapth); % selectivity in ME
-meta = loadEKH3_ALMVideo(meta,datapth); % selectivity in ME
+% meta = loadJEB6_ALMVideo(meta,datapth);
+% meta = loadJEB7_ALMVideo(meta,datapth); % selectivity in ME
+% % % meta = loadEKH1_ALMVideo(meta,datapth); % selectivity in ME
+% meta = loadEKH3_ALMVideo(meta,datapth); % selectivity in ME
 meta = loadJGR2_ALMVideo(meta,datapth);
-meta = loadJGR3_ALMVideo(meta,datapth);
-meta = loadJEB13_ALMVideo(meta,datapth);
-meta = loadJEB14_ALMVideo(meta,datapth); % selectivity in ME % go cue is at 2.3 instead of 2.5 like all other sessions??
-meta = loadJEB15_ALMVideo(meta,datapth);
+% meta = loadJGR3_ALMVideo(meta,datapth);
+% meta = loadJEB13_ALMVideo(meta,datapth);
+% meta = loadJEB14_ALMVideo(meta,datapth); % selectivity in ME % go cue is at 2.3 instead of 2.5 like all other sessions??
+% meta = loadJEB15_ALMVideo(meta,datapth);
 
+meta = meta(1);
 
 % --- M1TJ ---
 % meta = loadJEB13_M1TJVideo(meta,datapth);
@@ -111,7 +112,7 @@ params.probe = {meta.probe}; % put probe numbers into params, one entry for elem
 % ------------------------------------------
 for sessix = 1:numel(meta)
     me(sessix) = loadMotionEnergy(obj(sessix), meta(sessix), params(sessix), datapth);
-    %     kin(sessix) = getKinematics(obj(sessix), me(sessix), params(sessix));
+    % kin(sessix) = getKinematics(obj(sessix), me(sessix), params(sessix));
 end
 
 

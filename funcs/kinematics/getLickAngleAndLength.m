@@ -40,8 +40,10 @@ jy = kin(:, :, ix2);
 
 
 
-tongue_tip_x = 0.5.*(t1x+t2x);
-tongue_tip_y = 0.5.*(t1y+t2y);
+% tongue_tip_x = 0.5.*(t1x+t2x);
+% tongue_tip_y = 0.5.*(t1y+t2y);
+tongue_tip_x = 0.5.*(t1x+t3x);
+tongue_tip_y = 0.5.*(t1y+t3y);
 
 tongue_base_x = 0.5.*(t2x+t4x);
 tongue_base_y = 0.5.*(t2y+t4y);
