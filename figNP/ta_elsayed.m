@@ -35,8 +35,8 @@ params.condition(end+1) = {'L&miss&~stim.enable&~autowater&~early'};            
 params.condition(end+1) = {'R&no&~stim.enable&~autowater&~early'};            % no right, no stim, aw off
 params.condition(end+1) = {'L&no&~stim.enable&~autowater&~early'};            % no left, no stim, aw off
 
-params.tmin = -2.4;
-params.tmax = 2.1;
+params.tmin = -2.5;
+params.tmax = 2.5;
 params.dt = 1/100;
 
 % smooth with causal gaussian kernel

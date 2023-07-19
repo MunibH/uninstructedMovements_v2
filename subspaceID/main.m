@@ -1,110 +1,175 @@
 
 % clear,clc,close all
 
-% add manopt to path
-cd_ = pwd; % path to manopt 
-addpath(genpath(fullfile(cd_,'manopt')))
+% add manopt and funcs directory to path
+manoptPath = pwd; % path to manopt 
+addpath(genpath(fullfile(manoptPath,'manopt')))
+funcsPath = pwd; % path to manopt 
+addpath(genpath(fullfile(funcsPath,'funcs')))
 
 %% LOAD SOME DATA
 
-% if working with trial-averaged data, data should be formatted as
-%     psth = (bins, neurons, nConditions)
+% single-trial firing rates should be formatted as
+%    (time bins, trials, neurons)
 
-load(fullfile(cd_,'testData.mat')); % (bins,neurons,nConditions)
-nBins = size(psth,1);
-nNeurons = size(psth,2);
-nConditions = size(psth,3);
+dataPath = pwd; % path to exampleData.mat
+load(fullfile(dataPath,'exampleData.mat')); 
 
-%% PREPROCESS DATA AS IN ELSAYED 2016
+% this data is from an example session:
+%   brain region - Left ALM
+%   task - delayed response (DR) + water-cued (WC)
+%   
 
-% soft-normalize
-% firing rate of a neuron, x of size (time,1), is transformed as:
-% x_norm = x / (lambda + max(x) - min(x))
-lambda = 5; 
-snpsth = psth ./ (lambda + max(psth) - min(psth));
+% exampleData is a struct containing fields:
+%   time - time bins corresponding to first dimension of fields 'seq' and
+%          'motionEnergy' (aligned to go cue/water drop)
+%   seq  - single trial neural firing rates in 5 ms bins and smoothed with
+%          causal gaussian kernel (35 ms s.d.). Shape = (time bins, trials,
+%          neurons)
+%   motionEnergy - motion energy is used to measure amount of movement
+%                  at a given frame. The time series has been resampled to 
+%                  match neural data. Shape = (time bins, trials)
+%   moveMask - logical array of shape (time bins, trials). 0 indicates
+%              stationarity, 1 indicates moving. This mask was produced from
+%              exampleData.motionEnergy using a manually set threshold
+%   anm/date - session meta data
 
-% mean center each neuron (across conditions)
-mcpsth = zeros(size(psth));
-for iclu = 1:nNeurons
-    % find mean at each time point for each condition (time,1)
-    mean_across_cond = mean(snpsth(:,iclu,:),3);
-    mcpsth(:,iclu,:) = snpsth(:,iclu,:) - repmat(mean_across_cond,[1,1,size(snpsth,3)]);
-end
+nBins = size(exampleData.seq,1);
+nTrials = size(exampleData.seq,2);
+nNeurons = size(exampleData.seq,3);
 
-%% DEFINE EPOCHS
+%% PREPROCESS DATA
+% choice of normalization/standardization is up to you, here just zscoring
 
-% null
-nullix = 70:120; % time bins to use to estimate null subspace
+temp = reshape(exampleData.seq,nBins*nTrials,nNeurons);
+N.full_cat = zscore(temp); % (time bins * nTrials, nNeurons)
+N.full= reshape(N.full_cat,nBins,nTrials,nNeurons); % (time bins, nTrials, nNeurons)
 
-% potent
-potentix = 125:175; % time bins to use to estimate null subspace
 
-%% CONCATENATE CONDITIONS
+%% DEFINE DATA TO USE FOR NULL AND POTENT SUBSPACES
 
-% we will estimate covariances from null and potent times using data
-% formatted as:
-%        (nBins*nConds,nNeurons)
+% for the null subspace, we will use all time points, from all trials, in
+% which the animal was stationary.
+moveMask = exampleData.moveMask(:); %(time bins * nTrials)
+N.null = N.full_cat(~moveMask,:);
 
-nullpsth = mcpsth(nullix,:,1);
-potentpsth = mcpsth(potentix,:,1);
-for i = 2:nConditions
-    nullpsth = cat(1,nullpsth,mcpsth(nullix,:,i));
-    potentpsth = cat(1,potentpsth,mcpsth(potentix,:,i));
-end
+% for the potent subspace, we will use all time points, from all trials, in
+% which the animal was moving.
+N.potent = N.full_cat(moveMask,:);
+
+rez.N = N; % put data into a results struct
 
 %% COVARIANCE AND DIMENSIONALITY
 
 % covariances
-Cnull = cov(nullpsth);
-Cpotent = cov(potentpsth);
+rez.cov.null = cov(N.null);
+rez.cov.potent = cov(N.potent);
 
-var2explain = 90; % dimensionality of subspaces will be equal to how many PCs needed to explain this much variance
+% dimensionality of subspaces
+% here I am hard-coding the number of dimensions to be 15. However, one
+% could perform further dimensionality reduction or keep more dimensions.
+% In our experience, dimensionality >  20 takes an incredibly long time to 
+% optimize over.
 
-[~,~,~,~,explained] = pca(nullpsth);
-dNull = find(cumsum(explained)>=var2explain,1,'first');
-[~,~,~,~,explained] = pca(potentpsth);
-dPotent = find(cumsum(explained)>=var2explain,1,'first');
+rez.dNull = 7;
+rez.dPotent = 7;
 
-dMax = max([dNull, dPotent]);
+rez.dMax = max([rez.dNull, rez.dPotent]);
 
 %% MAIN OPTIMIZATION STEP
 rng(101) % for reproducibility
 
 alpha = 0; % regularization hyperparam (+ve->discourage sparity, -ve->encourage sparsity)
-[Q,~,P,~,~] = orthogonal_subspaces(Cpotent,dPotent,Cnull,dNull,alpha);
+[Q,~,P,~,~] = orthogonal_subspaces(rez.cov.potent,rez.dPotent,rez.cov.null,rez.dNull,alpha);
 
+% manopt might provide a warning that we haven't provided the Hessian,
+% that's ok. Providing the Hessian of the objective function will speed up
+% computations, however.
 
-Qpotent = Q*P{1}; % size = (nNeurons,dPotent)
-Qnull = Q*P{2};   %        (nNeurons,dNull)
+% Q contains the dimensions of both the null and potent subspaces. Here, we
+% extract the columns corresponding to null and potent subspaces.
+rez.Q.potent = Q*P{1}; % size = (nNeurons,dPotent)
+rez.Q.null = Q*P{2};   %        (nNeurons,dNull)
 
 %% PROJECTIONS
 
-proj.potent = tensorprod(mcpsth,Qpotent,2,1); % size = (nBins,nConditions,dPotent)
-proj.null = tensorprod(mcpsth,Qnull,2,1);     % size = (nBins,nConditions,dNull)
+% now that we have null and potent subspaces, we can project our neural
+% activity onto the subspaces separately.
 
-% plot first dimension (not ordered in any way) of null and potent projs
+rez.proj.potent = tensorprod(N.full,rez.Q.potent,3,1); % size = (nBins,nTrials,dPotent)
+rez.proj.null = tensorprod(N.full,rez.Q.null,3,1);     % size = (nBins,nTrials,dNull)
+
+%%
+
+% plot the sum squared magnitude across dimensions of activity within the
+% null and potent subspaces
+
+plt.null.ssm = sum(rez.proj.null.^2,3);
+plt.potent.ssm = sum(rez.proj.potent.^2,3);
+
+
+
 f = figure;
 
-ax = subplot(2,1,1);
+xlims = [-2 2];
+ylims = [1 nTrials];
+
+% sort by average motion energy in late delay epoch
+sortTimes = [-0.505 -0.005]; % in seconds, relative to go cue
+for i = 1:numel(sortTimes)
+    closest_val = interp1(exampleData.time,exampleData.time,sortTimes(i),'nearest');
+    ix(i) = find(exampleData.time==closest_val);
+end
+[~,sortix] = sort(mean(exampleData.motionEnergy(ix(1):ix(2),:),1)); % sorted trial idx
+
+
+% plot motion energy
+ax = subplot(1,3,1);
 ax.LineWidth = 1;
 ax.TickDir = 'out';
 ax.TickLength = ax.TickLength .* 2;
 hold on;
-plot(squeeze(proj.potent(:,1,1)), 'linewidth',2,'color','b')
-plot(squeeze(proj.potent(:,2,1)), 'linewidth',2,'color','r')
-title('potent')
-ylabel('projection (a.u.)')
-xlabel('time bins')
+imagesc(exampleData.time,1:nTrials,exampleData.motionEnergy(:,sortix)')
+ax.YDir = 'normal';
+line([0 0], [ax.YLim(1) ax.YLim(2)],'color','w','linestyle','--') % go cue
+title('Motion energy')
+xlim(xlims);
+ylim(ylims);
+xlabel('Time from go cue (s)')
+ylabel('Trials')
+ax.FontSize = 12;
+c = colorbar;
 
-ax = subplot(2,1,2);
+% plot potent
+ax = subplot(1,3,2);
 ax.LineWidth = 1;
 ax.TickDir = 'out';
 ax.TickLength = ax.TickLength .* 2;
 hold on;
-plot(squeeze(proj.null(:,1,1)), 'linewidth',2,'color','b')
-plot(squeeze(proj.null(:,2,1)), 'linewidth',2,'color','r')
-title('null')
-ylabel('projection (a.u.)')
-xlabel('time bins')
+imagesc(exampleData.time,1:nTrials,plt.potent.ssm(:,sortix)')
+ax.YDir = 'normal';
+line([0 0], [ax.YLim(1) ax.YLim(2)],'color','w','linestyle','--') % go cue
+title('Potent')
+xlim(xlims);
+ylim(ylims);
+ax.FontSize = 12;
+c = colorbar;
+clim([c.Limits(1) c.Limits(2)/2])
 
-legend('right trials','left trials','edgecolor','none','location','best')
+% plot null
+ax = subplot(1,3,3);
+ax.LineWidth = 1;
+ax.TickDir = 'out';
+ax.TickLength = ax.TickLength .* 2;
+hold on;
+imagesc(exampleData.time,1:nTrials,plt.null.ssm(:,sortix)')
+ax.YDir = 'normal';
+line([0 0], [ax.YLim(1) ax.YLim(2)],'color','w','linestyle','--') % go cue
+title('Null')
+xlim(xlims);
+ylim(ylims);
+ax.FontSize = 12;
+c = colorbar;
+clim([c.Limits(1) c.Limits(2)/2])
+
+

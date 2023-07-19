@@ -51,8 +51,8 @@ params.condition(end+1) = {'R&miss&~stim.enable&autowater&~early'};             
 params.condition(end+1) = {'L&miss&~stim.enable&autowater&~early'};             % left hits, no stim, aw off  (18)
 
 params.tmin = -2.4;
-params.tmax = 2.5;
-params.dt = 1/50;
+params.tmax = 2.1;
+params.dt = 1/100;
 
 % smooth with causal gaussian kernel
 params.smooth = 15;
@@ -80,17 +80,18 @@ datapth = 'C:\Users\munib\Documents\Economo-Lab\data';
 meta = [];
 
 % --- ALM ---
-meta = loadJEB6_ALMVideo(meta,datapth);
-meta = loadJEB7_ALMVideo(meta,datapth); % selectivity in ME
+% meta = loadJEB6_ALMVideo(meta,datapth);
+% meta = loadJEB7_ALMVideo(meta,datapth); % selectivity in ME
 % % % % meta = loadEKH1_ALMVideo(meta,datapth); % selectivity in ME
 meta = loadEKH3_ALMVideo(meta,datapth); % selectivity in ME
-meta = loadJGR2_ALMVideo(meta,datapth);
-meta = loadJGR3_ALMVideo(meta,datapth);
-meta = loadJEB13_ALMVideo(meta,datapth);
-meta = loadJEB14_ALMVideo(meta,datapth); % selectivity in ME % go cue is at 2.3 instead of 2.5 like all other sessions??
-meta = loadJEB15_ALMVideo(meta,datapth);
-meta = loadJEB19_ALMVideo(meta,datapth);
+% meta = loadJGR2_ALMVideo(meta,datapth);
+% meta = loadJGR3_ALMVideo(meta,datapth);
+% meta = loadJEB13_ALMVideo(meta,datapth);
+% meta = loadJEB14_ALMVideo(meta,datapth); % selectivity in ME % go cue is at 2.3 instead of 2.5 like all other sessions??
+% meta = loadJEB15_ALMVideo(meta,datapth);
+% meta = loadJEB19_ALMVideo(meta,datapth);
 
+meta = meta(1);
 
 % --- M1TJ ---
 % meta = loadJEB13_M1TJVideo(meta,datapth);

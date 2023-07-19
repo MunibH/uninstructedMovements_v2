@@ -15,10 +15,11 @@ if strcmpi(spacename,'null')
     clrs.rhit = [3, 3, 173] ./ 255;
     clrs.lhit = [173, 3, 3] ./ 255;
 elseif strcmpi(spacename,'potent')
-    clrs.rhit = [115, 169, 245] ./ 255;
-    clrs.lhit = [240, 110, 138] ./ 255;
+    clrs.rhit = [189, 216, 255] ./ 255;
+    clrs.lhit = [255, 204, 215] ./ 255;
 end
 
+baseline = [1:10];
 
 
 for i = 1:numel(rez_2afc(1).cd_labels) % for each coding direction
@@ -31,6 +32,7 @@ for i = 1:numel(rez_2afc(1).cd_labels) % for each coding direction
     tempdat = squeeze(allrez.cd_proj(:,i,:,:));
 
     tempmean = nanmean(tempdat,3);
+    tempmean = tempmean - nanmean(tempmean(baseline,:));
     temperror = nanstd(tempdat,[],3) ./ 2;%./sqrt(numel(rez));
     % temperror = getCI(tempdat,0);
 
@@ -56,10 +58,15 @@ for i = 1:numel(rez_2afc(1).cd_labels) % for each coding direction
     ax(i).FontSize = 10;
     % title([rez(1).cd_labels{i} ' | ' spacename],'FontSize',7)
 
-    yline(0,'k-');
-    xline(sample,'k--','LineWidth',1)
-    xline(delay,'k--','LineWidth',1)
-    xline(0,'k--','LineWidth',1)
+    line([ax(i).XLim],[0 0],'color','k','linestyle','-')
+    line([sample sample],[ax(i).YLim],'color','k','linestyle','--')
+    line([delay delay],[ax(i).YLim],'color','k','linestyle','--')
+    line([0 0],[ax(i).YLim],'color','k','linestyle','--')
+
+    % yline(0,'k-');
+    % xline(sample,'k--','LineWidth',1)
+    % xline(delay,'k--','LineWidth',1)
+    % xline(0,'k--','LineWidth',1)
 
     hold off
 

@@ -2,7 +2,7 @@
 
 %% find L/R selective cells per session
 edges = [-0.8 0];
-cond2use = [8 9];
+cond2use = [2 3]; %[8 9];
 for i = 1:numel(obj)
     cluix{i} = findSelectiveCells(obj(i),params(i),edges,cond2use);
     % cluix{i} = logical(ones(numel(params(i).cluid),1));
@@ -27,6 +27,9 @@ for sessix = 1:numel(meta)
 
     trialdat.full = permute(obj(sessix).trialdat,[1 3 2]);
     trialdat.full = trialdat.full(:,trix,:);
+
+    rez(sessix).recon.null = tensorprod(rez(sessix).null_trialdat,rez(sessix).Qnull,3,2);
+    rez(sessix).recon.potent = tensorprod(rez(sessix).potent_trialdat,rez(sessix).Qpotent,3,2);
 
     W.null = rez(sessix).Qnull;
     W.potent = rez(sessix).Qpotent;

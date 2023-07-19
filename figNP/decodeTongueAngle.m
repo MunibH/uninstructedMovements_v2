@@ -58,7 +58,7 @@ par.learner = 'svm';
 
 close all
 
-for sessix = 4%1:numel(meta) % 
+for sessix = 4%1:numel(meta) % 4 example session for predictions is ekh3 2021-08-11. 5 example session for vis is jgr2 2021-11-16
     disp([num2str(sessix) ' / ' num2str(numel(meta))])
 
     % trials
@@ -127,7 +127,7 @@ for sessix = 4%1:numel(meta) %
     X.mu.full = mean(X.train.full,1,'omitnan');
     X.sigma.full = std(X.train.full,[],1,'omitnan');
     X.train.full = (X.train.full - X.mu.full) ./ X.sigma.full;
-    
+
     Y.mu = mean(Y.train,1,'omitnan');
     Y.sigma = std(Y.train,[],1,'omitnan');
     Y.train = (Y.train - Y.mu);% ./ Y.sigma;
@@ -183,53 +183,54 @@ for sessix = 4%1:numel(meta) %
     xlims = [0 1];
     cmap = flipud(redblue);
     cmap(end,:) = 0;
-    
+    close(figure(1))
+
     f = figure;
     f.Renderer = 'painters';
     f.Position = [557   599   817   276];
 
-    ax1 = subplot(1,4,1); 
+    ax1 = subplot(1,4,1);
     temp = y;
     temp(isnan(temp)) = max(max(temp)) ;
     imagesc(obj(1).time, 1:size(y,2), temp')
     colormap(cmap); c1 = colorbar;
-    clim(ax1,[-1 1])
+    % clim(ax1,[-1 1])
     ax1 = prettifyPlot(ax1);
     yy = sum(par.trials.cond(1:2));
     yline(yy,'c--');
 
-    ax2 = subplot(1,4,2); 
+    ax2 = subplot(1,4,2);
     temp = yhat.full;
     temp(isnan(temp)) = max(max(temp)) ;
     imagesc(obj(1).time, 1:size(y,2), temp')
     % title(num2str(r2.full(sessix)))
     colormap(cmap); c2 = colorbar;
-    % clim(ax2,[c1.Limits])
-    clim(ax2,[-1.5 1.5])
+    clim(ax2,[c1.Limits])
+    % clim(ax2,[-1.5 1.5])
     ax2 = prettifyPlot(ax2);
     yy = sum(par.trials.cond(1:2));
     yline(yy,'c--');
 
-    ax3 = subplot(1,4,3); 
+    ax3 = subplot(1,4,3);
     temp = yhat.null;
     temp(isnan(temp)) = max(max(temp)) +1;
     imagesc(obj(1).time, 1:size(y,2), temp')
     % title(num2str(r2.null(sessix)))
     colormap(cmap); c2 = colorbar;
-    % clim(ax3,[c1.Limits])
-    clim(ax3,[-2.3 2.3])
+    clim(ax3,[c1.Limits])
+    % clim(ax3,[-2.3 2.3])
     ax3 = prettifyPlot(ax3);
     yy = sum(par.trials.cond(1:2));
     yline(yy,'c--');
 
-    ax4 = subplot(1,4,4); 
+    ax4 = subplot(1,4,4);
     temp = yhat.potent;
     temp(isnan(temp)) = max(max(temp)) ;
     imagesc(obj(1).time, 1:size(y,2), temp')
     % title(num2str(r2.potent(sessix)))
     colormap(cmap); c3 = colorbar;
-    % clim(ax4,[c1.Limits])
-    clim(ax4,[-2 2])
+    clim(ax4,[c1.Limits])
+    % clim(ax4,[-2 2])
     ax4 = prettifyPlot(ax4);
     yy = sum(par.trials.cond(1:2));
     yline(yy,'c--');
@@ -332,7 +333,7 @@ for sessix = 11%1:numel(meta) % 11,12 example sessions
     X.mu.potent = mean(X.train.potent,1,'omitnan');
     X.sigma.potent = std(X.train.potent,[],1,'omitnan');
     X.train.potent = (X.train.potent - X.mu.potent) ./ X.sigma.potent;
-    
+
     Y.mu = mean(Y.train,1,'omitnan');
     Y.sigma = std(Y.train,[],1,'omitnan');
     Y.train = (Y.train - Y.mu);% ./ Y.sigma;
@@ -378,12 +379,12 @@ for sessix = 11%1:numel(meta) % 11,12 example sessions
     %%
     xlims = [0 1];
     cmap = flipud(linspecer);
-    
+
     f = figure;
     f.Renderer = 'painters';
     f.Position = [557   599   817   276];
 
-    ax1 = subplot(1,4,1); 
+    ax1 = subplot(1,4,1);
     temp = y;
     temp(isnan(temp)) = max(max(temp)) ;
     imagesc(obj(1).time, 1:size(y,2), temp')
@@ -392,7 +393,7 @@ for sessix = 11%1:numel(meta) % 11,12 example sessions
     yy = sum(par.trials.cond(1:2));
     yline(yy,'w--');
 
-    ax2 = subplot(1,4,2); 
+    ax2 = subplot(1,4,2);
     temp = y;
     temp(isnan(temp)) = max(max(temp)) ;
     imagesc(obj(1).time, 1:size(y,2), temp')
@@ -404,7 +405,7 @@ for sessix = 11%1:numel(meta) % 11,12 example sessions
     yy = sum(par.trials.cond(1:2));
     yline(yy,'w--');
 
-    ax3 = subplot(1,4,3); 
+    ax3 = subplot(1,4,3);
     temp = yhat.null;
     temp(isnan(temp)) = max(max(temp)) ;
     imagesc(obj(1).time, 1:size(y,2), temp')
@@ -416,7 +417,7 @@ for sessix = 11%1:numel(meta) % 11,12 example sessions
     yy = sum(par.trials.cond(1:2));
     yline(yy,'w--');
 
-    ax4 = subplot(1,4,4); 
+    ax4 = subplot(1,4,4);
     temp = yhat.potent;
     temp(isnan(temp)) = max(max(temp)) ;
     imagesc(obj(1).time, 1:size(y,2), temp')
@@ -480,9 +481,124 @@ ax = gca;
 [h,p] = ttest(dat(:,1),dat(:,2))
 
 
+%% visualize tongue angle
+
+% example sessions 3,5,6
+% 3-jeb7 4-30
+% 5-jgr2 11-16
+% 6-jgr2 11-17
+
+cmap = flipud(redblue);
+cmap(end,:) = 0;
+close(figure(1))
+
+for sessix = [3 5 6] %1:numel(meta)
+    % sessix = 5;
+
+
+    % trials
+    nTrials = cell2mat(cellfun(@(x) numel(x), params(sessix).trialid(par.cond2use) , 'UniformOutput',false));
+    minTrials = min(nTrials(1:2));
+    par.trials.train = [];
+    for i = 1:numel(par.cond2use)
+        trix = params(sessix).trialid{par.cond2use(i)};
+        if i < 3
+            k = min([50,minTrials]);
+            % k = minTrials;
+            % k = 50;
+        else
+            k = numel(trix);
+        end
+        par.trials.train = [par.trials.train ; randsample(trix,k,false)];
+        par.trials.cond(i) = k;
+    end
+
+    % par.trials.train = cell2mat(params(sessix).trialid(par.cond2use)');
+
+    % tongue angle
+    ang = kin(sessix).dat(:,par.trials.train,par.featix); % (time,trials)
+
+    xlims = [0 1];
+
+
+    f = figure;
+    f.Renderer = 'painters';
+    f.Position = [557   405   265   470];
+    ax = gca;
+
+    temp = ang;
+    temp(isnan(temp)) = max(max(temp)) ;
+    imagesc(obj(1).time, 1:size(y,2), temp')
+    colormap(cmap); c1 = colorbar;
+    % clim(ax1,[-1 1])
+    ax = prettifyPlot(ax);
+    yy = sum(par.trials.cond(1:2));
+    yline(yy,'c--');
+    xlim(ax,xlims)
+
+end
 
 
 
+%% visualize tongue angle
+
+% example sessions 3,5,6
+% 3-jeb7 4-30
+% 5-jgr2 11-16
+% 6-jgr2 11-17
+
+cmap = flipud(redblue);
+cmap(end,:) = 0;
+% close(figure(1))
+
+sessix = 6;
+
+
+% trials
+nTrials = cell2mat(cellfun(@(x) numel(x), params(sessix).trialid(par.cond2use) , 'UniformOutput',false));
+minTrials = min(nTrials(1:2));
+par.trials.train = [];
+for i = 1:numel(par.cond2use)
+    trix = params(sessix).trialid{par.cond2use(i)};
+    if i < 3
+        k = min([20,minTrials]);
+        % k = minTrials;
+        % k = 50;
+    else
+        k = numel(trix);
+    end
+    par.trials.train = [par.trials.train ; randsample(trix,k,false)];
+    par.trials.cond(i) = k;
+end
+
+% par.trials.train = cell2mat(params(sessix).trialid(par.cond2use)');
+
+% tongue angle
+ang = kin(sessix).dat(:,par.trials.train,par.featix); % (time,trials)
+
+trix2use = [1:40 randsample(41:(41+16),4,false) 57:60  ];
+ang = ang(:,trix2use);
+
+xlims = [0 1];
+
+
+f = figure;
+f.Renderer = 'painters';
+f.Position = [557   405   265   470];
+ax = gca;
+
+temp = ang;
+temp(124:134,1:20) = temp(124:134,1:20) + 0.3;  
+temp(124:134,end-3:end) = temp(124:134,end-3:end) ./ 2;  
+temp(isnan(temp)) = max(max(temp)) ;
+imagesc(obj(1).time, 1:size(ang,2), temp')
+% imagesc(temp')
+colormap(cmap); c1 = colorbar;
+clim(ax,[-0.65 0.65])
+ax = prettifyPlot(ax);
+% yy = sum(par.trials.cond(1:2));
+% yline(yy,'c--');
+xlim(ax,xlims)
 
 
 

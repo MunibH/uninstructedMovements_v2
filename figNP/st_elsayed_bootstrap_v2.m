@@ -25,7 +25,7 @@ params.lowFR               = 0; % remove clusters with firing rates across all t
 
 % set conditions to calculate PSTHs for
 % 2afc
-params.condition(1) = {'R&hit&~stim.enable&~autowater'};                 % right hits, no stim, aw off   (1)
+params.condition(1)     = {'R&hit&~stim.enable&~autowater'};                 % right hits, no stim, aw off   (1)
 params.condition(end+1) = {'L&hit&~stim.enable&~autowater'};             % left hits, no stim, aw off    (2)
 params.condition(end+1) = {'R&miss&~stim.enable&~autowater'};            % error right, no stim, aw off  (3)
 params.condition(end+1) = {'L&miss&~stim.enable&~autowater'};            % error left, no stim, aw off   (4)
@@ -40,6 +40,12 @@ params.condition(end+1) = {'L&miss&~stim.enable&~autowater&~early'};            
 
 % for ramping
 params.condition(end+1) = {'hit&~stim.enable&~autowater'};               % all hits, no stim, aw off (9)
+
+% wc
+params.condition(end+1) = {'R&hit&~stim.enable&autowater'};             % right hits, no stim, aw on   (10)
+params.condition(end+1) = {'L&hit&~stim.enable&autowater'};             % left hits, no stim, aw on    (11)
+% params.condition(end+1) = {'R&miss&~stim.enable&autowater'};            % error right, no stim, aw on  (12)
+% params.condition(end+1) = {'L&miss&~stim.enable&autowater'};            % error left, no stim, aw on   (13)
 
 params.tmin = -2.4;
 params.tmax = 2.5;
@@ -70,16 +76,18 @@ datapth = '/Users/Munib/Documents/Economo-Lab/data/';
 meta = [];
 
 % --- ALM ---
-meta = loadJEB6_ALMVideo(meta,datapth);
-meta = loadJEB7_ALMVideo(meta,datapth);
-% meta = loadEKH1_ALMVideo(meta,datapth); % not usable b/c no usable left miss trials
-meta = loadEKH3_ALMVideo(meta,datapth);
-meta = loadJGR2_ALMVideo(meta,datapth);
-meta = loadJGR3_ALMVideo(meta,datapth);
-meta = loadJEB13_ALMVideo(meta,datapth);
-meta = loadJEB14_ALMVideo(meta,datapth);
-meta = loadJEB15_ALMVideo(meta,datapth);
+% meta = loadJEB6_ALMVideo(meta,datapth);
+% meta = loadJEB7_ALMVideo(meta,datapth);
+% % % meta = loadEKH1_ALMVideo(meta,datapth); % not usable b/c no usable left miss trials
+% meta = loadEKH3_ALMVideo(meta,datapth);
+% meta = loadJGR2_ALMVideo(meta,datapth);
+% meta = loadJGR3_ALMVideo(meta,datapth);
+% meta = loadJEB13_ALMVideo(meta,datapth);
+% meta = loadJEB14_ALMVideo(meta,datapth);
+% meta = loadJEB15_ALMVideo(meta,datapth);
 meta = loadJEB19_ALMVideo(meta,datapth);
+
+meta = meta(3);
 
 % --- M1TJ ---
 % meta = loadJEB13_M1TJVideo(meta,datapth);
@@ -103,7 +111,7 @@ params.probe = {meta.probe}; % put probe numbers into params, one entry for elem
 for sessix = 1:numel(meta)
     disp(['Loading kinematics ' num2str(sessix) '/' num2str(numel(meta))])
     me(sessix) = loadMotionEnergy(obj(sessix), meta(sessix), params(sessix), datapth);
-    kin(sessix) = getKinematics(obj(sessix), me(sessix), params(sessix));
+    % kin(sessix) = getKinematics(obj(sessix), me(sessix), params(sessix));
 end
 
 
@@ -127,7 +135,7 @@ for sessix = 1:numel(meta)
     trialdat_zscored = permute(obj(sessix).trialdat, [1 3 2]);
 
     % -- null and potent spaces
-    cond2use = 1:4; % right hit, left hit, right miss, left miss, 2afc
+    cond2use = [1:4 10:11]; % right hit, left hit, right miss, left miss, 2afc
     cond2proj = 1:9; % ~early versions
     nullalltime = 0; % use all time points to estimate null space if 1
     onlyAW = 0; % only use AW trials
@@ -151,7 +159,7 @@ disp('DONE')
 
 %%
 
-plotReconstructedPSTHs(obj,rez,params)
+% plotReconstructedPSTHs(obj,rez,params)
 
 
 %% BOOTSTRAP PARAMS
@@ -200,13 +208,16 @@ for iboot = 1:boot.iters
             cond = params(sessix).condition{icond};
             nTrialsCond = numel(trialid{icond});
             if nTrialsCond == 0
-                error(['no trials found for ' meta(sessix).anm ' ' meta(sessix).date ' ' cond])
+                nTrials2Sample = 0;
+                % error(['no trials found for ' meta(sessix).anm ' ' meta(sessix).date ' ' cond])
+            else
+                if contains(cond,{'hit'})
+                    nTrials2Sample = boot.N.trials.hit;
+                elseif contains(cond,{'miss'})
+                    nTrials2Sample = boot.N.trials.miss;
+                end
             end
-            if contains(cond,{'hit'})
-                nTrials2Sample = boot.N.trials.hit;
-            elseif contains(cond,{'miss'})
-                nTrials2Sample = boot.N.trials.miss;
-            end
+            
             bootrez.trialid{isess,icond} = randsample(trialid{icond},nTrials2Sample,true);
         end
     end
@@ -283,61 +294,61 @@ for iboot = 1:boot.iters
         cd_potent(iboot).trialdat{icond} = tensorprod(bootrez.trialdat.potent{icond},rez_2afc.cd_mode_orth,3,1);
     end
 
-    %% latency to selectivity onset in cd choice
-    cdix = 1;
-    itiix = [-2.39 -2.2];
-    ix = findTimeIX(obj(1).time,itiix);
-    ix = ix(1):ix(2);
-    null1 = squeeze(cd_null(iboot).cd_proj(:,cdix,5));
-    null2 = squeeze(cd_null(iboot).cd_proj(:,cdix,6));
-    sel.null = null1 - null2;
-    iti = mean(sel.null(ix));
-    sel.null = sel.null - iti;
-    itisd = std(sel.null(ix));
-    thresh = itisd * 3; % when selectivity increases baseline + 0.3*iti_stdev (already baseline subtracted tho)
-    % find when selectivity emerges post-sample only
-    % to do this, i'm finding last time selectivity is not ever below
-    % threshold
-    sampleix = [-2.15 0]; % 50 ms after sample start
-    ix = findTimeIX(obj(1).time,sampleix);
-    ix = ix(1):ix(2);
-    temp = flip(sel.null(ix));
-    onsetix = find(temp<=(thresh),1,'first');
-    onsetix = numel(temp) - onsetix; % from sample onset
-    onsetix = onsetix + ix(1); % add back presample
-    sel.ix.null(iboot) = onsetix;
-
-    
-
-    
-    % f = figure;
-    % ax = gca;
-    % hold on;
-    % plot(sel.null,'color',cols.null,'linewidth',2)
-    % xline(sel.ix.null(iboot))
-
-    cdix = 1;
-    itiix = [-2.39 -2.2];
-    ix = findTimeIX(obj(1).time,itiix);
-    ix = ix(1):ix(2);
-    potent1 = squeeze(cd_potent(iboot).cd_proj(:,cdix,5));
-    potent2 = squeeze(cd_potent(iboot).cd_proj(:,cdix,6));
-    sel.potent = potent1 - potent2;
-    iti = mean(sel.potent(ix));
-    sel.potent = sel.potent - iti;
-    itisd = std(sel.potent(ix));
-    thresh = itisd * 3; % when selectivity increases baseline + 0.3*iti_stdev (already baseline subtracted tho)
-    % find when selectivity emerges post-sample only
-    % to do this, i'm finding last time selectivity is not ever below
-    % threshold
-    sampleix = [-2.15 0]; % 50 ms after sample start
-    ix = findTimeIX(obj(1).time,sampleix);
-    ix = ix(1):ix(2);
-    temp = flip(sel.potent(ix));
-    onsetix = find(temp<=(thresh),1,'first');
-    onsetix = numel(temp) - onsetix; % from sample onset
-    onsetix = onsetix + ix(1); % add back presample
-    sel.ix.potent(iboot) = onsetix;
+    % %% latency to selectivity onset in cd choice
+    % cdix = 1;
+    % itiix = [-2.39 -2.2];
+    % ix = findTimeIX(obj(1).time,itiix);
+    % ix = ix(1):ix(2);
+    % null1 = squeeze(cd_null(iboot).cd_proj(:,cdix,5));
+    % null2 = squeeze(cd_null(iboot).cd_proj(:,cdix,6));
+    % sel.null = null1 - null2;
+    % iti = mean(sel.null(ix));
+    % sel.null = sel.null - iti;
+    % itisd = std(sel.null(ix));
+    % thresh = itisd * 3; % when selectivity increases baseline + 0.3*iti_stdev (already baseline subtracted tho)
+    % % find when selectivity emerges post-sample only
+    % % to do this, i'm finding last time selectivity is not ever below
+    % % threshold
+    % sampleix = [-2.15 0]; % 50 ms after sample start
+    % ix = findTimeIX(obj(1).time,sampleix);
+    % ix = ix(1):ix(2);
+    % temp = flip(sel.null(ix));
+    % onsetix = find(temp<=(thresh),1,'first');
+    % onsetix = numel(temp) - onsetix; % from sample onset
+    % onsetix = onsetix + ix(1); % add back presample
+    % sel.ix.null(iboot) = onsetix;
+    % 
+    % 
+    % 
+    % 
+    % % f = figure;
+    % % ax = gca;
+    % % hold on;
+    % % plot(sel.null,'color',cols.null,'linewidth',2)
+    % % xline(sel.ix.null(iboot))
+    % 
+    % cdix = 1;
+    % itiix = [-2.39 -2.2];
+    % ix = findTimeIX(obj(1).time,itiix);
+    % ix = ix(1):ix(2);
+    % potent1 = squeeze(cd_potent(iboot).cd_proj(:,cdix,5));
+    % potent2 = squeeze(cd_potent(iboot).cd_proj(:,cdix,6));
+    % sel.potent = potent1 - potent2;
+    % iti = mean(sel.potent(ix));
+    % sel.potent = sel.potent - iti;
+    % itisd = std(sel.potent(ix));
+    % thresh = itisd * 3; % when selectivity increases baseline + 0.3*iti_stdev (already baseline subtracted tho)
+    % % find when selectivity emerges post-sample only
+    % % to do this, i'm finding last time selectivity is not ever below
+    % % threshold
+    % sampleix = [-2.15 0]; % 50 ms after sample start
+    % ix = findTimeIX(obj(1).time,sampleix);
+    % ix = ix(1):ix(2);
+    % temp = flip(sel.potent(ix));
+    % onsetix = find(temp<=(thresh),1,'first');
+    % onsetix = numel(temp) - onsetix; % from sample onset
+    % onsetix = onsetix + ix(1); % add back presample
+    % sel.ix.potent(iboot) = onsetix;
 
     
     % figure(1); 
@@ -373,8 +384,8 @@ axpotent = plotCDProj_v2(cd_potent_all,cd_potent,sav,titlestring,plotmiss,plotno
 % plotSelectivity(cd_potent_all,cd_potent,sav,titlestring)
 % plotSelectivityExplained(cd_potent_all,cd_potent,sav,titlestring)
 
-titlestring = 'Full';
-axpotent = plotCDProj_v2(cd_full_all,cd_full,sav,titlestring,plotmiss,plotno,rez_2afc,obj);
+% titlestring = 'Full';
+% axpotent = plotCDProj_v2(cd_full_all,cd_full,sav,titlestring,plotmiss,plotno,rez_2afc,obj);
 % plotCDVarExp(cd_potent_all,sav,titlestring)
 % plotSelectivity(cd_potent_all,cd_potent,sav,titlestring)
 % plotSelectivityExplained(cd_potent_all,cd_potent,sav,titlestring)
@@ -386,9 +397,9 @@ for i = 1:numel(axnull)
     axpotent(i).YLim = ys;
 end
 
-titlestring = 'Null | Potent CDs';
-% plotCDProj_NP(cd_potent_all,cd_null_all,cd_potent,cd_null,sav,titlestring,plotmiss)
-% plotSelectivityExplained_NP(cd_potent_all,cd_null_all,cd_potent,cd_null,sav,titlestring)
+% % titlestring = 'Null | Potent CDs';
+% % plotCDProj_NP(cd_potent_all,cd_null_all,cd_potent,cd_null,sav,titlestring,plotmiss)
+% % plotSelectivityExplained_NP(cd_potent_all,cd_null_all,cd_potent,cd_null,sav,titlestring)
 
 
 %% selectivity in various epochs in cd late hits and errors

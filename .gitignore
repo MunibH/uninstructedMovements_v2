@@ -2,6 +2,7 @@
 /figs
 *.png
 *.mat
+!exampleData.mat
 *.svg
 *.eps
 *.epsc

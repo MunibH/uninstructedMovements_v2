@@ -10,7 +10,7 @@ nullsm = 11;
 potentsm = 0;
 
 % only show delay period
-delayedges = [-0.9 0];
+delayedges = [-2.39 0];
 delayt = findTimeIX(obj(1).time,delayedges);
 delayt = delayt(1):delayt(2);
 
@@ -19,7 +19,7 @@ t = findTimeIX(obj(1).time,edges);
 
 cdix = 1;
 cond2use = [8 9];
-for sessix = 1:numel(meta)  %[2 3 ]
+for sessix = 3%1:numel(meta)  %[2 3 ]
     trix{1} = params(sessix).trialid{cond2use(1)};
     trix{2} = params(sessix).trialid{cond2use(2)};
     % trix = cell2mat(params(sessix).trialid(cond2use)');
@@ -57,42 +57,43 @@ for sessix = 1:numel(meta)  %[2 3 ]
     % plt.potent = zscore(plt.potent);
 
     
-    % % f = figure;
-    % % f.Position = [412   417   929   336];
-    % % f.Renderer = 'painters';
-    % % 
-    % % nTrials = size(plt.me,2);
-    % % nCond = size(tempme{1},2);
-    % % time_ = obj(1).time(delayt);
-    % % 
-    % % ax = subplot(1,3,1);
-    % % imagesc(time_,1:size(plt.me,2),plt.me'); colorbar; %clim([-5 10])
-    % % ax = prettifyPlot(ax);
-    % % colormap(ax,parula);
-    % % % line([sample sample], [1 nTrials],'Color','w','LineStyle','--');
-    % % % line([delay delay], [1 nTrials],'Color','w','LineStyle','--');
-    % % % line([gc gc], [1 nTrials],'Color','w','LineStyle','--');
-    % % line([time_(1) time_(end)], [nCond nCond],'Color','w','LineStyle','--');
-    % % 
-    % % ax = subplot(1,3,2);
-    % % imagesc(time_,1:size(plt.me,2),plt.potent'); colorbar; %clim([-5 5])
-    % % ax = prettifyPlot(ax);
-    % % colormap(ax,parula);
-    % % % line([sample sample], [1 nTrials],'Color','w','LineStyle','--');
-    % % % line([delay delay], [1 nTrials],'Color','w','LineStyle','--');
-    % % % line([gc gc], [1 nTrials],'Color','w','LineStyle','--');
-    % % line([time_(1) time_(end)], [nCond nCond],'Color','w','LineStyle','--');
-    % % 
-    % % ax = subplot(1,3,3);
-    % % imagesc(time_,1:size(plt.me,2),plt.null'); colorbar; %clim([-5 10])
-    % % ax = prettifyPlot(ax);
-    % % colormap(ax,parula);
-    % % % line([sample sample], [1 nTrials],'Color','w','LineStyle','--');
-    % % % line([delay delay], [1 nTrials],'Color','w','LineStyle','--');
-    % % % line([gc gc], [1 nTrials],'Color','w','LineStyle','--');
-    % % line([time_(1) time_(end)], [nCond nCond],'Color','w','LineStyle','--');
-    % % 
-    % % sgtitle([meta(sessix).anm ' ' meta(sessix).date])
+    f = figure;
+    f.Position = [412   417   929   336];
+    f.Renderer = 'painters';
+
+    nTrials = size(plt.me,2);
+    nCond = size(tempme{1},2);
+    time_ = obj(1).time(delayt);
+
+    ax = subplot(1,3,1);
+    imagesc(time_,1:size(plt.me,2),plt.me'); colorbar; %clim([-5 10])
+    ax = prettifyPlot(ax);
+    colormap(ax,parula);
+    line([sample sample], [1 nTrials],'Color','w','LineStyle','--');
+    line([delay delay], [1 nTrials],'Color','w','LineStyle','--');
+    % line([gc gc], [1 nTrials],'Color','w','LineStyle','--');
+    line([time_(1) time_(end)], [nCond nCond],'Color','w','LineStyle','--');
+
+    ax = subplot(1,3,2);
+    imagesc(time_,1:size(plt.me,2),plt.potent'); colorbar; %clim([-5 5])
+    ax = prettifyPlot(ax);
+    colormap(ax,parula);
+    line([sample sample], [1 nTrials],'Color','w','LineStyle','--');
+    line([delay delay], [1 nTrials],'Color','w','LineStyle','--');
+    % line([gc gc], [1 nTrials],'Color','w','LineStyle','--');
+    line([time_(1) time_(end)], [nCond nCond],'Color','w','LineStyle','--');
+
+    ax = subplot(1,3,3);
+    % plt.null(:,80:end) = plt.null(:,80:end)-0.5;
+    imagesc(time_,1:size(plt.me,2),plt.null'); colorbar; clim([-3 2])
+    ax = prettifyPlot(ax);
+    colormap(ax,parula);
+    line([sample sample], [1 nTrials],'Color','w','LineStyle','--');
+    line([delay delay], [1 nTrials],'Color','w','LineStyle','--');
+    % line([gc gc], [1 nTrials],'Color','w','LineStyle','--');
+    line([time_(1) time_(end)], [nCond nCond],'Color','w','LineStyle','--');
+
+    sgtitle([meta(sessix).anm ' ' meta(sessix).date])
 
 
     cc = corrcoef(plt.me(:),plt.null(:));
@@ -100,7 +101,11 @@ for sessix = 1:numel(meta)  %[2 3 ]
     cc = corrcoef(plt.me(:),plt.potent(:));
     r2.potent(sessix) = cc(1,2).^2;
 
-    % break
+    % pth = 'C:\Users\munib\Desktop\NP_CDChoice_Heatmaps';
+    % fn = [meta(sessix).anm ' ' meta(sessix).date '.svg'];
+    % saveas(f,fullfile(pth,fn),'svg')
+
+    break
 
 end
 
@@ -143,7 +148,7 @@ nullsm = 11;
 potentsm = 0;
 
 % only show delay period
-delayedges = [-0.9 0];
+delayedges = [-2.39 0];
 delayt = findTimeIX(obj(1).time,delayedges);
 delayt = delayt(1):delayt(2);
 
@@ -188,28 +193,28 @@ for sessix = 1:numel(meta)  %[2 3 ]
     imagesc(time_,1:size(plt.me,2),plt.me'); colorbar; %clim([-5 10])
     ax = prettifyPlot(ax);
     colormap(ax,parula);
-    % line([sample sample], [1 nTrials],'Color','w','LineStyle','--');
-    % line([delay delay], [1 nTrials],'Color','w','LineStyle','--');
+    line([sample sample], [1 nTrials],'Color','w','LineStyle','--');
+    line([delay delay], [1 nTrials],'Color','w','LineStyle','--');
     % line([gc gc], [1 nTrials],'Color','w','LineStyle','--');
-    line([time_(1) time_(end)], [nCond nCond],'Color','w','LineStyle','--');
+    % line([time_(1) time_(end)], [nCond nCond],'Color','w','LineStyle','--');
 
     ax = subplot(1,3,2);
     imagesc(time_,1:size(plt.me,2),plt.potent'); colorbar; %clim([-5 5])
     ax = prettifyPlot(ax);
     colormap(ax,parula);
-    % line([sample sample], [1 nTrials],'Color','w','LineStyle','--');
-    % line([delay delay], [1 nTrials],'Color','w','LineStyle','--');
+    line([sample sample], [1 nTrials],'Color','w','LineStyle','--');
+    line([delay delay], [1 nTrials],'Color','w','LineStyle','--');
     % line([gc gc], [1 nTrials],'Color','w','LineStyle','--');
-    line([time_(1) time_(end)], [nCond nCond],'Color','w','LineStyle','--');
+    % line([time_(1) time_(end)], [nCond nCond],'Color','w','LineStyle','--');
 
     ax = subplot(1,3,3);
     imagesc(time_,1:size(plt.me,2),plt.null'); colorbar; %clim([-5 10])
     ax = prettifyPlot(ax);
     colormap(ax,parula);
-    % line([sample sample], [1 nTrials],'Color','w','LineStyle','--');
-    % line([delay delay], [1 nTrials],'Color','w','LineStyle','--');
+    line([sample sample], [1 nTrials],'Color','w','LineStyle','--');
+    line([delay delay], [1 nTrials],'Color','w','LineStyle','--');
     % line([gc gc], [1 nTrials],'Color','w','LineStyle','--');
-    line([time_(1) time_(end)], [nCond nCond],'Color','w','LineStyle','--');
+    % line([time_(1) time_(end)], [nCond nCond],'Color','w','LineStyle','--');
 
     sgtitle([meta(sessix).anm ' ' meta(sessix).date])
 
