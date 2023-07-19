@@ -4,19 +4,38 @@ Version 1.0  July 19, 2023
 
 @ 2023 Munib Hasnain   munibh@bu.edu | Jackie Birnbaum   jackieb1@bu.edu 
 
-## VERSION HISTORY (will go here)
-
 
 ## HOW TO GET STARTED
 
-See `main.m`
+### Instructions for MATLAB code
 
-1) Single trial neural firing rates should be formatted as `(number of time bins, number of trials, number of neurons)`
+See `example.m`
 
-2) You need an binary annotation of when the animal is moving (`1`) or stationary (`0`). This matrix will be of time `(number of time bins, number of trials)`
+1) The optimization depends on the manopt toolbox. This github repo contains the latest version as of July 19, 2023. Manopt can be downloaded [here](https://www.manopt.org/). 
 
-3) The optimization depends on the manopt toolbox. This github repo contains the latest version as of July 19, 2023. Manopt can be downloaded [here](https://www.manopt.org/). 
+2) Single trial neural firing rates should be formatted as `(number of time bins, number of trials, number of neurons)`
 
-3) That's all you need! Now you can run the the example script (`main.m`)
+3) You need an binary annotation of when the animal is moving (`1`) or stationary (`0`). This matrix will be of time `(number of time bins, number of trials)`
 
-4) You can run through `main.m` using the data from an example session in `exampleData.mat` 
+4) That's all you need! Now you can run the the example script (`example.m`)
+
+5) You can run through `example.m` using the data from an example session in `exampleData.mat` 
+
+
+### Instructions for Python code
+
+See `example.ipynb`
+
+1) You need to install [Pymanopt](https://pymanopt.org/docs/stable/quickstart.html). Pymanopt is compatible with Python 3.6+, and depends on NumPy and SciPy
+    - other dependencies in 'maexamplein.ipynb' are `jupyter`,`matplotlib`
+
+2) Single trial neural firing rates should be formatted as `(number of time bins, number of trials, number of neurons)`
+
+3) You need an binary annotation of when the animal is moving (`1`) or stationary (`0`). This matrix will be of time `(number of time bins, number of trials)`
+
+4) That's all you need! Now you can run the the example script (`example.ipynb`)
+
+5) You can run through `example.ipynb` using the data from an example session in `exampleData.mat` 
+
+
+## VERSION HISTORY

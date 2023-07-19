@@ -6,3 +6,5 @@ exampleData.motionEnergy = me.data;
 exampleData.moveMask = me.data >= me.moveThresh;
 
 save("exampleData.mat",'exampleData')
+
+%%
