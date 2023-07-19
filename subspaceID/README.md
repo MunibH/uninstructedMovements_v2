@@ -2,7 +2,7 @@
 
 Version 1.0  July 19, 2023
 
-@ 2023 Munib Hasnain   munibh@bu.edu
+@ 2023 Munib Hasnain   munibh@bu.edu | Jackie Birnbaum   jackieb1@bu.edu 
 
 ## VERSION HISTORY (will go here)
 
@@ -17,4 +17,4 @@ See `main.m`
 
 3) That's all you need! Now you can run the the example script (`main.m`)
 
-4) You can run through main.m using the data from an example session in `exampleData.mat` 
+4) You can run through `main.m` using the data from an example session in `exampleData.mat` 
