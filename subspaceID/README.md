@@ -16,9 +16,9 @@ See `example.m`
 
 2) Single trial neural firing rates should be formatted as `(number of time bins, number of trials, number of neurons)`
 
-3) You need an binary annotation of when the animal is moving (`1`) or stationary (`0`). This matrix will be of time `(number of time bins, number of trials)`
+3) You need a binary annotation of when the animal is moving (`1`) or stationary (`0`). This matrix will be of time `(number of time bins, number of trials)`
 
-4) That's all you need! Now you can run the the example script (`example.m`)
+4) That's it! Now you can run the the example script (`example.m`)
 
 5) You can run through `example.m` using the data from an example session in `exampleData.mat` 
 
@@ -33,9 +33,9 @@ See `example.ipynb`
 
 2) Single trial neural firing rates should be formatted as `(number of time bins, number of trials, number of neurons)`
 
-3) You need an binary annotation of when the animal is moving (`1`) or stationary (`0`). This matrix will be of time `(number of time bins, number of trials)`
+3) You need a binary annotation of when the animal is moving (`1`) or stationary (`0`). This matrix will be of time `(number of time bins, number of trials)`
 
-4) That's all you need! Now you can run the the example script (`example.ipynb`)
+4) That's it! Now you can run the the example script (`example.ipynb`)
 
 5) You can run through `example.ipynb` using the data from an example session in `exampleData.mat` 
 
