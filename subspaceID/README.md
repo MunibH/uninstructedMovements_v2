@@ -1,4 +1,5 @@
 # Matlab code for null and potent subspace identification 
+This code was used to identify subspaces in "Separability of cognitive and motor processes in the behaving mouse - Hasnain, Birnbaum et al."
 
 Version 1.0  July 19, 2023
 
@@ -27,7 +28,8 @@ See `example.m`
 See `example.ipynb`
 
 1) You need to install [Pymanopt](https://pymanopt.org/docs/stable/quickstart.html). Pymanopt is compatible with Python 3.6+, and depends on NumPy and SciPy
-    - other dependencies in 'maexamplein.ipynb' are `jupyter`,`matplotlib`
+    - other dependencies in 'example.ipynb' are `jupyter`,`matplotlib`,`autograd`
+    - `pip install jupyter matplotlib autograd` in the same environment that pymanopt is installed.
 
 2) Single trial neural firing rates should be formatted as `(number of time bins, number of trials, number of neurons)`
 

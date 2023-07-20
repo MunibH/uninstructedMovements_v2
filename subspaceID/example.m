@@ -4,8 +4,6 @@
 % add manopt and funcs directory to path
 manoptPath = pwd; % path to manopt 
 addpath(genpath(fullfile(manoptPath,'manopt')))
-funcsPath = pwd; % path to manopt 
-addpath(genpath(fullfile(funcsPath,'funcs')))
 
 %% LOAD SOME DATA
 
@@ -61,6 +59,10 @@ rez.N = N; % put data into a results struct
 
 %% COVARIANCE AND DIMENSIONALITY
 
+% the null and potent subspaces are estimated by simultaneously maximizing
+% variance in the null and potent neural activity. We will use the
+% covariances matrices as input to this optimization problem
+
 % covariances
 rez.cov.null = cov(N.null);
 rez.cov.potent = cov(N.potent);
@@ -71,8 +73,8 @@ rez.cov.potent = cov(N.potent);
 % In our experience, dimensionality >  20 takes an incredibly long time to 
 % optimize over.
 
-rez.dNull = 7;
-rez.dPotent = 7;
+rez.dNull = 15;
+rez.dPotent = 15;
 
 rez.dMax = max([rez.dNull, rez.dPotent]);
 
@@ -81,6 +83,11 @@ rng(101) % for reproducibility
 
 alpha = 0; % regularization hyperparam (+ve->discourage sparity, -ve->encourage sparsity)
 [Q,~,P,~,~] = orthogonal_subspaces(rez.cov.potent,rez.dPotent,rez.cov.null,rez.dNull,alpha);
+% Q is a matrix of size (nNeurons, nDimensions), 
+% where nDimensions = dNull + dPotent. 
+% P is a cell array, where
+% Q*P{1} = Qpotent (the potent subspace)
+% Q*P{2} = Qnull (the null subspace)
 
 % manopt might provide a warning that we haven't provided the Hessian,
 % that's ok. Providing the Hessian of the objective function will speed up
@@ -99,22 +106,22 @@ rez.Q.null = Q*P{2};   %        (nNeurons,dNull)
 rez.proj.potent = tensorprod(N.full,rez.Q.potent,3,1); % size = (nBins,nTrials,dPotent)
 rez.proj.null = tensorprod(N.full,rez.Q.null,3,1);     % size = (nBins,nTrials,dNull)
 
-%%
-
 % plot the sum squared magnitude across dimensions of activity within the
 % null and potent subspaces
 
 plt.null.ssm = sum(rez.proj.null.^2,3);
 plt.potent.ssm = sum(rez.proj.potent.^2,3);
 
+%% PLOT
 
+% plot motion energy, potent ssm, null ssm
 
 f = figure;
 
 xlims = [-2 2];
 ylims = [1 nTrials];
 
-% sort by average motion energy in late delay epoch
+% sort trials by average motion energy in late delay epoch
 sortTimes = [-0.505 -0.005]; % in seconds, relative to go cue
 for i = 1:numel(sortTimes)
     closest_val = interp1(exampleData.time,exampleData.time,sortTimes(i),'nearest');
