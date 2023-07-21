@@ -1,4 +1,4 @@
-# Matlab code for null and potent subspace identification 
+# Code for null and potent subspace identification 
 This code was used to identify subspaces in "Separability of cognitive and motor processes in the behaving mouse - Hasnain, Birnbaum et al."
 
 Version 1.0  July 19, 2023
