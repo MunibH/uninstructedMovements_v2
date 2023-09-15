@@ -18,10 +18,7 @@ addpath(genpath(pwd))
 
 clc
 
-%% TODO
-% - created new objs from pipeline and nidq data - only use those
-% - need to handle frameTimes appropriately now (subtract 0.5 secs)
-% - for choice decoding, just use avg during stim period
+
 
 %% default params (same for each session)
 
@@ -40,9 +37,9 @@ dfparams.warp = 0; % 0 means no warping, 1 means warp delay period to
 
 
 % -- trial type params --
-dfparams.cond(1) = {'(hit|miss|no)&~stim.enable&~autowater&~early'}; % all trials, no stim, no autowater, no autolearn
+dfparams.cond(1) = {'(hit|miss)&~stim.enable&~autowater&~early'}; % all trials, no stim, no autowater, no autolearn
 % dfparams.cond(1) = {'(hit|miss|no)&~stim.enable'}; % all trials, no stim, no autowater, no autolearn
-dfparams.cond(end+1) = {'(hit|miss|no)&stim.enable&~autowater&~early'};  % all trials trials, stim, no autowater, no autolearn
+dfparams.cond(end+1) = {'(hit|miss)&stim.enable&~autowater&~early'};  % all trials trials, stim, no autowater, no autolearn
 % dfparams.cond(end+1) = {'(hit|miss|no)&stim.enable'};  % all trials trials, stim, no autowater, no autolearn
 dfparams.cond(end+1) = {'R&~no&~stim.enable&~autowater&~early'}; % right trials, no stim, no autowater
 dfparams.cond(end+1) = {'R&~no&stim.enable&~autowater&~early'};  % right trials, stim, no autowater
@@ -60,8 +57,8 @@ dfparams.stim.types = {'Bi_MC','Right_MC','Left_MC','Bi_ALM','Bi_M1TJ','Right_AL
 % dfparams.stim.num   = logical([1 1 1 1 1 1 1 1 1]);   % ALL
 % dfparams.stim.num   = logical([0 0 0 0 0 1 1 1 1]);   % Right_ALM / Left_ALM / Right_M1TJ / Left_M1TJ
 % dfparams.stim.num   = logical([0 0 0 1 0 0 0 0 0]);   % Bi_ALM
-dfparams.stim.num   = logical([0 0 0 0 1 0 0 0 0]);   % Bi_M1TJ
-% dfparams.stim.num   = logical([1 0 0 0 0 0 0 0 0]);   % Bi_MC
+% dfparams.stim.num   = logical([0 0 0 0 1 0 0 0 0]);   % Bi_M1TJ
+dfparams.stim.num   = logical([1 0 0 0 0 0 0 0 0]);   % Bi_MC
 % dfparams.stim.num   = logical([0 0 0 1 1 0 0 0 0]);   % Bi_M1TJ Bi_ALM
 % dfparams.stim.num   = logical([0 1 1 0 0 0 0 0 0]);   % Right_MC
 % dfparams.stim.num   = logical([0 0 1 0 0 0 0 0 0]);   % Left_MC
@@ -70,8 +67,8 @@ dfparams.stim.num   = logical([0 0 0 0 1 0 0 0 0]);   % Bi_M1TJ
 % dfparams.stim.num   = logical([0 0 0 0 0 0 1 0 0]);   % Right_M1TJ
 % dfparams.stim.num   = logical([0 0 0 0 0 0 0 0 1]);   % Left_M1TJ
 
-dfparams.stim.pow.types = [1.08, 3.14, 8]; % mW, 3.14 for all unilateral sessions and most bilateral sessions
-dfparams.stim.pow.num = logical([0 1 1]);
+dfparams.stim.pow.types = [1 1.08, 3.14, 8]; % mW, 3.14 for all unilateral sessions and most bilateral sessions, 1 for MAH20/21
+dfparams.stim.pow.num = logical([1 0 0 0]);
 
 
 % -- plotting params --
@@ -91,9 +88,10 @@ dfparams.plt.ms = {'.','.','x','x','o','o'};
 datapth = '/Users/Munib/Documents/Economo-Lab/data/';
 
 meta = [];
-meta = loadMAH13_MCStim(meta,datapth);
-meta = loadMAH14_MCStim(meta,datapth);
-% meta = loadMAH17_MCStim(meta,datapth);
+% meta = loadMAH13_MCStim(meta,datapth);
+% meta = loadMAH14_MCStim(meta,datapth);
+meta = loadMAH20_MCStim(meta,datapth);
+meta = loadMAH21_MCStim(meta,datapth);
 
 % subset based on stim types
 stim2use = dfparams.stim.types(dfparams.stim.num);

@@ -76,18 +76,17 @@ datapth = '/Users/Munib/Documents/Economo-Lab/data/';
 meta = [];
 
 % --- ALM ---
-% meta = loadJEB6_ALMVideo(meta,datapth);
-% meta = loadJEB7_ALMVideo(meta,datapth);
-% % % meta = loadEKH1_ALMVideo(meta,datapth); % not usable b/c no usable left miss trials
-% meta = loadEKH3_ALMVideo(meta,datapth);
-% meta = loadJGR2_ALMVideo(meta,datapth);
-% meta = loadJGR3_ALMVideo(meta,datapth);
-% meta = loadJEB13_ALMVideo(meta,datapth);
-% meta = loadJEB14_ALMVideo(meta,datapth);
-% meta = loadJEB15_ALMVideo(meta,datapth);
+meta = loadJEB6_ALMVideo(meta,datapth);
+meta = loadJEB7_ALMVideo(meta,datapth);
+% % meta = loadEKH1_ALMVideo(meta,datapth); % not usable b/c no usable left miss trials
+meta = loadEKH3_ALMVideo(meta,datapth);
+meta = loadJGR2_ALMVideo(meta,datapth);
+meta = loadJGR3_ALMVideo(meta,datapth);
+meta = loadJEB13_ALMVideo(meta,datapth);
+meta = loadJEB14_ALMVideo(meta,datapth);
+meta = loadJEB15_ALMVideo(meta,datapth);
 meta = loadJEB19_ALMVideo(meta,datapth);
 
-meta = meta(3);
 
 % --- M1TJ ---
 % meta = loadJEB13_M1TJVideo(meta,datapth);
@@ -406,8 +405,10 @@ end
 close all
 clc
 
-plotCDSelectivity_v2(meta,obj,cd_null_all,cd_null,cd_potent_all,cd_potent);
+% plotCDSelectivity_v2(meta,obj,cd_null_all,cd_null,cd_potent_all,cd_potent);
+compareSampleDelaySelectivityv2(meta,obj,cd_null_all,cd_null,cd_potent_all,cd_potent);
 
+% compareSampleDelaySelectivity(meta,obj,cd_null_all,cd_null,cd_potent_all,cd_potent);
 % plotCD_EpochSelectivity(meta,obj,cd_null_all,cd_null,cd_potent_all,cd_potent);
 % plotCD_EpochSelectivity(meta,obj,cd_null_all_shuf,cd_null_shuf,cd_potent_all_shuf,cd_potent_shuf);
 

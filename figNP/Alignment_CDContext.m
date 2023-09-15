@@ -1,16 +1,19 @@
-% var exp for reconstructions in null vs potent of cd choice
+% run this script after estimating subspaces and projecting neural data on
+% to them (after running the main script)
 
 %% find L/R selective cells per session
+% only using cells with significant selectivity in this analysis
+
 edges = [-0.8 0];
 cond2use = [5 6];
 for i = 1:numel(obj)
     cluix{i} = findSelectiveCells(obj(i),params(i),edges,cond2use);
 end
 
-%% reconstruct single cell activity from cd choice in n/p
+%% reconstruct single cell activity from CDchoice projs in either null or potent space
 
-cdix = 1;
-cond2use = {'hit|miss'};
+cdix = 1; % index of cdchoice in the projs
+cond2use = {'hit|miss'}; % specifying which trials 
 for sessix = 1:numel(meta)
     clear trialdat W proj 
     disp(['Session ' num2str(sessix) '/' num2str(numel(meta))])
@@ -18,12 +21,12 @@ for sessix = 1:numel(meta)
     trix = trix{1};
     clus = find(cluix{sessix});
 
-
-    trialdat.full = zscore_singleTrialNeuralData(obj(sessix));
+    % get full single trial data (will compare reconstructed against this)
+    % trialdat.full = zscore_singleTrialNeuralData(obj(sessix));
     % trialdat.full = permute(obj(sessix).trialdat,[1 3 2]);
     trialdat.full = trialdat.full(:,trix,:); % (time,trials,neurons);
-    
 
+    % get CDs
     W.null = cd_null(sessix).cd_mode_orth(:,cdix);
     W.potent = cd_potent(sessix).cd_mode_orth(:,cdix);
     fns = {'null','potent'};
@@ -32,9 +35,10 @@ for sessix = 1:numel(meta)
         trialdat.(fns{j}) = rez(sessix).recon.(fns{j})(:,trix,:); % (time,trials,dims)
         % project onto Wchoice
         proj.(fns{j}) = tensorprod(trialdat.(fns{j}),W.(fns{j}),3,1);
-        % reconstruct n/p reconstructions from CD choice proj
+        % reconstruct data from CD choice proj
         trialdat.recon.(fns{j}) = tensorprod(proj.(fns{j}),W.(fns{j}),3,2);
 
+        % for each cell, get R^2 b/w it's original data and reconstructed
         for k = 1:numel(clus) % for each cell
             thisclu = clus(k);
             % calculcate variance explained by CD choice
@@ -55,13 +59,7 @@ end
 %% plot
 close all
 
-f = figure;
-f.Position = [644   483   338   231];
-ax = gca;
-f.Renderer = 'painters';
-ax = prettifyPlot(ax);
-hold on;
-
+% concatenate R^2s from null and potent spaces into two vectors
 alln = [];
 allp = [];
 for sessix = 1:numel(meta)
@@ -71,35 +69,9 @@ for sessix = 1:numel(meta)
     allp = [allp p];
     % scatter(n,p,10,'filled','MarkerEdgeColor','k','MarkerFaceColor',[0.5,0.5,0.5]);
 end
-% scatterhist(alln,allp)
-scatter(alln,allp,10,'MarkerEdgeColor','k');%'MarkerFaceColor',[0.5,0.5,0.5]);
-xlabel('VE,null')
-ylabel('VE,potent')
+alignment = (alln - allp) ./ (allp + alln); % calculate alignment index
 
-axis square
-% r = refline(1,0);
-% r.Color = 'k';
-
-mdl = fitlm(alln,allp);
-allr2 = mdl.Rsquared.Ordinary;
-W = mdl.Coefficients.Estimate; % intercept, x1
-xs = ax.XLim;
-xs = linspace(xs(1),xs(2),100);
-rr =  xs.* W(2) + W(1);
-plot(xs,rr,'k--')
-text(0.2,0.87,['r2=' num2str(allr2)])
-text(0.2,0.77,['nCells=' num2str(numel(allp))])
-
-ax = setLimits(ax,0.1);
-
-%%
-
-close all
-
-alignment = (alln - allp) ./ (allp + alln);
-
-cols = getColors;
-
+% histogram
 f = figure;
 f.Position = [644   483   338   231];
 ax = gca;
@@ -108,37 +80,8 @@ ax = prettifyPlot(ax);
 hold on;
 
 h = histogram(alignment,30,'edgecolor','none','Normalization','count','Visible','off');
-bars = h.Values;
-binedges = h.BinEdges;
 
-x = find(binedges<0);
-b = bar(binedges(x),bars(x));
-b.BarWidth = 1;
-b.EdgeColor = 'none';
-b.FaceColor = cols.potent;
 
-x = find(binedges>0);
-x = x(1:end-1);
-b = bar(binedges(x),bars(x));
-b.BarWidth = 1;
-b.EdgeColor = 'none';
-b.FaceColor = cols.null;
-
-mu = mean(alignment);
-sd = std(alignment);
-n = numel(alignment);
-nulldist = normrnd(0,sd,1,n);
-
-% histogram(nulldist,30,'edgecolor','none')
-% 
-% [h,p] = ttest(alignment,nulldist)
-
-%% hartigans dip test
-
-[x,f] = ecdf(alignment);
-
-[dip, p_value] = HartigansDipSignifTest(f,10000)
-% [dip, p_value] = HartigansDipSignifTest(alignment,1000)
 
 
 

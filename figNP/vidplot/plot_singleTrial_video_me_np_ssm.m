@@ -168,21 +168,21 @@ for itrix = 1:numel(trix)
 
 
 
-    %
-    % Remove any unused structure array elements
-
-    % Write to a video file
-    % This could be done within the original loop, but I wanted to show it
-    % separately
-    fnout = [anm '_' date '_trial' num2str(trial) '_alldim_ssm' '_100fps' '.mp4'];
-    vOut = VideoWriter(fullfile('saved',fnout),'MPEG-4');
-    vOut.FrameRate = 100;
-    vOut.Quality = 100;
-    open(vOut)
-    for k = 1:numel(s)
-        writeVideo(vOut,s(k))
-    end
-    close(vOut)
+    % %
+    % % Remove any unused structure array elements
+    % 
+    % % Write to a video file
+    % % This could be done within the original loop, but I wanted to show it
+    % % separately
+    % fnout = [anm '_' date '_trial' num2str(trial) '_alldim_ssm' '_100fps' '.mp4'];
+    % vOut = VideoWriter(fullfile('saved',fnout),'MPEG-4');
+    % vOut.FrameRate = 100;
+    % vOut.Quality = 100;
+    % open(vOut)
+    % for k = 1:numel(s)
+    %     writeVideo(vOut,s(k))
+    % end
+    % close(vOut)
 
 
 end

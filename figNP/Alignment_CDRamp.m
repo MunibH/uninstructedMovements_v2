@@ -2,7 +2,7 @@
 
 %% find L/R selective cells per session
 edges = [-0.8 0];
-cond2use = [8 9];
+cond2use = [5 6];
 for i = 1:numel(obj)
     cluix{i} = findSelectiveCells(obj(i),params(i),edges,cond2use);
     % cluix{i} = logical(ones(numel(params(i).cluid),1));
@@ -126,20 +126,17 @@ b.BarWidth = 1;
 b.EdgeColor = 'none';
 b.FaceColor = cols.null;
 
-%% use aic for 1-GMM vs. 2-GMM to test bimodality
+mu = mean(alignment);
+sd = std(alignment);
+n = numel(alignment);
+nulldist = normrnd(0,sd,1,n);
 
-h = histogram(alignment,30,'edgecolor','none','Normalization','pdf','Visible','off');
-xpdf = h.Values;
-% [dip,xl,xu, ifault, gcm, lcm, mn, mj] = HartigansDipTest(xpdf);
-% [BF, BC] = bimodalitycoeff(xpdf);
+%% hartigans dip test
 
-for i =1:2
-    mdl = fitgmdist(alignment',i);
-    aic(i) = mdl.AIC;
-end
+[x,f] = ecdf(alignment);
 
-
-Tbl = table(aic',RowNames="GMM"+string(1:2),VariableNames={'AIC'})
+[dip, p_value] = HartigansDipSignifTest(f,10000)
+% [dip, p_value] = HartigansDipSignifTest(alignment,1000)
 
 
 

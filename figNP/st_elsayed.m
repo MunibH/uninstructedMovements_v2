@@ -79,16 +79,18 @@ datapth = 'C:\Users\munib\Documents\Economo-Lab\data';
 meta = [];
 
 % --- ALM ---
-meta = loadJEB6_ALMVideo(meta,datapth);
-meta = loadJEB7_ALMVideo(meta,datapth); % selectivity in ME
-% % % meta = loadEKH1_ALMVideo(meta,datapth); % selectivity in ME
-meta = loadEKH3_ALMVideo(meta,datapth); % selectivity in ME
-meta = loadJGR2_ALMVideo(meta,datapth);
-meta = loadJGR3_ALMVideo(meta,datapth);
-meta = loadJEB13_ALMVideo(meta,datapth);
-meta = loadJEB14_ALMVideo(meta,datapth); % selectivity in ME % go cue is at 2.3 instead of 2.5 like all other sessions??
+% meta = loadJEB6_ALMVideo(meta,datapth);
+% meta = loadJEB7_ALMVideo(meta,datapth); % selectivity in ME
+% % % % meta = loadEKH1_ALMVideo(meta,datapth); % selectivity in ME
+% meta = loadEKH3_ALMVideo(meta,datapth); % selectivity in ME
+% meta = loadJGR2_ALMVideo(meta,datapth);
+% meta = loadJGR3_ALMVideo(meta,datapth);
+% meta = loadJEB13_ALMVideo(meta,datapth);
+% meta = loadJEB14_ALMVideo(meta,datapth); % selectivity in ME % go cue is at 2.3 instead of 2.5 like all other sessions??
 meta = loadJEB15_ALMVideo(meta,datapth);
-meta = loadJEB19_ALMVideo(meta,datapth);
+% meta = loadJEB19_ALMVideo(meta,datapth);
+
+meta = meta(2);
 
 % --- M1TJ ---
 % meta = loadJEB13_M1TJVideo(meta,datapth);

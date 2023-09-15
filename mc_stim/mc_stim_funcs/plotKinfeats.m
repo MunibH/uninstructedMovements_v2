@@ -5,7 +5,7 @@ function plotKinfeats(meta,obj,dfparams,params,kin,kinfeats,feats2plot,cond2plot
 featix = find(mask);
 
 
-for i = 11%:numel(obj) % for each session
+for i = 1:numel(obj) % for each session
     if dfparams.warp
         align = mode(obj(i).bp.ev.([dfparams.alignEv '_warp']));
         delay = mode(obj(i).bp.ev.delay_warp) - align;

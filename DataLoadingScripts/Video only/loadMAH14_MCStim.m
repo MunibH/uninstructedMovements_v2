@@ -1,5 +1,6 @@
 function meta = loadMAH14_MCStim(meta,datapth)
 
+% meta(end).stimEpoch = 'delay';  FOR ALL SESSIONS
 %% power = 3 mW
 
 meta(end+1).datapth = datapth;

@@ -1,5 +1,7 @@
 function meta = loadMAH13_MCStim(meta,datapth)
 
+% meta(end).stimEpoch = 'delay'; FOR ALL SESSIONS
+
 % % first session, didn't record nidq, not using
 % meta(end+1).datapth = datapth;
 % meta(end).anm = 'MAH13';
