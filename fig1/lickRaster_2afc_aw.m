@@ -26,8 +26,8 @@ params.lowFR               = 1; % remove clusters with firing rates across all t
 % set conditions to calculate PSTHs for
 params.condition(1)     = {'R&~stim.enable&~autowater&((1:Ntrials)>20)'};             % right hits, no stim, aw off
 params.condition(end+1) = {'L&~stim.enable&~autowater&((1:Ntrials)>20)'};             % left hits, no stim, aw off
-params.condition(end+1) = {'R&~stim.enable&autowater&((1:Ntrials)>20)'};             % right hits, no stim, aw off
-params.condition(end+1) = {'L&~stim.enable&autowater&((1:Ntrials)>20)'};             % left hits, no stim, aw off
+params.condition(end+1) = {'R&~stim.enable&~early%autowater&((1:Ntrials)>20)'};             % right hits, no stim, aw on
+params.condition(end+1) = {'L&~stim.enable&~early&autowater&((1:Ntrials)>20)'};             % left hits, no stim, aw on
 
 params.tmin = -2.5;
 params.tmax = 2.5;

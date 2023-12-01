@@ -22,7 +22,8 @@ function rez = getCodingDimensions_2afc(obj,params,cond2use,cond2proj,rampcond)
 
 cd_labels = {'late','go','ramping'};
 cd_epochs = {'goCue','goCue'};
-cd_times = {[-0.42 -0.02], [0.02 0.42]}; % in seconds, relative to respective epochs
+% cd_times = {[-0.42 -0.02], [0.02 0.42]}; % in seconds, relative to respective epochs
+cd_times = {[-0.5 -0.02], [0.02 0.42]}; % in seconds, relative to respective epochs
 ramp_epochs = {'sample','goCue'};
 ramp_times = {[-0.3 -0.01], [-0.5 -0.01]}; % in seconds, relative to respective epochs
 
@@ -34,7 +35,7 @@ for sessix = 1:numel(obj)
     % ------------------------------------------
     rez(sessix).time = obj(sessix).time;
     rez(sessix).psth = standardizePSTH(obj(sessix));
-    %     rez(sessix).psth = obj(sessix).psth;
+    % rez(sessix).psth = obj(sessix).psth;
     rez(sessix).condition = params(sessix).condition;
     rez(sessix).trialid = params(sessix).trialid;
     rez(sessix).alignEvent = params(sessix).alignEvent;

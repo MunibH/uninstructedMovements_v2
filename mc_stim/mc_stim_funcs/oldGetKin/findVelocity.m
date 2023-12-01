@@ -36,6 +36,8 @@ for i = 1:numel(trialnums)                        % For each trial
             end
         end
         basederiv = median(diff(tsinterp),'omitnan');                                            % Find the median  velocity (aka baseline)
+    else
+        continue;
     end
 
     %Find the difference between the feat velocity and the

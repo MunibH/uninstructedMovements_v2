@@ -31,6 +31,10 @@ for cix = 1:numel(cond2use)
         lickL(lickL > 2) = [];
         lickR =  obj(sessix).bp.ev.lickR{trial} - obj(sessix).bp.ev.goCue(trial);
         lickR(lickR > 2) = [];
+        if cix==3 || cix==4
+            lickL(lickL < 0) = [];
+            lickR(lickR < 0) = [];
+        end
 
         if ~isempty(lickL)
             plot(lickL, trialOffset*ones(size(lickL)), '.', 'Color', clrs.lhit, 'MarkerSize',ms);

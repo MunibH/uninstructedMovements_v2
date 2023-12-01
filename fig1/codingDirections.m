@@ -15,6 +15,8 @@ rmpath(genpath(fullfile(utilspth,'musall2919/')))
 % add paths for figure specific functions
 addpath(genpath(pwd))
 
+clc
+
 %% PARAMETERS
 params.alignEvent          = 'goCue'; % 'jawOnset' 'goCue'  'moveOnset'  'firstLick'  'lastLick'
 
@@ -40,7 +42,7 @@ params.condition(end+1) = {'hit&~stim.enable&~autowater&~early'};        % rampi
 % params.condition(end+1) = {'L&hit&~stim.enable&autowater&~early&((1:Ntrials)>20)'};       % left hits, aw    (9)
 
 
-params.tmin = -3;
+params.tmin = -2.5;
 params.tmax = 2.5;
 params.dt = 1/100;
 
@@ -71,7 +73,7 @@ meta = [];
 meta = loadJEB6_ALMVideo(meta,datapth);
 meta = loadJEB7_ALMVideo(meta,datapth);
 meta = loadEKH1_ALMVideo(meta,datapth);
-% meta = loadEKH3_ALMVideo(meta,datapth);
+meta = loadEKH3_ALMVideo(meta,datapth);
 meta = loadJGR2_ALMVideo(meta,datapth);
 meta = loadJGR3_ALMVideo(meta,datapth);
 meta = loadJEB14_ALMVideo(meta,datapth);
@@ -119,7 +121,7 @@ sav = 0; % 1=save, 0=no_save
 % plotSelectivityCorrMatrix(obj(1),sel_corr_mat,params(1).alignEvent,sav)
 
 plotmiss = 0;
-plotaw = 1;
+plotaw = 0;
 plotCDProj(allrez,obj(1),sav,plotmiss,plotaw,params(1).alignEvent)
 
 % plotCDVarExp(allrez,sav)
@@ -128,8 +130,83 @@ plotCDProj(allrez,obj(1),sav,plotmiss,plotaw,params(1).alignEvent)
 
 % plotCDContext_singleTrials(obj, params, rez_aw, rez_2afc)
 
+%% plot avg trace for each session of cd choice
+close all
+
+cdix = 1; % cdchoice
+cond = [1 2]; % right hit, left hit (DR)
+dat = squeeze(allrez.cd_proj(:,cond,cdix,:)); % (time,cond,session)
+datsel = squeeze(dat(:,1,:) - dat(:,2,:));
 
 
+% cols = getColors;
+% c{1} = cols.rhit;
+% c{2} = cols.lhit;
+
+darkRed = [110, 0, 2]./255;
+lightRed = [255, 115, 117]./255;
+darkBlue = [4, 13, 89]./255;
+lightBlue = [85, 74, 255]./255;
+cmap{1} = createcolormap(numel(meta), darkBlue, lightBlue);
+cmap{2} = createcolormap(numel(meta), darkRed, lightRed);
+
+sm = 11;
+
+baselineix = 1:30;
+
+
+% % projs
+% f = figure;
+% ax = gca;
+% ax = prettifyPlot(ax);
+% hold on;
+% for isess = 1:numel(meta)
+%     % ax = nexttile;
+%     % ax = prettifyPlot(ax);
+%     % hold on;
+%     for icond = 1:numel(cond)
+%         toplot = mySmooth(squeeze(dat(:,icond,isess)),sm,'reflect');
+%         % toplot = normalize(toplot,'range',[0 1]);
+%         toplot = toplot - mean(toplot(baselineix));
+%         plot(obj(1).time,toplot,'Color',cmap{icond}(isess,:))
+%         % patchline(obj(1).time,toplot,'EdgeColor',c{icond},'EdgeAlpha',0.5)
+%     end
+% end
+
+
+ix = findTimeIX(obj(1).time,[-1 0]);
+ix = ix(1):ix(2);
+selmeans = mean(datsel(ix,:));
+[~,sortix] = sort(selmeans);
+datsel = datsel(:,sortix);
+
+c1 = [0 0 0]./255;
+c2 = [0.8 0.8 0.8];
+cmap_ = flip(createcolormap(numel(meta), c1, c2));
+
+% selectivity 
+f = figure;
+f.Position = [698   436   343   230];
+f.Renderer = 'painters';
+ax = gca;
+ax = prettifyPlot(ax);
+hold on;
+for isess = 1:numel(meta)
+    % ax = nexttile;
+    % ax = prettifyPlot(ax);
+    % hold on;
+    toplot = mySmooth(datsel(:,isess),sm,'reflect');
+    % toplot = normalize(toplot,'range',[0 1]);
+    toplot = toplot - mean(toplot(baselineix));
+    plot(obj(1).time,toplot,'Color',cmap_(isess,:),'LineWidth',1.5)
+end
+yline(0,'k-')
+plot(obj(1).time,mean(datsel,2),'Color','r')
+xlabel('Time from go cue (s)')
+ylabel('Selectivity (spks/s)')
+evtimes = getEventTimes(obj(1).bp.ev,{'bitStart','sample','delay','goCue'},params(1).alignEvent);
+plotEventTimes(ax,evtimes)
+xlim([-2.4;2])
 
 %%
 

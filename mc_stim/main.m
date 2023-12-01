@@ -38,9 +38,7 @@ dfparams.warp = 0; % 0 means no warping, 1 means warp delay period to
 
 % -- trial type params --
 dfparams.cond(1) = {'(hit|miss)&~stim.enable&~autowater&~early'}; % all trials, no stim, no autowater, no autolearn
-% dfparams.cond(1) = {'(hit|miss|no)&~stim.enable'}; % all trials, no stim, no autowater, no autolearn
 dfparams.cond(end+1) = {'(hit|miss)&stim.enable&~autowater&~early'};  % all trials trials, stim, no autowater, no autolearn
-% dfparams.cond(end+1) = {'(hit|miss|no)&stim.enable'};  % all trials trials, stim, no autowater, no autolearn
 dfparams.cond(end+1) = {'R&~no&~stim.enable&~autowater&~early'}; % right trials, no stim, no autowater
 dfparams.cond(end+1) = {'R&~no&stim.enable&~autowater&~early'};  % right trials, stim, no autowater
 dfparams.cond(end+1) = {'L&~no&~stim.enable&~autowater&~early'}; % left trials, no stim, no autowater
@@ -49,8 +47,13 @@ dfparams.cond(end+1) = {'R&hit&~stim.enable&~autowater&~early'}; % right hit tri
 dfparams.cond(end+1) = {'R&hit&stim.enable&~autowater&~early'};  % right hit trials, stim, no autowater
 dfparams.cond(end+1) = {'L&hit&~stim.enable&~autowater&~early'}; % left hit trials, no stim, no autowater
 dfparams.cond(end+1) = {'L&hit&stim.enable&~autowater&~early'};  % left hit trials, stim, no autowater
-% dfparams.cond(end+1) = {'R&miss&~stim.enable&~autowater&~autolearn'}; % left hit trials, no stim, no autowater
-% dfparams.cond(end+1) = {'L&miss&stim.enable&~autowater&~autolearn'};  % left hit trials, stim, no autowater
+% WC (11:16)
+dfparams.cond(end+1) = {'(hit|miss)&~stim.enable&autowater&~early'}; % all trials, no stim, no autowater, no autolearn
+dfparams.cond(end+1) = {'(hit|miss)&stim.enable&autowater&~early'};  % all trials trials, stim, no autowater, no autolearn
+dfparams.cond(end+1) = {'R&~no&~stim.enable&autowater&~early'}; % right trials, no stim, no autowater
+dfparams.cond(end+1) = {'R&~no&stim.enable&autowater&~early'};  % right trials, stim, no autowater
+dfparams.cond(end+1) = {'L&~no&~stim.enable&autowater&~early'}; % left trials, no stim, no autowater
+dfparams.cond(end+1) = {'L&~no&stim.enable&autowater&~early'};  % left trials, stim, no autowater
 
 % -- stim types --
 dfparams.stim.types = {'Bi_MC','Right_MC','Left_MC','Bi_ALM','Bi_M1TJ','Right_ALM','Right_M1TJ','Left_ALM','Left_M1TJ'};
@@ -68,8 +71,10 @@ dfparams.stim.num   = logical([1 0 0 0 0 0 0 0 0]);   % Bi_MC
 % dfparams.stim.num   = logical([0 0 0 0 0 0 0 0 1]);   % Left_M1TJ
 
 dfparams.stim.pow.types = [1 1.08, 3.14, 8]; % mW, 3.14 for all unilateral sessions and most bilateral sessions, 1 for MAH20/21
-dfparams.stim.pow.num = logical([1 0 0 0]);
+dfparams.stim.pow.num = logical([1 1 1 1]);
 
+% -- stim epoch --
+df.params.stim.epoch = 'delay'; % 'delay' or 'response'
 
 % -- plotting params --
 dfparams.plt.color{1}     = [10, 10, 10];
@@ -88,17 +93,18 @@ dfparams.plt.ms = {'.','.','x','x','o','o'};
 datapth = '/Users/Munib/Documents/Economo-Lab/data/';
 
 meta = [];
-% meta = loadMAH13_MCStim(meta,datapth);
-% meta = loadMAH14_MCStim(meta,datapth);
+meta = loadMAH13_MCStim(meta,datapth);
+meta = loadMAH14_MCStim(meta,datapth);
 meta = loadMAH20_MCStim(meta,datapth);
 meta = loadMAH21_MCStim(meta,datapth);
 
 % subset based on stim types
 stim2use = dfparams.stim.types(dfparams.stim.num);
 use = false(size(meta));
-for sessix = 1:numel(use)
-    [~,mask] = patternMatchCellArray({meta(sessix).stimLoc}, stim2use,'any');
-    if mask
+for sessix = 1:numel(meta)
+    [~,mask1] = patternMatchCellArray({meta(sessix).stimLoc}, stim2use,'any');
+    mask2 = strcmpi(meta(sessix).stimEpoch,df.params.stim.epoch);
+    if mask1 && mask2
         use(sessix) = true;
     end
 end
@@ -149,14 +155,18 @@ end
 %% behavioral performance
 close all
 
-rez = getPerformance(meta,obj,params); % rez is struct array, each entyr is an animal. perf is (sessions,conditions)
+perf = getPerformance(meta,obj,params); % rez is struct array, each entyr is an animal. perf is (sessions,conditions)
 % only include sessions with good behavior
 
 % plots
-cond2use = 1:6;
-connectConds = 0;
-plotPerformanceAllMice(meta,obj,rez,dfparams,params,cond2use,connectConds)
-% plotPerformanceEachMouse(meta,obj,rez,dfparams,params) % TODO
+cond2use = 1:6; % DR
+% cond2use = 11:16; % WC
+plotSessions = 1; % each point in plot will represent a session
+plotMice = 1; % each point in plot will represent average perf for mouse across all sessions
+% if plotSessions==1 & plotMice==1, will plot sessions transparent lines
+% and bold lines for averages
+% plotPerformanceAllMice(meta,perf,dfparams,cond2use,plotSessions,plotMice)
+plotPerformanceAllMice_v2(meta,perf,dfparams,cond2use,plotSessions,plotMice)
 
 
 
@@ -181,7 +191,7 @@ plotKinfeats(meta,obj,dfparams,params,kin,kinfeats,feats2plot,cond2plot,sav)
 clim([0 100])
 
 
-%% avg jaw velocity during stim
+%% avg ME during stim vs ctrl trials
 close all
 if strcmpi(dfparams.alignEv,'delay') % function depends on data aligned to delay period, since we use the stim period to measure avgjawvel
     %     feats2plot = {'jaw_ydisp_view1',...
@@ -189,6 +199,7 @@ if strcmpi(dfparams.alignEv,'delay') % function depends on data aligned to delay
     %         'motion_energy'};
     %     feats2plot = {'jaw_yvel_view1',...
     %         'tongue_ydisp_view1'};
+    % feats2plot = {'jaw_ydisp_view1'};
     feats2plot = {'motion_energy'};
     cond2plot = 3:6;
     sav = 0;
@@ -227,16 +238,16 @@ end
 [h,p] = ttest(dat(:,1),dat(:,2))
 
 %% performance
-clear dat perf
+clear dat 
 
 cond2use = 1:2;
 
-for i = 1:numel(rez)
-    perf{i} = rez(i).perf;
+for i = 1:numel(meta)
+    allperf{i} = perf;
 end
-perf = cell2mat(perf'); % (sessions,conditions)
+allperf = cell2mat(allperf'); % (sessions,conditions)
 
-perf = perf(:,cond2use);
+allperf = allperf(:,cond2use);
 
-[h,p] = ttest(perf(:,1),perf(:,2))
+[h,p] = ttest(allperf(:,1),allperf(:,2))
 

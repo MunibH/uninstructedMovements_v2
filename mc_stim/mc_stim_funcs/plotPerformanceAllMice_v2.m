@@ -1,4 +1,4 @@
-function plotPerformanceAllMice(meta,perf,dfparams,cond2use,plotSessions,plotMice)
+function plotPerformanceAllMice_v2(meta,perf,dfparams,cond2use,plotSessions,plotMice)
 
 perf = perf .* 100;
 
@@ -55,14 +55,10 @@ for i = 1:size(perf,2)
         b(i).LineWidth = 1;
         b(i).FaceAlpha = 1;
     end
-
-%     vs(i) = scatter(xs(i)*ones(size(perf(:,i))),perf(:,i),10,'MarkerFaceColor','k',...
-%         'MarkerEdgeColor','k','LineWidth',1,'XJitter','randn','XJitterWidth',0.25);
     
-    % xx = randn(size(perf(:,i))) * 0.1 + xs(i)*ones(size(perf(:,i)));
     xx = xs(i)*ones(size(perf(:,i)));
-    vs(i) = scatter(xx,perf(:,i),30,'MarkerFaceColor','k',...
-        'MarkerEdgeColor','w','LineWidth',1, 'visible','off');
+    vs(i) = scatter(xx,perf(:,i),30,'MarkerFaceColor',dfparams.plt.color{i},...
+        'MarkerEdgeColor','w','LineWidth',0.7, 'visible','on');
 
     xs_(:,i) = vs(i).XData';
     ys_(:,i) = perf(:,i);
@@ -74,11 +70,11 @@ for i = 1:size(perf,2)
 
     % always plot sessPerf but invisible, in case check==1
     % %%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % xx = xs(i)*ones(size(sessPerf(:,i)));
-    vio = getXCoordsForViolin(sessPerf(:,i), []);
-    xx = xs(i) + (vio.jitter.*vio.jitterStrength);
+    xx = xs(i)*ones(size(sessPerf(:,i)));
+    % vio = getXCoordsForViolin(sessPerf(:,i), []);
+    % xx = xs(i) + (vio.jitter.*vio.jitterStrength);
     vs2(i) = scatter(xx,sessPerf(:,i),15,'MarkerFaceColor',dfparams.plt.color{i},...
-        'MarkerEdgeColor','w','LineWidth',0.6, 'visible','on');
+        'MarkerEdgeColor','w','LineWidth',0.6, 'visible','off');
     xs_2(:,i) = vs2(i).XData';
     ys_2(:,i) = sessPerf(:,i);
 
@@ -86,21 +82,21 @@ for i = 1:size(perf,2)
 end
 
 for i = 1:size(xs_,1)
-    line(xs_(i,1:2),ys_(i,1:2),'LineWidth',0.1,'color','k')
-    line(xs_(i,3:4),ys_(i,3:4),'LineWidth',0.1,'color','k')
-    line(xs_(i,5:6),ys_(i,5:6),'LineWidth',0.1,'color','k')
+    line(xs_(i,1:2),ys_(i,1:2),'LineWidth',1,'color','k')
+    line(xs_(i,3:4),ys_(i,3:4),'LineWidth',1,'color','k')
+    line(xs_(i,5:6),ys_(i,5:6),'LineWidth',1,'color','k')
     % patchline(xs_(i,1:2),ys_(i,1:2),'EdgeAlpha',0.4,'LineWidth',0.1)
     % patchline(xs_(i,3:4),ys_(i,3:4),'EdgeAlpha',0.4,'LineWidth',0.1)
     % patchline(xs_(i,5:6),ys_(i,5:6),'EdgeAlpha',0.4,'LineWidth',0.1)
 end
-% if check
-%     for i = 1:size(xs_2,1)
-%         alph = 0.5;
-%         patchline(xs_2(i,1:2),ys_2(i,1:2),'EdgeAlpha',alph,'LineWidth',0.1)
-%         patchline(xs_2(i,3:4),ys_2(i,3:4),'EdgeAlpha',alph,'LineWidth',0.1)
-%         patchline(xs_2(i,5:6),ys_2(i,5:6),'EdgeAlpha',alph,'LineWidth',0.1)
-%     end
-% end
+if check
+    for i = 1:size(xs_2,1)
+        alph = 0.2;
+        patchline(xs_2(i,1:2),ys_2(i,1:2),'EdgeAlpha',alph,'LineWidth',0.1)
+        patchline(xs_2(i,3:4),ys_2(i,3:4),'EdgeAlpha',alph,'LineWidth',0.1)
+        patchline(xs_2(i,5:6),ys_2(i,5:6),'EdgeAlpha',alph,'LineWidth',0.1)
+    end
+end
 
 xticks(xs)
 xticklabels(["All ctrl" "All stim"  "Right ctrl" "Right stim"  "Left ctrl" "Left stim"])

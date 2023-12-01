@@ -11,6 +11,7 @@ meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(
 meta(end).stim = 'bilateral';
 meta(end).stimLoc = 'Bi_MC';
 meta(end).stimPow = 3.14; % mw
+meta(end).stimEpoch = 'delay';
 
 meta(end+1).datapth = datapth;
 meta(end).anm = 'MAH14';
@@ -20,6 +21,7 @@ meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(
 meta(end).stim = 'bilateral';
 meta(end).stimLoc = 'Bi_MC';
 meta(end).stimPow = 3.14; % mw
+meta(end).stimEpoch = 'delay';
 
 meta(end+1).datapth = datapth;
 meta(end).anm = 'MAH14';
@@ -29,6 +31,7 @@ meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(
 meta(end).stim = 'bilateral';
 meta(end).stimLoc = 'Bi_MC';
 meta(end).stimPow = 3.14; % mw
+meta(end).stimEpoch = 'delay';
 
 meta(end+1).datapth = datapth;
 meta(end).anm = 'MAH14';
@@ -38,6 +41,7 @@ meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(
 meta(end).stim = 'bilateral';
 meta(end).stimLoc = 'Bi_MC';
 meta(end).stimPow = 3.14; % mw
+meta(end).stimEpoch = 'delay';
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -49,6 +53,7 @@ meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(
 meta(end).stim = 'bilateral';
 meta(end).stimLoc = 'Bi_MC';
 meta(end).stimPow = 3.14; % mw
+meta(end).stimEpoch = 'delay';
 
 meta(end+1).datapth = datapth;
 meta(end).anm = 'MAH14';
@@ -58,6 +63,7 @@ meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(
 meta(end).stim = 'bilateral';
 meta(end).stimLoc = 'Bi_MC';
 meta(end).stimPow = 3.14; % mw
+meta(end).stimEpoch = 'delay';
 
 meta(end+1).datapth = datapth;
 meta(end).anm = 'MAH14';
@@ -67,6 +73,7 @@ meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(
 meta(end).stim = 'bilateral';
 meta(end).stimLoc = 'Bi_MC';
 meta(end).stimPow = 3.14; % mw
+meta(end).stimEpoch = 'delay';
 
 meta(end+1).datapth = datapth;
 meta(end).anm = 'MAH14';
@@ -76,6 +83,7 @@ meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(
 meta(end).stim = 'unilateral';
 meta(end).stimLoc = 'Left_ALM';
 meta(end).stimPow = 3.14; % mw
+meta(end).stimEpoch = 'delay';
 
 meta(end+1).datapth = datapth;
 meta(end).anm = 'MAH14';
@@ -85,6 +93,7 @@ meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(
 meta(end).stim = 'unilateral';
 meta(end).stimLoc = 'Left_ALM';
 meta(end).stimPow = 3.14; % mw
+meta(end).stimEpoch = 'delay';
 
 meta(end+1).datapth = datapth;
 meta(end).anm = 'MAH14';
@@ -94,6 +103,7 @@ meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(
 meta(end).stim = 'unilateral';
 meta(end).stimLoc = 'Left_ALM';
 meta(end).stimPow = 3.14; % mw
+meta(end).stimEpoch = 'delay';
 
 meta(end+1).datapth = datapth;
 meta(end).anm = 'MAH14';
@@ -103,6 +113,7 @@ meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(
 meta(end).stim = 'unilateral';
 meta(end).stimLoc = 'Left_ALM';
 meta(end).stimPow = 3.14; % mw
+meta(end).stimEpoch = 'delay';
 
 meta(end+1).datapth = datapth;
 meta(end).anm = 'MAH14';
@@ -112,6 +123,7 @@ meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(
 meta(end).stim = 'unilateral';
 meta(end).stimLoc = 'Right_ALM';
 meta(end).stimPow = 3.14; % mw
+meta(end).stimEpoch = 'delay';
 
 meta(end+1).datapth = datapth;
 meta(end).anm = 'MAH14';
@@ -121,6 +133,7 @@ meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(
 meta(end).stim = 'unilateral';
 meta(end).stimLoc = 'Right_ALM';
 meta(end).stimPow = 3.14; % mw
+meta(end).stimEpoch = 'delay';
 
 meta(end+1).datapth = datapth;
 meta(end).anm = 'MAH14';
@@ -130,6 +143,7 @@ meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(
 meta(end).stim = 'unilateral';
 meta(end).stimLoc = 'Right_ALM';
 meta(end).stimPow = 3.14; % mw
+meta(end).stimEpoch = 'delay';
 
 meta(end+1).datapth = datapth;
 meta(end).anm = 'MAH14';
@@ -139,6 +153,7 @@ meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(
 meta(end).stim = 'unilateral';
 meta(end).stimLoc = 'Right_ALM';
 meta(end).stimPow = 3.14; % mw
+meta(end).stimEpoch = 'delay';
 
 meta(end+1).datapth = datapth;
 meta(end).anm = 'MAH14';
@@ -148,6 +163,7 @@ meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(
 meta(end).stim = 'bilateral';
 meta(end).stimLoc = 'Bi_ALM';
 meta(end).stimPow = 3.14; % mw
+meta(end).stimEpoch = 'delay';
 
 meta(end+1).datapth = datapth;
 meta(end).anm = 'MAH14';
@@ -157,6 +173,7 @@ meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(
 meta(end).stim = 'bilateral';
 meta(end).stimLoc = 'Bi_ALM';
 meta(end).stimPow = 3.14; % mw
+meta(end).stimEpoch = 'delay';
 
 meta(end+1).datapth = datapth;
 meta(end).anm = 'MAH14';
@@ -166,7 +183,7 @@ meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(
 meta(end).stim = 'bilateral';
 meta(end).stimLoc = 'Bi_ALM';
 meta(end).stimPow = 3.14; % mw
-
+meta(end).stimEpoch = 'delay';
 
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -179,6 +196,7 @@ meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(
 meta(end).stim = 'bilateral';
 meta(end).stimLoc = 'Bi_ALM';
 meta(end).stimPow = 3.14; % mw
+meta(end).stimEpoch = 'delay';
 
 meta(end+1).datapth = datapth;
 meta(end).anm = 'MAH14';
@@ -188,6 +206,7 @@ meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(
 meta(end).stim = 'bilateral';
 meta(end).stimLoc = 'Bi_ALM';
 meta(end).stimPow = 3.14; % mw
+meta(end).stimEpoch = 'delay';
 
 meta(end+1).datapth = datapth;
 meta(end).anm = 'MAH14';
@@ -197,6 +216,7 @@ meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(
 meta(end).stim = 'bilateral';
 meta(end).stimLoc = 'Bi_ALM';
 meta(end).stimPow = 3.14; % mw
+meta(end).stimEpoch = 'delay';
 
 meta(end+1).datapth = datapth;
 meta(end).anm = 'MAH14';
@@ -206,6 +226,7 @@ meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(
 meta(end).stim = 'bilateral';
 meta(end).stimLoc = 'Bi_M1TJ';
 meta(end).stimPow = 3.14; % mw
+meta(end).stimEpoch = 'delay';
 
 meta(end+1).datapth = datapth;
 meta(end).anm = 'MAH14';
@@ -215,6 +236,7 @@ meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(
 meta(end).stim = 'bilateral';
 meta(end).stimLoc = 'Bi_M1TJ';
 meta(end).stimPow = 3.14; % mw
+meta(end).stimEpoch = 'delay';
 
 meta(end+1).datapth = datapth;
 meta(end).anm = 'MAH14';
@@ -224,6 +246,7 @@ meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(
 meta(end).stim = 'bilateral';
 meta(end).stimLoc = 'Bi_M1TJ';
 meta(end).stimPow = 3.14; % mw
+meta(end).stimEpoch = 'delay';
 
 meta(end+1).datapth = datapth;
 meta(end).anm = 'MAH14';
@@ -233,6 +256,7 @@ meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(
 meta(end).stim = 'bilateral';
 meta(end).stimLoc = 'Bi_M1TJ';
 meta(end).stimPow = 3.14; % mw
+meta(end).stimEpoch = 'delay';
 
 
 meta(end+1).datapth = datapth;
@@ -243,6 +267,7 @@ meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(
 meta(end).stim = 'bilateral';
 meta(end).stimLoc = 'Bi_MC';
 meta(end).stimPow = 3.14; % mw
+meta(end).stimEpoch = 'delay';
 
 meta(end+1).datapth = datapth;
 meta(end).anm = 'MAH14';
@@ -252,6 +277,7 @@ meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(
 meta(end).stim = 'bilateral';
 meta(end).stimLoc = 'Right_MC';
 meta(end).stimPow = 3.14; % mw
+meta(end).stimEpoch = 'delay';
 
 meta(end+1).datapth = datapth;
 meta(end).anm = 'MAH14';
@@ -261,6 +287,7 @@ meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(
 meta(end).stim = 'bilateral';
 meta(end).stimLoc = 'Right_MC';
 meta(end).stimPow = 3.14; % mw
+meta(end).stimEpoch = 'delay';
 
 meta(end+1).datapth = datapth;
 meta(end).anm = 'MAH14';
@@ -270,6 +297,7 @@ meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(
 meta(end).stim = 'bilateral';
 meta(end).stimLoc = 'Left_MC';
 meta(end).stimPow = 3.14; % mw
+meta(end).stimEpoch = 'delay';
 
 meta(end+1).datapth = datapth;
 meta(end).anm = 'MAH14';
@@ -279,6 +307,7 @@ meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(
 meta(end).stim = 'bilateral';
 meta(end).stimLoc = 'Left_MC';
 meta(end).stimPow = 3.14; % mw
+meta(end).stimEpoch = 'delay';
 
 meta(end+1).datapth = datapth;
 meta(end).anm = 'MAH14';
@@ -288,6 +317,7 @@ meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(
 meta(end).stim = 'bilateral';
 meta(end).stimLoc = 'Right_M1TJ';
 meta(end).stimPow = 3.14; % mw
+meta(end).stimEpoch = 'delay';
 
 meta(end+1).datapth = datapth;
 meta(end).anm = 'MAH14';
@@ -297,6 +327,7 @@ meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(
 meta(end).stim = 'bilateral';
 meta(end).stimLoc = 'Right_M1TJ';
 meta(end).stimPow = 3.14; % mw
+meta(end).stimEpoch = 'delay';
 
 meta(end+1).datapth = datapth;
 meta(end).anm = 'MAH14';
@@ -306,6 +337,7 @@ meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(
 meta(end).stim = 'bilateral';
 meta(end).stimLoc = 'Right_M1TJ';
 meta(end).stimPow = 3.14; % mw
+meta(end).stimEpoch = 'delay';
 
 meta(end+1).datapth = datapth;
 meta(end).anm = 'MAH14';
@@ -315,6 +347,7 @@ meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(
 meta(end).stim = 'bilateral';
 meta(end).stimLoc = 'Left_M1TJ';
 meta(end).stimPow = 3.14; % mw
+meta(end).stimEpoch = 'delay';
 
 meta(end+1).datapth = datapth;
 meta(end).anm = 'MAH14';
@@ -324,6 +357,7 @@ meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(
 meta(end).stim = 'bilateral';
 meta(end).stimLoc = 'Left_M1TJ';
 meta(end).stimPow = 3.14; % mw
+meta(end).stimEpoch = 'delay';
 
 meta(end+1).datapth = datapth;
 meta(end).anm = 'MAH14';
@@ -333,6 +367,7 @@ meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(
 meta(end).stim = 'bilateral';
 meta(end).stimLoc = 'Left_M1TJ';
 meta(end).stimPow = 3.14; % mw
+meta(end).stimEpoch = 'delay';
 
 meta(end+1).datapth = datapth;
 meta(end).anm = 'MAH14';
@@ -342,6 +377,7 @@ meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(
 meta(end).stim = 'bilateral';
 meta(end).stimLoc = 'Left_M1TJ';
 meta(end).stimPow = 3.14; % mw
+meta(end).stimEpoch = 'delay';
 
 meta(end+1).datapth = datapth;
 meta(end).anm = 'MAH14';
@@ -351,7 +387,7 @@ meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(
 meta(end).stim = 'bilateral';
 meta(end).stimLoc = 'Left_MC';
 meta(end).stimPow = 3.14; % mw
-
+meta(end).stimEpoch = 'delay';
 
 %% power = 8 mW 
 
@@ -363,6 +399,7 @@ meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(
 meta(end).stim = 'bilateral';
 meta(end).stimLoc = 'Bi_M1TJ';
 meta(end).stimPow = 8; % mw
+meta(end).stimEpoch = 'delay';
 
 meta(end+1).datapth = datapth;
 meta(end).anm = 'MAH14';
@@ -372,6 +409,7 @@ meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(
 meta(end).stim = 'bilateral';
 meta(end).stimLoc = 'Bi_ALM';
 meta(end).stimPow = 8; % mw
+meta(end).stimEpoch = 'delay';
 
 %% power = 1.08 mW 
 
@@ -383,6 +421,7 @@ meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(
 meta(end).stim = 'bilateral';
 meta(end).stimLoc = 'Bi_ALM';
 meta(end).stimPow = 1.08; % mw
+meta(end).stimEpoch = 'delay';
 
 meta(end+1).datapth = datapth;
 meta(end).anm = 'MAH14';
@@ -392,6 +431,7 @@ meta(end).datapth = fullfile(meta(end).datapth,'DataObjects',meta(end).anm,meta(
 meta(end).stim = 'bilateral';
 meta(end).stimLoc = 'Bi_ALM';
 meta(end).stimPow = 1.08; % mw
+meta(end).stimEpoch = 'delay';
 
 
 end

@@ -41,7 +41,7 @@ dat = cell2mat(val'); % (sessions,cond)
 
 ms = {'o','o','o','o'};
 col = {[0 0 1] ; [1 0 0]};
-sz = 40;
+sz = 20;
 
 % plot each pair of ctrl/stim for l/r against each other
 f = figure;
